@@ -17,4 +17,13 @@
     <ProjectReference Include="../nb.Resources/nb.Resources.csproj" Version="0.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="default.frag">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="default.vert">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

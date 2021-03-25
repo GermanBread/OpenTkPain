@@ -12,36 +12,36 @@ namespace nb.Game.Rendering.Shaders
     public class Shader : IDisposable
     {
         public int ShaderHandle;
-        private int _vertexShaderHandle;
-        private int _fragmentShaderHandle;
-        private string _vertexSourceCode;
-        private string _fragmentSourceCode;
+        private int vertexShaderHandle;
+        private int fragmentShaderHandle;
+        private string vertexSourceCode;
+        private string fragmentSourceCode;
         public Shader(Stream vertex, Stream fragment) {
             // Read the shader code
             using (StreamReader vertexStreamReader = new StreamReader(vertex))
             {
-                _vertexSourceCode = vertexStreamReader.ReadToEnd();
+                vertexSourceCode = vertexStreamReader.ReadToEnd();
             }
             using (StreamReader fragmentStreamReader = new StreamReader(fragment))
             {
-                _fragmentSourceCode = fragmentStreamReader.ReadToEnd();
+                fragmentSourceCode = fragmentStreamReader.ReadToEnd();
             }
 
             // Create our handles
-            _vertexShaderHandle = GL.CreateShader(ShaderType.VertexShader);
-            _fragmentShaderHandle = GL.CreateShader(ShaderType.FragmentShader);
+            vertexShaderHandle = GL.CreateShader(ShaderType.VertexShader);
+            fragmentShaderHandle = GL.CreateShader(ShaderType.FragmentShader);
 
             // Bind them to the source code
-            GL.ShaderSource(_vertexShaderHandle, _vertexSourceCode);
-            GL.ShaderSource(_fragmentShaderHandle, _fragmentSourceCode);
+            GL.ShaderSource(vertexShaderHandle, vertexSourceCode);
+            GL.ShaderSource(fragmentShaderHandle, fragmentSourceCode);
 
             // And now compile them
-            GL.CompileShader(_vertexShaderHandle);
-            GL.CompileShader(_fragmentShaderHandle);
+            GL.CompileShader(vertexShaderHandle);
+            GL.CompileShader(fragmentShaderHandle);
 
             // Get error messages
-            string _vertexCompilationResult = GL.GetShaderInfoLog(_vertexShaderHandle);
-            string _fragmentCompilationREsult = GL.GetShaderInfoLog(_fragmentShaderHandle);
+            string _vertexCompilationResult = GL.GetShaderInfoLog(vertexShaderHandle);
+            string _fragmentCompilationREsult = GL.GetShaderInfoLog(fragmentShaderHandle);
 
             // If there are any, log them
             if (!string.IsNullOrEmpty(_vertexCompilationResult))
@@ -51,38 +51,32 @@ namespace nb.Game.Rendering.Shaders
 
             // Now we're making the shader usable
             ShaderHandle = GL.CreateProgram();
-            GL.AttachShader(ShaderHandle, _vertexShaderHandle);
-            GL.AttachShader(ShaderHandle, _fragmentShaderHandle);
+            GL.AttachShader(ShaderHandle, vertexShaderHandle);
+            GL.AttachShader(ShaderHandle, fragmentShaderHandle);
             GL.LinkProgram(ShaderHandle);
 
             // Do a little cleanup
-            GL.DetachShader(ShaderHandle, _vertexShaderHandle);
-            GL.DetachShader(ShaderHandle, _fragmentShaderHandle);
-            GL.DeleteShader(_vertexShaderHandle);
-            GL.DeleteShader(_fragmentShaderHandle);
+            GL.DetachShader(ShaderHandle, vertexShaderHandle);
+            GL.DetachShader(ShaderHandle, fragmentShaderHandle);
+            GL.DeleteShader(vertexShaderHandle);
+            GL.DeleteShader(fragmentShaderHandle);
         }
 
         public void Use() {
             GL.UseProgram(ShaderHandle);
         }
 
-        private bool _disposed = false;
+        private bool disposed = false;
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (!disposed)
             {
                 GL.DeleteProgram(ShaderHandle);
 
-                _disposed = true;
+                disposed = true;
             }
         }
-
-        ~Shader()
-        {
-            GL.DeleteProgram(ShaderHandle);
-        }
-
 
         public void Dispose()
         {

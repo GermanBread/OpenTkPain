@@ -19,16 +19,10 @@ namespace nb.Game
 
         Rectangle rectangle = new Rectangle("default") {
             rotation = 0,
-            size = new Vector2(1.5f)
+            size = new Vector2(.5f)
         };
 
         public void load() {
-            Logger.Log(new LogMessage(LogSeverity.Info, "Game", "Hello world!"));
-
-            var _testObject = SceneManager.GetScene("default").gameObjects[0];
-            _testObject.SayHello();
-
-            Logger.Log(new LogMessage(LogSeverity.Verbose, "Game", $"Test object ist located in scene \"{_testObject.scene.sceneName}\""));
         }
 
         public void update() {

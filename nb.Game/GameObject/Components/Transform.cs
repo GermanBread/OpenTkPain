@@ -13,11 +13,11 @@ namespace nb.Game.GameObject.Components
         /// <summary>
         /// Returns coordinates to be passed as vertices
         /// </summary>
-        public Vector2[] coordinates { get {
-            Vector2[] _calculated = vertices;
+        public Vector2[] Coordinates { get {
+            Vector2[] _calculated = Vertices;
             
             // Skewing
-            _calculated = Array.ConvertAll(_calculated, vec => new Vector2((vec.X + skew.X * vec.Y), (vec.Y + skew.Y * vec.X)));
+            _calculated = Array.ConvertAll(_calculated, vec => new Vector2((vec.X + Skew.X * vec.Y), (vec.Y + Skew.Y * vec.X)));
             // Rotation
             _calculated = Array.ConvertAll(_calculated, vec => {
                 double _len = vec.Length;
@@ -28,30 +28,29 @@ namespace nb.Game.GameObject.Components
                 return vec;
             });
             // Size
-            _calculated = Array.ConvertAll(_calculated, vec => Vector2.Multiply(vec, size));
+            _calculated = Array.ConvertAll(_calculated, vec => Vector2.Multiply(vec, Size));
             // Positioning
-            _calculated = Array.ConvertAll(_calculated, vec => Vector2.Add(vec, position));
+            _calculated = Array.ConvertAll(_calculated, vec => Vector2.Add(vec, Position));
 
             return _calculated;
         } }
         /// <summary>
         /// Position in 2D space, scaled with screen resolution
         /// </summary>
-        public Vector2 position;
+        public Vector2 Position;
         /// <summary>
         /// 2D size, scaled with screen resolution
         /// </summary>
-        public Vector2 size;
+        public Vector2 Size;
         /// <summary>
         /// Skew along the x and y axis
         /// </summary>
-        /// <returns></returns>
-        public Vector2 skew;
+        public Vector2 Skew;
         /// <summary>
         /// Rotation around the Z-axis
         /// </summary>
-        public float rotation = 0;
-        public Vector2[] vertices;
-        public uint[] indices;
+        public float Rotation = 0;
+        public Vector2[] Vertices;
+        public uint[] Indices;
     }
 }

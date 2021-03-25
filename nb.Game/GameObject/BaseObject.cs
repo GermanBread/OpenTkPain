@@ -27,8 +27,8 @@ namespace nb.Game.GameObject
         }
         public void Init() {
             // Initialize the pointer
-            index = scene.gameObjects.IndexOf(this);
-            vertexPointer = sizeof(float) * transform.vertices.Length * 3 /* 3 because our vectors count as a single object */ * index;
+            index = Scene.gameObjects.IndexOf(this);
+            //VertexPointer = sizeof(float) * transform.Vertices.Length * 3 /* 3 because our vectors count as a single object */ * index;
             
             // Get the embedded resources using reflection magic, would be great if it worked
             /*var _assembly = Assembly.Load("nb.Resources");
@@ -39,50 +39,46 @@ namespace nb.Game.GameObject
             Stream _vertexResourceStream = new StreamReader("default.vert").BaseStream; /*_assembly.GetManifestResourceStream(_vertexShader);*/
             Stream _fragmentResourceStream = new StreamReader("default.frag").BaseStream; /*_assembly.GetManifestResourceStream(_fragmentShader);*/
             
-            shader = new Shader(_vertexResourceStream, _fragmentResourceStream); /* basic shader */
+            Shader = new Shader(_vertexResourceStream, _fragmentResourceStream); /* basic Shader */
             
             _vertexResourceStream.Dispose();
             _fragmentResourceStream.Dispose();
 
-            vertexHandle = GL.GenVertexArray();
+            VertexHandle = GL.GenVertexArray();
             ElementBufferHandle = GL.GenBuffer();
+            VertexBufferHandle = GL.GenBuffer();
             
-            GL.BindVertexArray(vertexHandle);
+            GL.BindVertexArray(VertexHandle);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, ElementBufferHandle);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, VertexBufferHandle);
             
-            GL.BufferData(BufferTarget.ArrayBuffer, transform.vertices.Length /* Vec2[] */ * Unsafe.SizeOf<Vector2>(), transform.coordinates, BufferUsageHint.StaticDraw);
-            GL.VertexAttribPointer(vertexPointer, 2, VertexAttribPointerType.Float, false, 2, 0);
-            if (transform.indices?.Length > 0)
-                GL.BufferData(BufferTarget.ElementArrayBuffer, transform.indices.Length * sizeof(uint), transform.indices, BufferUsageHint.StaticDraw);
-            GL.EnableVertexAttribArray(vertexPointer);
+            GL.BufferData(BufferTarget.ArrayBuffer, transform.Vertices.Length /* Vec2[] */ * Unsafe.SizeOf<Vector2>(), transform.Coordinates, BufferUsageHint.StaticDraw);
+            if (transform.Indices?.Length > 0)
+                GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.StaticDraw);
+            GL.VertexAttribPointer(VertexPointer, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vector2>(), 0);
+            GL.EnableVertexAttribArray(VertexPointer);
         }
         /// <summary>
         /// Get the scene this object is located in
         /// </summary>
-        public Scene scene { get => SceneManager.GetSceneOfObject(this); }
+        public Scene Scene { get => SceneManager.GetSceneOfObject(this); }
         /// <summary>
         /// Alias to GameGlobals.window
         /// </summary>
         protected GameWindow gameWindow { get => GameGlobals.window; }
         /// <summary>
-        /// Generic method to test if the object exists
-        /// </summary>
-        public void SayHello() {
-            Logger.Log(new LogMessage(LogSeverity.Verbose, "BaseObject", "Hello World!"));
-        }
-        /// <summary>
         /// Draws the object
         /// </summary>
         public void Draw() {
-            // Note: Pass the position data to the vertex shader
+            // Note: Pass the position data to the vertex Shader
 
-            shader.Use();
+            Shader.Use();
 
-            GL.BindVertexArray(vertexHandle);
-            if (transform.indices?.Length > 0)
-                GL.DrawElements(PrimitiveType.Triangles, transform.indices.Length, DrawElementsType.UnsignedInt, 0);
+            GL.BindVertexArray(VertexHandle);
+            if (transform.Indices?.Length > 0)
+                GL.DrawElements(PrimitiveType.Triangles, transform.Indices.Length, DrawElementsType.UnsignedInt, 0);
             else
-                GL.DrawArrays(PrimitiveType.Triangles, 0, transform.vertices.Length);
+                GL.DrawArrays(PrimitiveType.Triangles, 0, transform.Vertices.Length);
         }
         /// <summary>
         /// Contains all children of this object
@@ -95,27 +91,28 @@ namespace nb.Game.GameObject
         /// <summary>
         /// Alias to transform.skew
         /// </summary>
-        public Vector2 skew { get => transform.skew; set => transform.skew = value; }
+        public Vector2 skew { get => transform.Skew; set => transform.Skew = value; }
         /// <summary>
         /// Alias to transform.size
         /// </summary>
-        public Vector2 size { get => transform.size; set => transform.size = value; }
+        public Vector2 size { get => transform.Size; set => transform.Size = value; }
         /// <summary>
         /// Alias to transform.position
         /// </summary>
-        public Vector2 position { get => transform.position; set => transform.position = value; }
+        public Vector2 position { get => transform.Position; set => transform.Position = value; }
         /// <summary>
         /// Alias to transform.rotation
         /// </summary>
-        public float rotation { get => transform.rotation; set => transform.rotation = value; }
+        public float rotation { get => transform.Rotation; set => transform.Rotation = value; }
         /// <summary>
         /// Draw order, 0 = first
         /// </summary>
         public uint layer = 0;
-        public Shader shader;
-        public int vertexHandle;
+        public Shader Shader;
+        public int VertexHandle;
+        public int VertexBufferHandle;
         public int ElementBufferHandle;
-        public int vertexPointer;
+        public int VertexPointer;
         private int index;
     }
 }
