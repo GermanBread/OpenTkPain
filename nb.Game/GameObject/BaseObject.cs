@@ -20,7 +20,7 @@ using nb.Game.GameObject.Components;
 
 namespace nb.Game.GameObject
 {
-    public class BaseObject
+    public class BaseObject : IDisposable
     {
         public BaseObject(string scene) {
             SceneManager.AddToScene(this, scene ?? "default");
@@ -28,7 +28,7 @@ namespace nb.Game.GameObject
         public void Init() {
             // Initialize the pointer
             index = Scene.gameObjects.IndexOf(this);
-            //VertexPointer = sizeof(float) * transform.Vertices.Length * 3 /* 3 because our vectors count as a single object */ * index;
+            //VertexPointer = Unsafe.SizeOf<Vector2>() * Transform.Vertices.Length /* 3 because our vectors count as a single object */ * index;
             
             // Get the embedded resources using reflection magic, would be great if it worked
             /*var _assembly = Assembly.Load("nb.Resources");
@@ -47,16 +47,19 @@ namespace nb.Game.GameObject
             VertexHandle = GL.GenVertexArray();
             ElementBufferHandle = GL.GenBuffer();
             VertexBufferHandle = GL.GenBuffer();
-            
+
             GL.BindVertexArray(VertexHandle);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, ElementBufferHandle);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, VertexBufferHandle);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, VertexBufferHandle); // I was missing a VBO here... how did I miss it?
             
-            GL.BufferData(BufferTarget.ArrayBuffer, transform.Vertices.Length /* Vec2[] */ * Unsafe.SizeOf<Vector2>(), transform.Coordinates, BufferUsageHint.StaticDraw);
-            if (transform.Indices?.Length > 0)
-                GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.StaticDraw);
-            GL.VertexAttribPointer(VertexPointer, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vector2>(), 0);
+            Shader.Use();
+            
+            GL.BufferData(BufferTarget.ArrayBuffer, Transform.Vertices.Length /* Vec2[] */ * Unsafe.SizeOf<Vector2>(), Transform.Coordinates, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, Transform.Indices.Length * sizeof(uint), Transform.Indices, BufferUsageHint.StaticDraw);
+            GL.VertexAttribPointer(VertexPointer, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vector2>(), 0); // Like @Reimnop (GitHub) told me: The pointer must be initialized at the end
             GL.EnableVertexAttribArray(VertexPointer);
+
+            Shader.Use();
         }
         /// <summary>
         /// Get the scene this object is located in
@@ -71,43 +74,60 @@ namespace nb.Game.GameObject
         /// </summary>
         public void Draw() {
             // Note: Pass the position data to the vertex Shader
-
             Shader.Use();
 
-            GL.BindVertexArray(VertexHandle);
-            if (transform.Indices?.Length > 0)
-                GL.DrawElements(PrimitiveType.Triangles, transform.Indices.Length, DrawElementsType.UnsignedInt, 0);
-            else
-                GL.DrawArrays(PrimitiveType.Triangles, 0, transform.Vertices.Length);
+            GL.BufferData(BufferTarget.ArrayBuffer, Transform.Vertices.Length /* Vec2[] */ * Unsafe.SizeOf<Vector2>(), Transform.Coordinates, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, Transform.Indices.Length * sizeof(uint), Transform.Indices, BufferUsageHint.StaticDraw);
+
+            GL.DrawElements(PrimitiveType.Triangles, Transform.Indices.Length, DrawElementsType.UnsignedInt, 0);
+        }
+        /// <summary>
+        /// Frees any resources used by this Object
+        /// </summary>
+        public void Dispose() {
+            Dispose(true);
+            GC.SuppressFinalize(true);
+        }
+        private bool disposed = false;
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                Shader.Dispose();
+                GL.DeleteVertexArray(VertexHandle);
+                GL.DeleteBuffer(VertexBufferHandle);
+                GL.DeleteBuffer(ElementBufferHandle);
+                disposed = true;
+            }
         }
         /// <summary>
         /// Contains all children of this object
         /// </summary>
-        public List<BaseObject> children = new List<BaseObject>();
+        public List<BaseObject> Children = new List<BaseObject>();
         /// <summary>
         /// Contains all information related to size, position and rotation
         /// </summary>
-        public Transform transform = new Transform();
+        public Transform Transform = new Transform();
         /// <summary>
-        /// Alias to transform.skew
+        /// Alias to Transform.Skew
         /// </summary>
-        public Vector2 skew { get => transform.Skew; set => transform.Skew = value; }
+        public Vector2 Skew { get => Transform.Skew; set => Transform.Skew = value; }
         /// <summary>
-        /// Alias to transform.size
+        /// Alias to Transform.Size
         /// </summary>
-        public Vector2 size { get => transform.Size; set => transform.Size = value; }
+        public Vector2 Size { get => Transform.Size; set => Transform.Size = value; }
         /// <summary>
-        /// Alias to transform.position
+        /// Alias to Transform.Position
         /// </summary>
-        public Vector2 position { get => transform.Position; set => transform.Position = value; }
+        public Vector2 Position { get => Transform.Position; set => Transform.Position = value; }
         /// <summary>
-        /// Alias to transform.rotation
+        /// Alias to Transform.Rotation
         /// </summary>
-        public float rotation { get => transform.Rotation; set => transform.Rotation = value; }
+        public float Rotation { get => Transform.Rotation; set => Transform.Rotation = value; }
         /// <summary>
         /// Draw order, 0 = first
         /// </summary>
-        public uint layer = 0;
+        public uint Layer = 0;
         public Shader Shader;
         public int VertexHandle;
         public int VertexBufferHandle;

@@ -17,6 +17,10 @@
       <Pack>true</Pack>
       <PackagePath>runtimes</PackagePath>
     </None>
+    <None Include="shaders\*">
+      <Pack>true</Pack>
+      <PackagePath>shaders</PackagePath>
+    </None>
     <None Include="_._">
       <!-- Means this package doesn't provide any reference assembly to the target framework.
            nupkg is a zip file and doesn't has concept for folders,

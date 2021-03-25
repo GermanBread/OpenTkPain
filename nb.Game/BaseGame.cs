@@ -48,7 +48,7 @@ namespace nb.Game
             SceneManager.LoadScene("default");
             foreach (var scene in EngineGlobals.Scenes.Where(x => x.isLoaded))
             {
-                scene.gameObjects.Sort((val1, val2) => val1.layer.CompareTo(val2.layer));
+                scene.gameObjects.Sort((val1, val2) => val1.Layer.CompareTo(val2.Layer));
                 scene.gameObjects.ForEach(x => {
                     x.Init();
                 });
@@ -60,9 +60,10 @@ namespace nb.Game
         }
 
         protected override void OnRenderFrame(FrameEventArgs e) {
-            // We want OnUpdateFrame to not mess with the timing
+            // We want "update" to not mess with the timing
             Invoke("update");
             
+            Context.MakeCurrent();
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
             foreach (var scene in EngineGlobals.Scenes.Where(x => x.isLoaded))
@@ -73,6 +74,7 @@ namespace nb.Game
             }
 
             Context.SwapBuffers();
+            Context.MakeNoneCurrent();
             
             base.OnRenderFrame(e);
         }

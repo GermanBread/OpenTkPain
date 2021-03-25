@@ -17,9 +17,16 @@ namespace nb.Game
     {
         public Game(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings) { }
 
-        Rectangle rectangle = new Rectangle("default") {
-            rotation = 0,
-            size = new Vector2(.5f)
+        Rectangle first = new Rectangle("default") {
+            Size = new Vector2(1, .2f),
+            Position = new Vector2(0, -.8f)
+        };
+        Rectangle second = new Rectangle("default") {
+            Size = new Vector2(.2f)
+        };
+        Triangle third = new Triangle("default") {
+            Size = new Vector2(.4f),
+            Position = new Vector2(.6f)
         };
 
         public void load() {

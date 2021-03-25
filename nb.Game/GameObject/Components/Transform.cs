@@ -16,15 +16,13 @@ namespace nb.Game.GameObject.Components
         public Vector2[] Coordinates { get {
             Vector2[] _calculated = Vertices;
             
-            // Skewing
-            _calculated = Array.ConvertAll(_calculated, vec => new Vector2((vec.X + Skew.X * vec.Y), (vec.Y + Skew.Y * vec.X)));
+            // Skewing; Must be RELATIVE to the center of the object!
+            _calculated = Array.ConvertAll(_calculated, vec => new Vector2((vec.X + Skew.X * (vec.Y - Position.Y)), (vec.Y + Skew.Y * (vec.X - Position.X))));
             // Rotation
             _calculated = Array.ConvertAll(_calculated, vec => {
                 double _len = vec.Length;
                 // Calculate the rotation relative north
-                Console.WriteLine(vec);
                 double _rot = Math.Atan(vec.Y / vec.X);
-                Console.WriteLine(_rot);
                 return vec;
             });
             // Size
