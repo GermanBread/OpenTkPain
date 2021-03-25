@@ -28,7 +28,7 @@ namespace nb.Game.GameObject
         public void Init() {
             // Initialize the pointer
             index = scene.gameObjects.IndexOf(this);
-            vertexPointer = sizeof(float) * transform.vertices.Length * 3 /* 3 because our vectors count as a single object */ * index;
+            //vertexPointer = sizeof(float) * transform.vertices.Length * 3 /* 3 because our vectors count as a single object */ * index;
             
             // Get the embedded resources using reflection magic, would be great if it worked
             /*var _assembly = Assembly.Load("nb.Resources");
@@ -46,14 +46,20 @@ namespace nb.Game.GameObject
 
             vertexHandle = GL.GenVertexArray();
             ElementBufferHandle = GL.GenBuffer();
+            VertexBufferHandle = GL.GenBuffer(); //missing VBO!
             
             GL.BindVertexArray(vertexHandle);
+            //TODO: read the comments!!!
+            //even though you use am element buffer, it cannot function without a vertex buffer!
+            GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferHandle); //bind whatever buffer you're sending data to, order is important!
+            GL.BufferData(BufferTarget.ArrayBuffer, transform.vertices.Length /* Vec2[] */ * Unsafe.SizeOf<Vector2>(), transform.vertices /* pass in the vertices, not coords! */, BufferUsageHint.StaticDraw);
+
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, ElementBufferHandle);
-            
-            GL.BufferData(BufferTarget.ArrayBuffer, transform.vertices.Length /* Vec2[] */ * Unsafe.SizeOf<Vector2>(), transform.coordinates, BufferUsageHint.StaticDraw);
-            GL.VertexAttribPointer(vertexPointer, 2, VertexAttribPointerType.Float, false, 2, 0);
             if (transform.indices?.Length > 0)
                 GL.BufferData(BufferTarget.ElementArrayBuffer, transform.indices.Length * sizeof(uint), transform.indices, BufferUsageHint.StaticDraw);
+
+            //ptr setup this comes last! (vertexPointer == 0)
+            GL.VertexAttribPointer(vertexPointer, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vector2>(), 0); //stride is the size of the ptr measured in bytes!
             GL.EnableVertexAttribArray(vertexPointer);
         }
         /// <summary>
@@ -114,6 +120,7 @@ namespace nb.Game.GameObject
         public uint layer = 0;
         public Shader shader;
         public int vertexHandle;
+        public int VertexBufferHandle;
         public int ElementBufferHandle;
         public int vertexPointer;
         private int index;
