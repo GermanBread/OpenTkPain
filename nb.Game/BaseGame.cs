@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 
 // Open TK
+using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.Common;
+using OpenTK.Windowing.Desktop;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 // New Beginnings
 using nb.Game.GameObject;
@@ -19,30 +21,40 @@ namespace nb.Game
 {
     public abstract class BaseGame : GameWindow
     {
-        private int bufferHandle;
         public BaseGame(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings) {
             Logger.Log(new LogMessage(LogSeverity.Info, "BaseGame", "Made by GermanBread#9077"));
         }
         protected override void OnLoad() {
-            GL.ClearColor(0f, 0f, 0f, 1);
-
             #if DEBUG
             Title += " (DEBUG)";
             #endif
 
-            // Fullscreen test
-            /*KeyDown += (KeyboardKeyEventArgs e) => {
-                if (e.Alt & e.Key == OpenTK.Windowing.GraphicsLibraryFramework.Keys.Enter) {
+            EngineGlobals.CurrentResolution = Size;
+            
+            // Create a buffer where we feed out vertices into
+            Context.MakeCurrent();
+            arrayBufferHandle = GL.GenBuffer();
+            GL.BindBuffer(BufferTarget.ArrayBuffer, arrayBufferHandle);
+            GL.ClearColor(fillColor);
+
+            // Fullscreen
+            KeyDown += (KeyboardKeyEventArgs e) => {
+                if (e.Alt && e.Key == Keys.Enter) {
                     if (base.WindowState == WindowState.Fullscreen)
                         base.WindowState = WindowState.Normal;
                     else
                         base.WindowState = WindowState.Fullscreen;
                 }
-            };*/
+            };
+            // ESC, CONTROL + Q = quit
+            KeyDown += (KeyboardKeyEventArgs e) => {
+                if (e.Key == Keys.Escape)
+                    Close();
+                if ((e.Command || e.Control) && e.Key == Keys.Q)
+                    Close();
+            };
 
-            // Create a buffer where we feed out vertices into
-            bufferHandle = GL.GenBuffer();
-            GL.BindBuffer(BufferTarget.ArrayBuffer, bufferHandle);
+            Invoke("init");
             
             // Initialize our objects for loading
             SceneManager.LoadScene("default");
@@ -56,14 +68,22 @@ namespace nb.Game
             
             Invoke("load");
             
+            Context.MakeNoneCurrent();
             base.OnLoad();
         }
 
         protected override void OnRenderFrame(FrameEventArgs e) {
+            frameDelta = e.Time;
+            int FPS = -1;
+            if (frameDelta > double.Epsilon)
+                FPS = (int)Math.Ceiling(1 / frameDelta);
+            Logger.Log(new LogMessage(LogSeverity.Verbose, "BaseGame", $"Frame delta: {frameDelta}  | FPS: {(FPS > 0 ? FPS : "Not Applicable")}"));
+
             // We want "update" to not mess with the timing
             Invoke("update");
             
             Context.MakeCurrent();
+            GL.ClearColor(fillColor);
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
             foreach (var scene in EngineGlobals.Scenes.Where(x => x.isLoaded))
@@ -85,20 +105,26 @@ namespace nb.Game
 
         protected override void OnResize(ResizeEventArgs e)
         {
-            GL.Viewport(0, 0, e.Width, e.Height);
+            GL.Viewport(0, 0, e.Height, e.Width);
+            EngineGlobals.CurrentResolution = e.Size;
+            Logger.Log(new LogMessage(LogSeverity.Verbose, "BaseGame", $"Resized window to: {e.Size}"));
             base.OnResize(e);
         }
         
         /// <summary>
         /// Invoke a child method
         /// </summary>
-        /// <param name="method"></param>
-        private void Invoke(string method) {
+        private void Invoke(string MethodName, bool CaseInsensitive = true) {
             try {
                 // Invoke the child method and run it as a Task
-                Logger.Log(new LogMessage(LogSeverity.Verbose, "BaseGame", $"Invoking {method}"));
-                Task loadInvoke = new TaskFactory().StartNew(()
-                 => typeof(Game).GetMethod(method).Invoke(this, null));
+                Logger.Log(new LogMessage(LogSeverity.Verbose, "BaseGame", $"Invoking {MethodName}"));
+                Task loadInvoke;
+                if (CaseInsensitive)
+                    loadInvoke = new TaskFactory().StartNew(()
+                     => typeof(Game).GetMethods().First(x => x.Name.ToLower() == MethodName.ToLower()).Invoke(this, null));
+                else
+                    loadInvoke = new TaskFactory().StartNew(()
+                     => typeof(Game).GetMethod(MethodName).Invoke(this, null));
                 
                 // Wait 5 seconds
                 if (!loadInvoke.Wait(1000)) {
@@ -115,5 +141,15 @@ namespace nb.Game
                 Logger.Log(new LogMessage(LogSeverity.Error, "BaseGame", "Invoke failed", e));
             }
         }
+
+        // Variables
+        private double frameDelta;
+        private int arrayBufferHandle;
+        private Color4 fillColor = Color4.Black;
+        /// <summary>
+        /// Gets the time it took for the last frame to draw
+        /// </summary>
+        public double FrameDelta { get => frameDelta; }
+        public Color4 FillColor { get => fillColor; set => fillColor = value; }
     }
 }

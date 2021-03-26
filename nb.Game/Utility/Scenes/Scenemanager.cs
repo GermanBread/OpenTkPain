@@ -25,7 +25,7 @@ namespace nb.Game.Utility.Scenes
         }
         
         // Adding scenes
-        public static void Add(Scene sceneObject) {
+        public static void AddScene(Scene sceneObject) {
             Globals.EngineGlobals.Scenes.Add(sceneObject);
         }
 
@@ -41,7 +41,7 @@ namespace nb.Game.Utility.Scenes
             if (EqualityComparer<Scene>.Default.Equals(_scene, default(Scene))) {
                 _scene = new Scene(name, new List<BaseObject>());
                 // This scene dies not exist in the list yet. So add it now.
-                Add(_scene);
+                AddScene(_scene);
             }
             return _scene;
         }

@@ -7,7 +7,7 @@ namespace nb.Game.GameObject
 {
     public class Rectangle : BaseObject
     {
-        public Rectangle(string scene) : base(scene) {
+        public Rectangle(string scene = null) : base(scene) {
             Transform.Vertices = new Vector2[] {
                 new Vector2(-1, -1),
                 new Vector2(-1,  1),

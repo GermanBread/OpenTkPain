@@ -6,6 +6,8 @@ using System.Collections.Generic;
 // OpenTK
 using OpenTK.Mathematics;
 
+using nb.Game.Utility.Globals;
+
 namespace nb.Game.GameObject.Components
 {
     public class Transform
@@ -26,7 +28,9 @@ namespace nb.Game.GameObject.Components
                 return vec;
             });
             // Size
-            _calculated = Array.ConvertAll(_calculated, vec => Vector2.Multiply(vec, Size));
+            var _sizeAdjust = new Vector2(EngineGlobals.CurrentResolution.Y / EngineGlobals.CurrentResolution.X, 1);
+            _sizeAdjust = new Vector2(1, 1);
+            _calculated = Array.ConvertAll(_calculated, vec => Vector2.Multiply(vec, Size * _sizeAdjust));
             // Positioning
             _calculated = Array.ConvertAll(_calculated, vec => Vector2.Add(vec, Position));
 

@@ -28,9 +28,9 @@ namespace nb.Game.GameObject
         public void Init() {
             // Initialize the pointer
             index = Scene.gameObjects.IndexOf(this);
-            //VertexPointer = Unsafe.SizeOf<Vector2>() * Transform.Vertices.Length /* 3 because our vectors count as a single object */ * index;
+            //vertexPointer = Unsafe.SizeOf<Vector2>() * Transform.Vertices.Length /* 3 because our vectors count as a single object */ * index;
             
-            // Get the embedded resources using reflection magic, would be great if it worked
+            // FIXME Get the embedded resources using reflection magic, would be great if it worked
             /*var _assembly = Assembly.Load("nb.Resources");
             
             string _vertexShader = _assembly.GetManifestResourceNames().Single(x => x.EndsWith("default.vert"));
@@ -44,20 +44,20 @@ namespace nb.Game.GameObject
             _vertexResourceStream.Dispose();
             _fragmentResourceStream.Dispose();
 
-            VertexHandle = GL.GenVertexArray();
-            ElementBufferHandle = GL.GenBuffer();
-            VertexBufferHandle = GL.GenBuffer();
+            vertexHandle = GL.GenVertexArray();
+            elementBufferHandle = GL.GenBuffer();
+            vertexBufferHandle = GL.GenBuffer();
 
-            GL.BindVertexArray(VertexHandle);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, ElementBufferHandle);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, VertexBufferHandle); // I was missing a VBO here... how did I miss it?
+            GL.BindVertexArray(vertexHandle);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, elementBufferHandle);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, vertexBufferHandle); // I was missing a VBO here... how did I miss it?
             
             Shader.Use();
             
             GL.BufferData(BufferTarget.ArrayBuffer, Transform.Vertices.Length /* Vec2[] */ * Unsafe.SizeOf<Vector2>(), Transform.Coordinates, BufferUsageHint.StaticDraw);
             GL.BufferData(BufferTarget.ElementArrayBuffer, Transform.Indices.Length * sizeof(uint), Transform.Indices, BufferUsageHint.StaticDraw);
-            GL.VertexAttribPointer(VertexPointer, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vector2>(), 0); // Like @Reimnop (GitHub) told me: The pointer must be initialized at the end
-            GL.EnableVertexAttribArray(VertexPointer);
+            GL.VertexAttribPointer(vertexPointer, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vector2>(), 0); // Like @Reimnop (GitHub) told me: The pointer must be initialized at the end
+            GL.EnableVertexAttribArray(vertexPointer);
 
             Shader.Use();
         }
@@ -94,9 +94,9 @@ namespace nb.Game.GameObject
             if (!disposed)
             {
                 Shader.Dispose();
-                GL.DeleteVertexArray(VertexHandle);
-                GL.DeleteBuffer(VertexBufferHandle);
-                GL.DeleteBuffer(ElementBufferHandle);
+                GL.DeleteVertexArray(vertexHandle);
+                GL.DeleteBuffer(vertexBufferHandle);
+                GL.DeleteBuffer(elementBufferHandle);
                 disposed = true;
             }
         }
@@ -128,11 +128,18 @@ namespace nb.Game.GameObject
         /// Draw order, 0 = first
         /// </summary>
         public uint Layer = 0;
+        /// <summary>
+        /// The shader currently in use
+        /// </summary>
         public Shader Shader;
-        public int VertexHandle;
-        public int VertexBufferHandle;
-        public int ElementBufferHandle;
-        public int VertexPointer;
+        /// <summary>
+        /// The Anchor of the object. Used for positioning
+        /// </summary>
+        public Anchor Anchor = Anchor.Center;
+        private int vertexHandle;
+        private int vertexBufferHandle;
+        private int elementBufferHandle;
+        private int vertexPointer;
         private int index;
     }
 }
