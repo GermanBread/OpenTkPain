@@ -1,3 +1,4 @@
+using System.Globalization;
 // System
 using System;
 using System.Linq;
@@ -25,6 +26,8 @@ namespace nb.Game
             Logger.Log(new LogMessage(LogSeverity.Info, "BaseGame", "Made by GermanBread#9077"));
         }
         protected override void OnLoad() {
+            base.OnLoad();
+            
             #if DEBUG
             Title += " (DEBUG)";
             #endif
@@ -32,18 +35,17 @@ namespace nb.Game
             EngineGlobals.CurrentResolution = Size;
             
             // Create a buffer where we feed out vertices into
-            Context.MakeCurrent();
             arrayBufferHandle = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, arrayBufferHandle);
             GL.ClearColor(fillColor);
 
-            // Fullscreen
+            // ALT + ENTER, F11 = toggle fullscreen
             KeyDown += (KeyboardKeyEventArgs e) => {
-                if (e.Alt && e.Key == Keys.Enter) {
-                    if (base.WindowState == WindowState.Fullscreen)
-                        base.WindowState = WindowState.Normal;
+                if ((e.Alt && e.Key == Keys.Enter) || e.Key == Keys.F11) {
+                    if (WindowState == WindowState.Fullscreen)
+                        WindowState = WindowState.Normal;
                     else
-                        base.WindowState = WindowState.Fullscreen;
+                        WindowState = WindowState.Fullscreen;
                 }
             };
             // ESC, CONTROL + Q = quit
@@ -54,7 +56,7 @@ namespace nb.Game
                     Close();
             };
 
-            Invoke("init");
+            Invoke("Init");
             
             // Initialize our objects for loading
             SceneManager.LoadScene("default");
@@ -65,14 +67,11 @@ namespace nb.Game
                     x.Init();
                 });
             }
-            
-            Invoke("load");
-            
-            Context.MakeNoneCurrent();
-            base.OnLoad();
         }
 
         protected override void OnRenderFrame(FrameEventArgs e) {
+            base.OnRenderFrame(e);
+            
             frameDelta = e.Time;
             int FPS = -1;
             if (frameDelta > double.Epsilon)
@@ -80,9 +79,8 @@ namespace nb.Game
             Logger.Log(new LogMessage(LogSeverity.Verbose, "BaseGame", $"Frame delta: {frameDelta}  | FPS: {(FPS > 0 ? FPS : "Not Applicable")}"));
 
             // We want "update" to not mess with the timing
-            Invoke("update");
+            Invoke("Update");
             
-            Context.MakeCurrent();
             GL.ClearColor(fillColor);
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
@@ -94,48 +92,49 @@ namespace nb.Game
             }
 
             Context.SwapBuffers();
-            Context.MakeNoneCurrent();
-            
-            base.OnRenderFrame(e);
         }
 
         protected override void OnUnload() {
             base.OnUnload();
         }
+        protected override void OnClosed() {
+            Logger.Log(new LogMessage(LogSeverity.Verbose, "BaseGame", "Exit"));
+            base.OnClosed();
+        }
 
         protected override void OnResize(ResizeEventArgs e)
         {
-            GL.Viewport(0, 0, e.Height, e.Width);
+            GL.Viewport(0, 0, e.Width, e.Height);
             EngineGlobals.CurrentResolution = e.Size;
             Logger.Log(new LogMessage(LogSeverity.Verbose, "BaseGame", $"Resized window to: {e.Size}"));
-            base.OnResize(e);
+            //base.OnResize(); Is not needed, since it's originally just a stub. Commenting this out also makes resize faster
         }
         
         /// <summary>
         /// Invoke a child method
         /// </summary>
-        private void Invoke(string MethodName, bool CaseInsensitive = true) {
+        private void Invoke(string MethodName, bool CaseInsensitive = false) {
             try {
                 // Invoke the child method and run it as a Task
                 Logger.Log(new LogMessage(LogSeverity.Verbose, "BaseGame", $"Invoking {MethodName}"));
-                Task loadInvoke;
+                Task _loadInvoke;
                 if (CaseInsensitive)
-                    loadInvoke = new TaskFactory().StartNew(()
+                    _loadInvoke = new TaskFactory().StartNew(()
                      => typeof(Game).GetMethods().First(x => x.Name.ToLower() == MethodName.ToLower()).Invoke(this, null));
                 else
-                    loadInvoke = new TaskFactory().StartNew(()
+                    _loadInvoke = new TaskFactory().StartNew(()
                      => typeof(Game).GetMethod(MethodName).Invoke(this, null));
                 
-                // Wait 5 seconds
-                if (!loadInvoke.Wait(1000)) {
+                // Wait 1 second
+                if (!_loadInvoke.Wait(1000)) {
                     // If it timed out, display a warning message
                     Logger.Log(new LogMessage(LogSeverity.Warning, "BaseGame", "Invoke exceeded time limit"));
-                    loadInvoke.Wait();
+                    _loadInvoke.Wait();
                 }
                 
                 // If the task completed, dispose
                 //Logger.Log(new LogMessage("BaseGame", LogSeverity.Info, "Invoke done"));
-                loadInvoke.Dispose();
+                _loadInvoke.Dispose();
             } catch (Exception e) {
                 // Log any errors happening
                 Logger.Log(new LogMessage(LogSeverity.Error, "BaseGame", "Invoke failed", e));
@@ -149,7 +148,7 @@ namespace nb.Game
         /// <summary>
         /// Gets the time it took for the last frame to draw
         /// </summary>
-        public double FrameDelta { get => frameDelta; }
+        public float FrameDelta { get => (float)frameDelta; }
         public Color4 FillColor { get => fillColor; set => fillColor = value; }
     }
 }

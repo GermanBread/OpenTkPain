@@ -1,0 +1,5 @@
+bin
+obj
+.vscode
+# test videos/images used for demoing textures and audio functionality
+test *

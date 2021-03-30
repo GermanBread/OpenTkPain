@@ -1,3 +1,6 @@
+// OpenTk
+using OpenTK.Mathematics;
+
 namespace nb.Game.GameObject.Components
 {
     // Data
@@ -5,6 +8,11 @@ namespace nb.Game.GameObject.Components
     {
         public float X;
         public float Y;
+        public Vector2 Xy { get => new Vector2(X, Y); set {
+            X = value.X;
+            Y = value.Y;
+        } }
+        public Vector2 Yx { get => Xy.Yx; }
         public Anchor(float X, float Y) {
             this.X = X;
             this.Y = Y;
@@ -26,11 +34,17 @@ namespace nb.Game.GameObject.Components
     }
     // Arithmetic
     public partial struct Anchor {
-        public static Anchor operator +(Anchor anchor1,Anchor anchor2) {
-            return new Anchor(anchor1.X + anchor2.X, anchor1.Y + anchor2.Y);
-        }
-        public static Anchor operator -(Anchor anchor1,Anchor anchor2) {
-            return new Anchor(anchor1.X - anchor2.X, anchor1.Y - anchor2.Y);
-        }
+        public static Anchor operator +(Anchor anchor1, Anchor anchor2)
+         => new Anchor(anchor1.X + anchor2.X, anchor1.Y + anchor2.Y);
+        public static Anchor operator -(Anchor anchor1, Anchor anchor2)
+         => new Anchor(anchor1.X - anchor2.X, anchor1.Y - anchor2.Y);
+        public static Anchor operator *(Anchor anchor1, Anchor anchor2)
+         => new Anchor(anchor1.X * anchor2.X, anchor1.Y * anchor2.Y);
+        public static Anchor operator /(Anchor anchor1, Anchor anchor2)
+         => new Anchor(anchor1.X / anchor2.X, anchor1.Y / anchor2.Y);
+        public static Anchor operator *(Anchor anchor1, int scalar)
+         => new Anchor(anchor1.X * scalar, anchor1.Y * scalar);
+        public static Anchor operator /(Anchor anchor1, int scalar)
+         => new Anchor(anchor1.X / scalar, anchor1.Y / scalar);
     }
 }

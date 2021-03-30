@@ -28,7 +28,8 @@ namespace nb.Game.GameObject
         public void Init() {
             // Initialize the pointer
             index = Scene.gameObjects.IndexOf(this);
-            //vertexPointer = Unsafe.SizeOf<Vector2>() * Transform.Vertices.Length /* 3 because our vectors count as a single object */ * index;
+            //vertexPointer = Unsafe.SizeOf<Vector2>() * transform.Vertices.Length /* 3 because our vectors count as a single object */ * index;
+            vertexPointer = 0;
             
             // FIXME Get the embedded resources using reflection magic, would be great if it worked
             /*var _assembly = Assembly.Load("nb.Resources");
@@ -54,8 +55,8 @@ namespace nb.Game.GameObject
             
             Shader.Use();
             
-            GL.BufferData(BufferTarget.ArrayBuffer, Transform.Vertices.Length /* Vec2[] */ * Unsafe.SizeOf<Vector2>(), Transform.Coordinates, BufferUsageHint.StaticDraw);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, Transform.Indices.Length * sizeof(uint), Transform.Indices, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ArrayBuffer, transform.Vertices.Length /* Vec2[] */ * Unsafe.SizeOf<Vector2>(), transform.Coordinates, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.StaticDraw);
             GL.VertexAttribPointer(vertexPointer, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vector2>(), 0); // Like @Reimnop (GitHub) told me: The pointer must be initialized at the end
             GL.EnableVertexAttribArray(vertexPointer);
 
@@ -66,9 +67,9 @@ namespace nb.Game.GameObject
         /// </summary>
         public Scene Scene { get => SceneManager.GetSceneOfObject(this); }
         /// <summary>
-        /// Alias to GameGlobals.window
+        /// Alias to EngineGlobals.Window
         /// </summary>
-        protected GameWindow gameWindow { get => GameGlobals.window; }
+        protected GameWindow gameWindow { get => EngineGlobals.Window; }
         /// <summary>
         /// Draws the object
         /// </summary>
@@ -76,10 +77,10 @@ namespace nb.Game.GameObject
             // Note: Pass the position data to the vertex Shader
             Shader.Use();
 
-            GL.BufferData(BufferTarget.ArrayBuffer, Transform.Vertices.Length /* Vec2[] */ * Unsafe.SizeOf<Vector2>(), Transform.Coordinates, BufferUsageHint.StaticDraw);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, Transform.Indices.Length * sizeof(uint), Transform.Indices, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ArrayBuffer, transform.Vertices.Length /* Vec2[] */ * Unsafe.SizeOf<Vector2>(), transform.Coordinates, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.StaticDraw);
 
-            GL.DrawElements(PrimitiveType.Triangles, Transform.Indices.Length, DrawElementsType.UnsignedInt, 0);
+            GL.DrawElements(PrimitiveType.Triangles, transform.Indices.Length, DrawElementsType.UnsignedInt, 0);
         }
         /// <summary>
         /// Frees any resources used by this Object
@@ -107,23 +108,27 @@ namespace nb.Game.GameObject
         /// <summary>
         /// Contains all information related to size, position and rotation
         /// </summary>
-        public Transform Transform = new Transform();
+        protected Transform transform = new Transform();
         /// <summary>
-        /// Alias to Transform.Skew
+        /// Alias to transform.Skew
         /// </summary>
-        public Vector2 Skew { get => Transform.Skew; set => Transform.Skew = value; }
+        public Vector2 Skew { get => transform.Skew; set => transform.Skew = value; }
         /// <summary>
-        /// Alias to Transform.Size
+        /// Alias to transform.Size
         /// </summary>
-        public Vector2 Size { get => Transform.Size; set => Transform.Size = value; }
+        public Vector2 Size { get => transform.Size; set => transform.Size = value; }
         /// <summary>
-        /// Alias to Transform.Position
+        /// Alias to transform.Position
         /// </summary>
-        public Vector2 Position { get => Transform.Position; set => Transform.Position = value; }
+        public Vector2 Position { get => transform.Position; set => transform.Position = value; }
         /// <summary>
-        /// Alias to Transform.Rotation
+        /// Alias to transform.Rotation
         /// </summary>
-        public float Rotation { get => Transform.Rotation; set => Transform.Rotation = value; }
+        public float Rotation { get => transform.Rotation; set => transform.Rotation = value; }
+        /// <summary>
+        /// Alias to transform.Anchor
+        /// </summary>
+        public Anchor Anchor { get => transform.Anchor; set => transform.Anchor = value; }
         /// <summary>
         /// Draw order, 0 = first
         /// </summary>
@@ -132,10 +137,6 @@ namespace nb.Game.GameObject
         /// The shader currently in use
         /// </summary>
         public Shader Shader;
-        /// <summary>
-        /// The Anchor of the object. Used for positioning
-        /// </summary>
-        public Anchor Anchor = Anchor.Center;
         private int vertexHandle;
         private int vertexBufferHandle;
         private int elementBufferHandle;

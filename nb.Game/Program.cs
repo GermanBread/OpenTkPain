@@ -7,13 +7,13 @@ namespace nb.Game
         static void Main(string[] args)
         {
             using (Game window = new Game(new GameWindowSettings { 
-                IsMultiThreaded = true, 
                 RenderFrequency = 60, 
-                UpdateFrequency = 120 
+                UpdateFrequency = 120
             }, new NativeWindowSettings {
-                Title = "OpenTK again..."
+                Title = "Unsigned Framework Dev."
             })) {
                 window.Run();
+                window.Dispose();
             }
         }
     }

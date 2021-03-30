@@ -8,13 +8,13 @@ namespace nb.Game.GameObject
     public class Rectangle : BaseObject
     {
         public Rectangle(string scene = null) : base(scene) {
-            Transform.Vertices = new Vector2[] {
+            transform.Vertices = new Vector2[] {
                 new Vector2(-1, -1),
                 new Vector2(-1,  1),
                 new Vector2( 1,  1),
                 new Vector2( 1, -1)
             };
-            Transform.Indices = new uint[] {
+            transform.Indices = new uint[] {
                 0, 1, 3,
                 1, 2, 3
             };
