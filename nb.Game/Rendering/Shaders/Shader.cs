@@ -6,6 +6,7 @@ using System.IO;
 using OpenTK.Graphics.OpenGL;
 
 using nb.Game.Utility.Logging;
+using nb.Game.Utility.Resources;
 
 namespace nb.Game.Rendering.Shaders
 {
@@ -16,16 +17,10 @@ namespace nb.Game.Rendering.Shaders
         private int fragmentShaderHandle;
         private string vertexSourceCode;
         private string fragmentSourceCode;
-        public Shader(Stream vertex, Stream fragment) {
+        public Shader(Resource VertexShader, Resource FragmentShader) {
             // Read the shader code
-            using (StreamReader vertexStreamReader = new StreamReader(vertex))
-            {
-                vertexSourceCode = vertexStreamReader.ReadToEnd();
-            }
-            using (StreamReader fragmentStreamReader = new StreamReader(fragment))
-            {
-                fragmentSourceCode = fragmentStreamReader.ReadToEnd();
-            }
+            vertexSourceCode = VertexShader.Stream.ReadToEnd();
+            fragmentSourceCode = FragmentShader.Stream.ReadToEnd();
 
             // Create our handles
             vertexShaderHandle = GL.CreateShader(ShaderType.VertexShader);

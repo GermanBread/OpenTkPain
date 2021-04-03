@@ -8,19 +8,19 @@ namespace nb.Game.Utility.Scenes
 {
     public class Scene
     {
-        public string sceneName;
-        public List<BaseObject> gameObjects;
-        public bool isLoaded { get; private set; }
+        public string SceneName;
+        public List<BaseObject> GameObjects;
+        public bool IsLoaded { get; private set; }
         public void Unload() {
-            isLoaded = false;
+            IsLoaded = false;
         }
         public void Load() {
-            isLoaded = true;
+            IsLoaded = true;
         }
         public Scene(string sceneName, List<BaseObject> gameObjects) {
-            this.sceneName = sceneName;
-            this.gameObjects = gameObjects;
-            this.isLoaded = false;
+            this.SceneName = sceneName;
+            this.GameObjects = gameObjects;
+            this.IsLoaded = false;
         }
     }
 }

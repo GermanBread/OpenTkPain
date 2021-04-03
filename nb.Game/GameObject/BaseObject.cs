@@ -2,8 +2,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Resources;
-using System.Reflection;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -12,9 +10,10 @@ using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Desktop;
 
+using nb.Game.Rendering;
 using nb.Game.Utility.Scenes;
-using nb.Game.Utility.Logging;
 using nb.Game.Utility.Globals;
+using nb.Game.Utility.Resources;
 using nb.Game.Rendering.Shaders;
 using nb.Game.GameObject.Components;
 
@@ -27,40 +26,31 @@ namespace nb.Game.GameObject
         }
         public void Init() {
             // Initialize the pointer
-            index = Scene.gameObjects.IndexOf(this);
+            index = Scene.GameObjects.IndexOf(this);
             //vertexPointer = Unsafe.SizeOf<Vector2>() * transform.Vertices.Length /* 3 because our vectors count as a single object */ * index;
             vertexPointer = 0;
             
-            // FIXME Get the embedded resources using reflection magic, would be great if it worked
-            /*var _assembly = Assembly.Load("nb.Resources");
+            Shader = new Shader(ResourceManager.GetResource("default.vert"), ResourceManager.GetResource("default.frag")); /* basic Shader */
             
-            string _vertexShader = _assembly.GetManifestResourceNames().Single(x => x.EndsWith("default.vert"));
-            string _fragmentShader = _assembly.GetManifestResourceNames().Single(x => x.EndsWith("default.frag"));*/
-            
-            Stream _vertexResourceStream = new StreamReader("default.vert").BaseStream; /*_assembly.GetManifestResourceStream(_vertexShader);*/
-            Stream _fragmentResourceStream = new StreamReader("default.frag").BaseStream; /*_assembly.GetManifestResourceStream(_fragmentShader);*/
-            
-            Shader = new Shader(_vertexResourceStream, _fragmentResourceStream); /* basic Shader */
-            
-            _vertexResourceStream.Dispose();
-            _fragmentResourceStream.Dispose();
-
             vertexHandle = GL.GenVertexArray();
             elementBufferHandle = GL.GenBuffer();
             vertexBufferHandle = GL.GenBuffer();
+
+            // Set a default color value
+            if (Color == default)
+                Color = Color4.White;
+            
+            Shader.Use();
 
             GL.BindVertexArray(vertexHandle);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, elementBufferHandle);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, vertexBufferHandle); // I was missing a VBO here... how did I miss it?
             
-            Shader.Use();
-            
-            GL.BufferData(BufferTarget.ArrayBuffer, transform.Vertices.Length /* Vec2[] */ * Unsafe.SizeOf<Vector2>(), transform.Coordinates, BufferUsageHint.StaticDraw);
+            var _data = transform.CompileData(Color);
+            GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.StaticDraw);
             GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.StaticDraw);
-            GL.VertexAttribPointer(vertexPointer, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vector2>(), 0); // Like @Reimnop (GitHub) told me: The pointer must be initialized at the end
+            GL.VertexAttribPointer(vertexPointer, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 0); // Like @Reimnop (GitHub) told me: The pointer must be initialized at the end
             GL.EnableVertexAttribArray(vertexPointer);
-
-            Shader.Use();
         }
         /// <summary>
         /// Get the scene this object is located in
@@ -74,10 +64,10 @@ namespace nb.Game.GameObject
         /// Draws the object
         /// </summary>
         public void Draw() {
-            // Note: Pass the position data to the vertex Shader
             Shader.Use();
 
-            GL.BufferData(BufferTarget.ArrayBuffer, transform.Vertices.Length /* Vec2[] */ * Unsafe.SizeOf<Vector2>(), transform.Coordinates, BufferUsageHint.StaticDraw);
+            var _data = transform.CompileData(Color);
+            GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.StaticDraw);
             GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.StaticDraw);
 
             GL.DrawElements(PrimitiveType.Triangles, transform.Indices.Length, DrawElementsType.UnsignedInt, 0);
@@ -98,6 +88,7 @@ namespace nb.Game.GameObject
                 GL.DeleteVertexArray(vertexHandle);
                 GL.DeleteBuffer(vertexBufferHandle);
                 GL.DeleteBuffer(elementBufferHandle);
+                SceneManager.RemoveFromScene(this);
                 disposed = true;
             }
         }
@@ -137,6 +128,10 @@ namespace nb.Game.GameObject
         /// The shader currently in use
         /// </summary>
         public Shader Shader;
+        /// <summary>
+        /// Default color of the object
+        /// </summary>
+        public Color4 Color;
         private int vertexHandle;
         private int vertexBufferHandle;
         private int elementBufferHandle;

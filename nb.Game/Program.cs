@@ -1,8 +1,9 @@
-﻿using OpenTK.Windowing.Desktop;
+﻿// OpenTK
+using OpenTK.Windowing.Desktop;
 
 namespace nb.Game
 {
-    class Program
+    class Entry
     {
         static void Main(string[] args)
         {

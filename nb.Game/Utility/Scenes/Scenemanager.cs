@@ -10,18 +10,34 @@ namespace nb.Game.Utility.Scenes
     public static class SceneManager
     {
         // Adding objects to scenes
-        public static void AddToScene(BaseObject gameObject, string sceneName) {
-            var _scene = GetScene(sceneName);
-            _scene.gameObjects.Add(gameObject);
+        public static void AddToScene(BaseObject GameObject, string SceneName) {
+            var _scene = GetScene(SceneName);
+            _scene.GameObjects.Add(GameObject);
         }
-        public static void AddToScene(BaseObject[] gameObjects, string sceneName) {
-            var _scene = GetScene(sceneName);
-            _scene.gameObjects.AddRange(gameObjects);
+        public static void AddToScene(BaseObject[] GameObjects, string SceneName) {
+            var _scene = GetScene(SceneName);
+            _scene.GameObjects.AddRange(GameObjects);
+        }
+        
+        // Removing
+        public static void RemoveFromScene(BaseObject GameObject) {
+            GetSceneOfObject(GameObject).GameObjects.Remove(GameObject);
+        }
+        public static void RemoveFromScene(BaseObject[] GameObjects) {
+            foreach (var gameObject in GameObjects) {
+                GetSceneOfObject(gameObject).GameObjects.Remove(gameObject);
+            }
+        }
+        public static void RemoveFromScene(BaseObject GameObject, string SceneName) {
+            GetScene(SceneName).GameObjects.Remove(GameObject);
+        }
+        public static void RemoveFromScene(BaseObject[] GameObjects, string SceneName) {
+
         }
 
         // Getting the scene a object is located in
-        public static Scene GetSceneOfObject(BaseObject gameObject) {
-            return Globals.EngineGlobals.Scenes.FirstOrDefault(x => x.gameObjects.Contains(gameObject));
+        public static Scene GetSceneOfObject(BaseObject GameObject) {
+            return Globals.EngineGlobals.Scenes.FirstOrDefault(x => x.GameObjects.Contains(GameObject));
         }
         
         // Adding scenes
@@ -36,9 +52,9 @@ namespace nb.Game.Utility.Scenes
 
         // Retrieving Scenes
         public static Scene GetScene(string name) {
-            var _scene = Globals.EngineGlobals.Scenes.FirstOrDefault(x => x.sceneName == name);
+            var _scene = Globals.EngineGlobals.Scenes.FirstOrDefault(x => x.SceneName == name);
             // Check if the value is a default value
-            if (EqualityComparer<Scene>.Default.Equals(_scene, default(Scene))) {
+            if (_scene == default(Scene)) {
                 _scene = new Scene(name, new List<BaseObject>());
                 // This scene dies not exist in the list yet. So add it now.
                 AddScene(_scene);

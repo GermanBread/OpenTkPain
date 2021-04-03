@@ -5,9 +5,7 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "New Beginnings", "nb.Game\New Beginnings.csproj", "{BE5D63D1-C5A4-4C38-AD9D-92B73FA7653A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uf.Resources", "nb.Resources\uf.Resources.csproj", "{901EB056-3A33-4ABB-86A9-B6279BCC010B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nb.Framework", "nb.Framework\nb.Framework.csproj", "{7B2D157D-AD92-4DF9-8EC9-9C7244A5E281}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nb.Resources", "nb.Resources\nb.Resources.csproj", "{0F743B18-7186-4D60-8D82-C0266E89926C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,5 +56,17 @@ Global
 		{7B2D157D-AD92-4DF9-8EC9-9C7244A5E281}.Release|x64.Build.0 = Release|Any CPU
 		{7B2D157D-AD92-4DF9-8EC9-9C7244A5E281}.Release|x86.ActiveCfg = Release|Any CPU
 		{7B2D157D-AD92-4DF9-8EC9-9C7244A5E281}.Release|x86.Build.0 = Release|Any CPU
+		{0F743B18-7186-4D60-8D82-C0266E89926C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F743B18-7186-4D60-8D82-C0266E89926C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F743B18-7186-4D60-8D82-C0266E89926C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0F743B18-7186-4D60-8D82-C0266E89926C}.Debug|x64.Build.0 = Debug|Any CPU
+		{0F743B18-7186-4D60-8D82-C0266E89926C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0F743B18-7186-4D60-8D82-C0266E89926C}.Debug|x86.Build.0 = Debug|Any CPU
+		{0F743B18-7186-4D60-8D82-C0266E89926C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F743B18-7186-4D60-8D82-C0266E89926C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F743B18-7186-4D60-8D82-C0266E89926C}.Release|x64.ActiveCfg = Release|Any CPU
+		{0F743B18-7186-4D60-8D82-C0266E89926C}.Release|x64.Build.0 = Release|Any CPU
+		{0F743B18-7186-4D60-8D82-C0266E89926C}.Release|x86.ActiveCfg = Release|Any CPU
+		{0F743B18-7186-4D60-8D82-C0266E89926C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
