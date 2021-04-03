@@ -117,10 +117,10 @@ namespace nb.Game
 
         protected override void OnResize(ResizeEventArgs e)
         {
+            base.OnResize(e); //Is not needed, since it's originally just a stub. Commenting this out also makes resizes faster
             GL.Viewport(0, 0, e.Width, e.Height);
             EngineGlobals.CurrentResolution = e.Size;
             Logger.Log(new LogMessage(LogSeverity.Verbose, "BaseGame", $"Resized window to: {e.Size}"));
-            //base.OnResize(); Is not needed, since it's originally just a stub. Commenting this out also makes resize faster
         }
         
         /// <summary>

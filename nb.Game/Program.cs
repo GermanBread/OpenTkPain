@@ -16,6 +16,14 @@ namespace nb.Game
                 window.Run();
                 window.Dispose();
             }
+
+            // TODO
+            // Camera
+            // Working textures
+            // Input helper
+            // Parenting
+            // Scene position offset, rotation, scale
+            // Text
         }
     }
 }

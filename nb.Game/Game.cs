@@ -23,14 +23,20 @@ namespace nb.Game
         public Game(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings) { }
 
         Rectangle first;
-        Triangle second = new Triangle {
+        Triangle second = new() {
             Size = new Vector2(150),
             Anchor = Anchor.BottomRight
         };
-        Rectangle third = new Rectangle {
+        Rectangle third = new() {
             Position = new Vector2(0, 80),
             Size = new Vector2(50),
             Anchor = Anchor.Left
+        };
+        Rectangle fourth = new() {
+            Size = new Vector2(25),
+            Color = Color4.Black,
+            Anchor = Anchor.TopLeft,
+            Layer = int.MaxValue - 1
         };
         List<Rectangle> visualisers;
         float counter = 0;
@@ -39,6 +45,7 @@ namespace nb.Game
             first = new Rectangle {
                 Size = new Vector2(250),
                 Anchor = Anchor.TopRight,
+                Position = new Vector2(-10),
                 Color = Color4.Beige,
                 Layer = 1,
                 Texture = new Texture(ResourceManager.GetResource("chungus"))
@@ -58,10 +65,19 @@ namespace nb.Game
                 });
             }
             SceneManager.LoadScene("visualisers");
+
+            CursorVisible = false;
         }
 
         public void Update() {
             counter += FrameDelta;
+            
+            var _normalizedMouseCoords = MousePosition * 2;
+            fourth.Position = new Vector2(_normalizedMouseCoords.X, -_normalizedMouseCoords.Y);
+            fourth.Color = counter % .5 < .25 ? Color4.White : Color4.Black;
+            fourth.Rotation += (MathF.Sin(counter) + 1) * FrameDelta;
+            fourth.Size = new Vector2(MathF.Sqrt(Size.X * Size.Y) * .05f);
+            
             first.Skew = new Vector2(MathF.Sin(counter * 10) * 20f);
             second.Position = new Vector2(MathF.Sin(counter * 5) * 20f - 20f, 0f);
             second.Rotation += FrameDelta;
