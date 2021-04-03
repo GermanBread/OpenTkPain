@@ -12,10 +12,16 @@ namespace nb.Game.GameObject.Components
             X = value.X;
             Y = value.Y;
         } }
-        public Vector2 Yx { get => Xy.Yx; }
+        public Vector2 Yx { get => Xy.Yx; set {
+            Y = value.X;
+            X = value.Y;
+        } }
         public Anchor(float X, float Y) {
             this.X = X;
             this.Y = Y;
+        }
+        public Anchor(Vector2 Position) {
+            Position.Deconstruct(out X, out Y);
         }
     }
     // Preset values

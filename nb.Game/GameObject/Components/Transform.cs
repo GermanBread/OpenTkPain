@@ -14,42 +14,10 @@ namespace nb.Game.GameObject.Components
     public class Transform
     {
         /// <summary>
-        /// Returns coordinates to be passed as vertices
+        /// Compiles all data necessary for rendering into a Vertex object
         /// </summary>
-        [Obsolete("Use CompileData() instead")]
-        public Vector2[] Coordinates { get {
-            Vector2[] _calculated = Vertices;
-            
-            // Skewing; Must be RELATIVE to the center of the object!
-            _calculated = Array.ConvertAll(_calculated, vec
-             => Vector2.Add(vec, new Vector2(
-                    (vec.Y - Position.Y / EngineGlobals.CurrentResolution.X) * Skew.X / Size.X,
-                    (vec.X - Position.X / EngineGlobals.CurrentResolution.Y) * Skew.Y / Size.Y
-                )
-            ));
-            // Rotation
-            _calculated = Array.ConvertAll(_calculated, vec => {
-                Matrix2.CreateRotation(Rotation + MathF.Atan2(vec.X, vec.Y), out var _rotMatrix);
-                return _rotMatrix.Column0 * vec.LengthFast;
-            });
-            // Size
-            _calculated = Array.ConvertAll(_calculated, vec
-             => Vector2.Divide(
-                    vec * Size, 
-                    EngineGlobals.CurrentResolution
-                )
-            );
-            // Positioning
-            _calculated = Array.ConvertAll(_calculated, vec
-             => Vector2.Divide(
-                    Position - Size * Anchor.Xy, 
-                    EngineGlobals.CurrentResolution
-                ) + vec + Anchor.Xy
-            );
-
-            return _calculated;
-        } }
         public Vertex[] CompileData(Color4 ObjectColor) {
+            // TODO: Implement parenting
             Vector2[] _coordinates = Vertices;
             
             // Skewing; Must be RELATIVE to the center of the object!

@@ -12,6 +12,7 @@ using nb.Game.GameObject;
 using nb.Game.Utility.Audio;
 using nb.Game.Utility.Scenes;
 using nb.Game.Utility.Logging;
+using nb.Game.Utility.Textures;
 using nb.Game.Utility.Resources;
 using nb.Game.GameObject.Components;
 
@@ -21,22 +22,28 @@ namespace nb.Game
     {
         public Game(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings) { }
 
-        Rectangle first = new Rectangle {
-            Size = new Vector2(250),
-            Anchor = Anchor.TopRight
-        };
+        Rectangle first;
         Triangle second = new Triangle {
-            Size = new Vector2(150f),
+            Size = new Vector2(150),
             Anchor = Anchor.BottomRight
         };
         Rectangle third = new Rectangle {
-            Position = new Vector2(0, 80f),
-            Size = new Vector2(50f),
+            Position = new Vector2(0, 80),
+            Size = new Vector2(50),
             Anchor = Anchor.Left
         };
         List<Rectangle> visualisers;
         float counter = 0;
         public void Init() {
+            ResourceManager.LoadResource("chungus", "bigbigchungus.jpg");
+            first = new Rectangle {
+                Size = new Vector2(250),
+                Anchor = Anchor.TopRight,
+                Color = Color4.Beige,
+                Layer = 1,
+                Texture = new Texture(ResourceManager.GetResource("chungus"))
+            };
+
             AudioManager.GlobalStreamVolume = .5f;
             ResourceManager.LoadResource("big chungus", "chungus.mp3");
             var _clip = AudioManager.CreateClip(ResourceManager.GetResource("big chungus"));
@@ -59,6 +66,7 @@ namespace nb.Game
             second.Position = new Vector2(MathF.Sin(counter * 5) * 20f - 20f, 0f);
             second.Rotation += FrameDelta;
             third.Position = new Vector2(0f, MathF.Sin(counter * 3) * 50f + 80f);
+            second.Color = Color4.FromHsv(new Vector4(counter / 2f % 1, 1f, 1f, 1f));
             FillColor = Color4.FromHsv(new Vector4(counter / 5f % 1, 1f, 1f, 1f));
 
             var _clip = AudioManager.GetClip("big chungus");
@@ -66,7 +74,6 @@ namespace nb.Game
             var _fft = _data.Item1;
             for (int i = 0; i < _fft.Length; i++) {
                 visualisers[i].Size = new Vector2(visualisers[i].Size.X, 5f + _fft[i] / 5000000);
-                visualisers[i].Color = Color4.FromHsv(new Vector4((float)i / _fft.Length % 1, 1, 1, 1));
             }
         }
     }

@@ -61,23 +61,18 @@ namespace nb.Game.Rendering.Shaders
             GL.UseProgram(ShaderHandle);
         }
 
+        // Disposing
         private bool disposed = false;
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposed)
-            {
+        protected virtual void Dispose(bool disposing) {
+            if (!disposed) {
                 GL.DeleteProgram(ShaderHandle);
 
                 disposed = true;
             }
         }
-
-        public void Dispose()
-        {
+        public void Dispose() {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-
     }
 }

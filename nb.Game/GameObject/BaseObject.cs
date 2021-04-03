@@ -13,6 +13,7 @@ using OpenTK.Windowing.Desktop;
 using nb.Game.Rendering;
 using nb.Game.Utility.Scenes;
 using nb.Game.Utility.Globals;
+using nb.Game.Utility.Textures;
 using nb.Game.Utility.Resources;
 using nb.Game.Rendering.Shaders;
 using nb.Game.GameObject.Components;
@@ -25,10 +26,8 @@ namespace nb.Game.GameObject
             SceneManager.AddToScene(this, scene ?? "default");
         }
         public void Init() {
-            // Initialize the pointer
-            index = Scene.GameObjects.IndexOf(this);
-            //vertexPointer = Unsafe.SizeOf<Vector2>() * transform.Vertices.Length /* 3 because our vectors count as a single object */ * index;
-            vertexPointer = 0;
+            if (Layer == int.MinValue)
+                Layer = Scene.GameObjects.IndexOf(this);
             
             Shader = new Shader(ResourceManager.GetResource("default.vert"), ResourceManager.GetResource("default.frag")); /* basic Shader */
             
@@ -40,17 +39,25 @@ namespace nb.Game.GameObject
             if (Color == default)
                 Color = Color4.White;
             
-            Shader.Use();
-
             GL.BindVertexArray(vertexHandle);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, elementBufferHandle);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, vertexBufferHandle); // I was missing a VBO here... how did I miss it?
-            
+
             var _data = transform.CompileData(Color);
             GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.StaticDraw);
             GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.StaticDraw);
-            GL.VertexAttribPointer(vertexPointer, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 0); // Like @Reimnop (GitHub) told me: The pointer must be initialized at the end
-            GL.EnableVertexAttribArray(vertexPointer);
+
+            if (Texture != null)
+                Texture.Use();
+            
+            // Like @Reimnop (GitHub) told me: The pointer must be initialized at the end
+            GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 0);
+            GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 2 * sizeof(float));
+            GL.VertexAttribPointer(2, 4, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 4 * sizeof(float));
+            
+            GL.EnableVertexAttribArray(0);
+            GL.EnableVertexAttribArray(1);
+            GL.EnableVertexAttribArray(2);
         }
         /// <summary>
         /// Get the scene this object is located in
@@ -65,6 +72,9 @@ namespace nb.Game.GameObject
         /// </summary>
         public void Draw() {
             Shader.Use();
+            
+            if (Texture != null)
+                Texture.Use();
 
             var _data = transform.CompileData(Color);
             GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.StaticDraw);
@@ -121,9 +131,9 @@ namespace nb.Game.GameObject
         /// </summary>
         public Anchor Anchor { get => transform.Anchor; set => transform.Anchor = value; }
         /// <summary>
-        /// Draw order, 0 = first
+        /// Draw order, smaller = drawn earlier
         /// </summary>
-        public uint Layer = 0;
+        public int Layer = int.MinValue;
         /// <summary>
         /// The shader currently in use
         /// </summary>
@@ -132,10 +142,12 @@ namespace nb.Game.GameObject
         /// Default color of the object
         /// </summary>
         public Color4 Color;
+        /// <summary>
+        /// The texture currently in use
+        /// </summary>
+        public Texture Texture;
         private int vertexHandle;
         private int vertexBufferHandle;
         private int elementBufferHandle;
-        private int vertexPointer;
-        private int index;
     }
 }

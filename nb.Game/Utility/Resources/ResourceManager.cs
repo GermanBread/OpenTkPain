@@ -14,7 +14,6 @@ namespace nb.Game.Utility.Resources
         /// <summary>
         /// Retrieves a resource
         /// </summary>
-        /// <returns>A copy of the resource</returns>
         public static Resource GetResource(string Name) {
             var _firstResult = resources.FirstOrDefault(x => x.Name == Name);
             if (_firstResult == default(Resource))
@@ -24,7 +23,7 @@ namespace nb.Game.Utility.Resources
             return _output;
         }
         /// <summary>
-        /// Loads a resource into the buffer and returns a copy
+        /// Loads a resource
         /// </summary>
         public static void LoadResource(string Name, string Path) {
             Logger.Log(new LogMessage(LogSeverity.Verbose, "ResourceManager", $"Loading resource {Name}, path {Path ?? "null"}"));

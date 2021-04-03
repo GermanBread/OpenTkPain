@@ -44,7 +44,7 @@ namespace nb.Game
             // Create a buffer where we feed out vertices into
             arrayBufferHandle = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, arrayBufferHandle);
-            GL.ClearColor(fillColor);
+            GL.ClearColor(FillColor);
 
             // ALT + ENTER, F11 = toggle fullscreen
             KeyDown += (KeyboardKeyEventArgs e) => {
@@ -92,7 +92,7 @@ namespace nb.Game
             // We want "update" to not mess with the timing
             Invoke("Update");
             
-            GL.ClearColor(fillColor);
+            GL.ClearColor(FillColor);
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
             foreach (var scene in EngineGlobals.Scenes.Where(x => x.IsLoaded))
@@ -166,11 +166,10 @@ namespace nb.Game
         private double frameDelta;
         private int arrayBufferHandle;
         private Dictionary<string, MethodInfo> reflectionCache = new();
-        private Color4 fillColor = Color4.Black;
         /// <summary>
         /// Gets the time it took for the last frame to draw
         /// </summary>
         public float FrameDelta { get => (float)frameDelta; }
-        public Color4 FillColor { get => fillColor; set => fillColor = value; }
+        public Color4 FillColor { get; set; }
     }
 }

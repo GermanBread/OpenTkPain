@@ -19,10 +19,14 @@ namespace nb.Game.Utility.Textures
     {
         private int handle;
         public Texture(Resource TextureResource) {
+            // Generate a texture handle
+            handle = GL.GenTexture();
+            GL.BindTexture(TextureTarget.Texture2D, handle);
+            
             Image<Rgba32> _image = Image.Load<Rgba32>(TextureResource.Path);
             
             // Convert to OGL address space
-            _image.Mutate(x => x.Flip(FlipMode.Vertical));
+            _image.Mutate(x => x.Rotate(RotateMode.Rotate270));
 
             // Create a byte array for OpenGL
             var _bytes = new List<byte>(4 * _image.Width * _image.Height);
@@ -41,6 +45,22 @@ namespace nb.Game.Utility.Textures
             // Create the texture
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, _image.Width, _image.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, _bytes.ToArray());
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+        }
+        public void Use() {
+            GL.BindTexture(TextureTarget.Texture2D, handle);
+        }
+        
+        // Disposing
+        private bool disposed = false;
+        protected virtual void Dispose(bool disposing) {
+            if (!disposed) {
+                GL.DeleteTexture(handle);
+                disposed = true;
+            }
+        }
+        public void Dispose() {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }
