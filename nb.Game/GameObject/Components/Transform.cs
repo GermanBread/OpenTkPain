@@ -17,7 +17,6 @@ namespace nb.Game.GameObject.Components
         /// Compiles all data necessary for rendering into a Vertex object
         /// </summary>
         public Vertex[] CompileData(Color4 ObjectColor) {
-            // TODO: Implement parenting
             Vector2[] _coordinates = Vertices;
             
             // Skewing; Must be RELATIVE to the center of the object!
@@ -29,22 +28,23 @@ namespace nb.Game.GameObject.Components
             ));
             // Rotation
             _coordinates = Array.ConvertAll(_coordinates, vec => {
-                Matrix2.CreateRotation(Rotation + MathF.Atan2(vec.X, vec.Y), out var _rotMatrix);
+                Matrix2.CreateRotation(Rotation + MathF.Atan2(vec.X, vec.Y) + Camera.Rotation, out var _rotMatrix);
                 return _rotMatrix.Column0 * vec.LengthFast;
             });
             // Size
             _coordinates = Array.ConvertAll(_coordinates, vec
              => Vector2.Divide(
-                    vec * Size, 
+                    vec * Size,
                     EngineGlobals.CurrentResolution
-                )
+                ) * Camera.Zoom
             );
             // Positioning
+            // TODO rotating the camera should also move the objects around
             _coordinates = Array.ConvertAll(_coordinates, vec
              => Vector2.Divide(
-                    Position - Size * Anchor.Xy, 
+                    Position - Size * Anchor.Xy - Camera.Position, 
                     EngineGlobals.CurrentResolution
-                ) + vec + Anchor.Xy
+                ) + vec + Anchor.Xy * Camera.Zoom
             );
 
             List<Vertex> _output = new(); // New C# 9 syntax, nice!

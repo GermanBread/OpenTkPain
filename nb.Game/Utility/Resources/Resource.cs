@@ -13,5 +13,6 @@ namespace nb.Game.Utility.Resources
         public string Name;
         public string Path;
         public IO.StreamReader Stream;
+        public static Resource Empty { get => new Resource(null, null, null); }
     }
 }

@@ -71,6 +71,10 @@ namespace nb.Game.GameObject
         /// Draws the object
         /// </summary>
         public void Draw() {
+            // Small optimization: Don't perform a draw call if the object is 100% transparent
+            if (Color.A == 0)
+                return;
+            
             Shader.Use();
             
             if (Texture != null)

@@ -8,6 +8,7 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Desktop;
 
 // New Beginnings
+using nb.Game.Rendering;
 using nb.Game.GameObject;
 using nb.Game.Utility.Audio;
 using nb.Game.Utility.Scenes;
@@ -35,25 +36,35 @@ namespace nb.Game
         Rectangle fourth = new() {
             Size = new Vector2(25),
             Color = Color4.Black,
-            Anchor = Anchor.TopLeft,
             Layer = int.MaxValue - 1
         };
         List<Rectangle> visualisers;
         float counter = 0;
         public void Init() {
+            // The resource manager allows us to create aliases for files on the user's file system. In the future I plan on enforcing the use of the resource manager.
+            ResourceManager.LoadResource("cool intro", "cool intro song.mp3");
             ResourceManager.LoadResource("chungus", "bigbigchungus.jpg");
+            ResourceManager.LoadResource("tonk", "tonk.png");
+
+            Logger.Log(new LogMessage(LogSeverity.Info, "Creating texture [1/2]"));
+            var _texture = new Texture(ResourceManager.GetResource("chungus"));
+            Logger.Log(new LogMessage(LogSeverity.Info, "Creating texture [2/2]"));
+            new Texture(ResourceManager.GetResource("tonk"));
+            _texture.Use();
+            Texture.DumpAtlas();
+
             first = new Rectangle {
                 Size = new Vector2(250),
                 Anchor = Anchor.TopRight,
                 Position = new Vector2(-10),
                 Color = Color4.Beige,
                 Layer = 1,
-                Texture = new Texture(ResourceManager.GetResource("chungus"))
+                Texture = _texture
             };
 
             AudioManager.GlobalStreamVolume = .5f;
-            ResourceManager.LoadResource("big chungus", "chungus.mp3");
-            var _clip = AudioManager.CreateClip(ResourceManager.GetResource("big chungus"));
+            
+            var _clip = AudioManager.CreateClip(ResourceManager.GetResource("cool intro"));
             _clip.Play();
             _clip.Loop = true;
             visualisers = new List<Rectangle>();
@@ -61,7 +72,9 @@ namespace nb.Game
                 visualisers.Add(new Rectangle("visualisers") {
                     Position = new Vector2(i * 5, 0),
                     Size = new Vector2(4, 5),
-                    Anchor = Anchor.BottomLeft
+                    Anchor = Anchor.BottomLeft,
+                    Color = Color4.Crimson,
+                    Layer = 500
                 });
             }
             SceneManager.LoadScene("visualisers");
@@ -69,11 +82,18 @@ namespace nb.Game
             CursorVisible = false;
         }
 
+        Vector2 parallax;
         public void Update() {
             counter += FrameDelta;
             
-            var _normalizedMouseCoords = MousePosition * 2;
-            fourth.Position = new Vector2(_normalizedMouseCoords.X, -_normalizedMouseCoords.Y);
+            // Nornalize the coordinate to (-1,-1)-( 1, 1)
+            var _normalizedMouseCoords = (Vector2.Divide(MousePosition, Size) - new Vector2(.5f)) * new Vector2( 1,-1);
+            var _mouseCoords = _normalizedMouseCoords * Size;
+
+            parallax = Vector2.Lerp(parallax, _mouseCoords, 2.5f * FrameDelta);
+            Camera.Position = parallax;
+
+            fourth.Position = _mouseCoords * 3;
             fourth.Color = counter % .5 < .25 ? Color4.White : Color4.Black;
             fourth.Rotation += (MathF.Sin(counter) + 1) * FrameDelta;
             fourth.Size = new Vector2(MathF.Sqrt(Size.X * Size.Y) * .05f);
@@ -83,13 +103,13 @@ namespace nb.Game
             second.Rotation += FrameDelta;
             third.Position = new Vector2(0f, MathF.Sin(counter * 3) * 50f + 80f);
             second.Color = Color4.FromHsv(new Vector4(counter / 2f % 1, 1f, 1f, 1f));
-            FillColor = Color4.FromHsv(new Vector4(counter / 5f % 1, 1f, 1f, 1f));
+            FillColor = Color4.FromHsv(new Vector4(counter / 5f % 1, 1f, .5f, 1f));
 
-            var _clip = AudioManager.GetClip("big chungus");
+            var _clip = AudioManager.GetClip("cool intro");
             var _data = _clip.GetWaveform(visualisers.Count);
             var _fft = _data.Item1;
             for (int i = 0; i < _fft.Length; i++) {
-                visualisers[i].Size = new Vector2(visualisers[i].Size.X, 5f + _fft[i] / 5000000);
+                visualisers[i].Size = new Vector2(visualisers[i].Size.X, 5f + _fft[i] * 100f);
             }
         }
     }

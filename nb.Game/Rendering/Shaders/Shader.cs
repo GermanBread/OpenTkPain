@@ -40,9 +40,9 @@ namespace nb.Game.Rendering.Shaders
 
             // If there are any, log them
             if (!string.IsNullOrEmpty(_vertexCompilationResult))
-                Logger.Log(new LogMessage(LogSeverity.Error, "Shader", "Failed to compile vertex shader", new ShaderCompilationException(_vertexCompilationResult)));
+                Logger.Log(new LogMessage(LogSeverity.Error, "Failed to compile vertex shader", new ShaderCompilationException(_vertexCompilationResult)));
             if (!string.IsNullOrEmpty(_fragmentCompilationREsult))
-                Logger.Log(new LogMessage(LogSeverity.Error, "Shader", "Failed to compile fragment shader", new ShaderCompilationException(_fragmentCompilationREsult)));
+                Logger.Log(new LogMessage(LogSeverity.Error, "Failed to compile fragment shader", new ShaderCompilationException(_fragmentCompilationREsult)));
 
             // Now we're making the shader usable
             ShaderHandle = GL.CreateProgram();

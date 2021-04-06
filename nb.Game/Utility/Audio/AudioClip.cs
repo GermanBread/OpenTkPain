@@ -1,6 +1,7 @@
 // System
 using System;
 using System.IO;
+using System.Linq;
 
 // BASS
 using ManagedBass;
@@ -72,14 +73,18 @@ namespace nb.Game.Utility.Audio
         /// Gets the raw waveform
         /// </summary>
         /// <param name="Count">The amount of data</param>
-        /// <returns>A tuple, value 1 is the data (interpolated if the array is not filled completely) and value 2 is the actual size of the array (how much has been read)</returns>
-        public (int[], int) GetWaveform(int Count) {
+        /// <returns>A tuple, value 1 is the data (semi-normalized) and value 2 is the actual size of the array (how much has been read)</returns>
+        public (float[], int) GetWaveform(int Count) {
             // FIXME: I doubt that this works like I think it does
             int[] _buffer = new int[Count];
             int _read = Bass.ChannelGetData(handle, _buffer, Count * 4);
             if (_read == -1)
-                return (new int[Count], 0);
-            return (_buffer, _read);
+                return (new float[Count], 0);
+            float[] _output = new float[_buffer.Length];
+            float _divisor = 1000000000f;
+            _output = Array.ConvertAll<int, float>(_buffer, x => x / _divisor);
+            _output = Array.ConvertAll(_output, x => x - _output.Min());
+            return (_output, _read);
         }
         
         /// <summary>

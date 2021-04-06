@@ -8,5 +8,6 @@ namespace nb.Game.Utility.Logging
         Normal = 3,
         Info = 4,
         Verbose = 5,
+        Debug = 6,
     }
 }

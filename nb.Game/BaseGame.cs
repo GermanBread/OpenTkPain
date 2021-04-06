@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
@@ -27,24 +28,29 @@ namespace nb.Game
     public abstract class BaseGame : GameWindow
     {
         public BaseGame(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings) {
-            Logger.Log(new LogMessage(LogSeverity.Info, "BaseGame", "Made by GermanBread#9077"));
-        }
-        protected override void OnLoad() {
-            base.OnLoad();
+            #if !DISABLE_SPLASH
+            Logger.Log(new LogMessage(LogSeverity.Info, "Unsigned Framework - Made by GermanBread#9077"));
+            #endif
 
             #if DEBUG
             Title += " (DEBUG)";
             #endif
-           
-            // Prepare BASS
-            AudioManager.Init();
-          
-            EngineGlobals.CurrentResolution = Size;
-            
+
+            // Create a stacktrace and obtain the child class
+            childObject = new StackTrace().GetFrame(1).GetMethod().DeclaringType;
+        }
+        protected override void OnLoad() {
+            base.OnLoad();
+
             // Create a buffer where we feed out vertices into
             arrayBufferHandle = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, arrayBufferHandle);
-            GL.ClearColor(FillColor);
+
+            GL.ClearColor(Color4.DarkGray);
+            GL.Clear(ClearBufferMask.ColorBufferBit);
+
+            // Prepare BASS
+            AudioManager.Init();
 
             // ALT + ENTER, F11 = toggle fullscreen
             KeyDown += (KeyboardKeyEventArgs e) => {
@@ -83,7 +89,7 @@ namespace nb.Game
             int FPS = -1;
             if (frameDelta > double.Epsilon)
                 FPS = (int)Math.Ceiling(1 / frameDelta);
-            Logger.Log(new LogMessage(LogSeverity.Verbose, "BaseGame", $"Frame delta: {frameDelta}  | FPS: {(FPS > 0 ? FPS : "Not Applicable")}"));
+            Logger.Log(new LogMessage(LogSeverity.Debug, $"Frame delta: {frameDelta}  | FPS: {(FPS > 0 ? FPS : "Not Applicable")}"));
 
             // Loop audio when applicable
             foreach (var clip in AudioManager.AudioClips.Where(x => x.Loop && x.IsPlaying && x.ClipStatus == PlaybackState.Stopped))
@@ -95,12 +101,23 @@ namespace nb.Game
             GL.ClearColor(FillColor);
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
-            foreach (var scene in EngineGlobals.Scenes.Where(x => x.IsLoaded))
-            {
-                scene.GameObjects.ForEach(x => {
-                    x.Draw();
-                });
+            // Create out two lists
+            var _scenes = EngineGlobals.Scenes.Where(x => x.IsLoaded);
+            List<BaseObject> _objects = new();
+            
+            // Insert the game objects into the _objects list
+            foreach (var scene in _scenes) {
+                foreach (var go in scene.GameObjects) {
+                    _objects.Add(go);
+                }
             }
+
+            // Sort
+            _objects.Sort((o1, o2) => o1.Layer.CompareTo(o2.Layer));
+
+            // Now draw
+            foreach (var go in _objects)
+                go.Draw();
 
             Context.SwapBuffers();
         }
@@ -111,7 +128,7 @@ namespace nb.Game
             AudioManager.Dispose();
         }
         protected override void OnClosed() {
-            Logger.Log(new LogMessage(LogSeverity.Verbose, "BaseGame", "Exit"));
+            Logger.Log(new LogMessage(LogSeverity.Debug, "Exit"));
             base.OnClosed();
         }
 
@@ -119,8 +136,7 @@ namespace nb.Game
         {
             base.OnResize(e); //Is not needed, since it's originally just a stub. Commenting this out also makes resizes faster
             GL.Viewport(0, 0, e.Width, e.Height);
-            EngineGlobals.CurrentResolution = e.Size;
-            Logger.Log(new LogMessage(LogSeverity.Verbose, "BaseGame", $"Resized window to: {e.Size}"));
+            Logger.Log(new LogMessage(LogSeverity.Debug, $"Resized window to: {e.Size}"));
         }
         
         /// <summary>
@@ -134,9 +150,9 @@ namespace nb.Game
                 if (_presentInCache)
                     _method = reflectionCache[MethodName];
                 else
-                    _method = typeof(Game).GetMethod(MethodName);
+                    _method = childObject.GetMethod(MethodName);
                 
-                Logger.Log(new LogMessage(LogSeverity.Verbose, "BaseGame", $"Invoking {MethodName}"));
+                Logger.Log(new LogMessage(LogSeverity.Debug, $"Invoking {MethodName}"));
                 // Invoke the child method and run it as a Task
                 Task _loadInvoke;
                 _loadInvoke = new TaskFactory().StartNew(()
@@ -149,7 +165,7 @@ namespace nb.Game
                 // Wait 1 second
                 if (!_loadInvoke.Wait(1000)) {
                     // If it timed out, display a warning message
-                    Logger.Log(new LogMessage(LogSeverity.Warning, "BaseGame", "Invoke exceeded time limit"));
+                    Logger.Log(new LogMessage(LogSeverity.Warning, "Invoke exceeded time limit"));
                     _loadInvoke.Wait();
                 }
                 
@@ -158,18 +174,22 @@ namespace nb.Game
                 _loadInvoke.Dispose();
             } catch (Exception e) {
                 // Log any errors happening
-                Logger.Log(new LogMessage(LogSeverity.Error, "BaseGame", "Invoke failed", e));
+                Logger.Log(new LogMessage(LogSeverity.Error, "Invoke failed", e));
             }
         }
 
         // Variables
         private double frameDelta;
         private int arrayBufferHandle;
+        private Type childObject;
         private Dictionary<string, MethodInfo> reflectionCache = new();
         /// <summary>
-        /// Gets the time it took for the last frame to draw
+        /// Time it took for the last frame to draw, measured in milliseconds
         /// </summary>
         public float FrameDelta { get => (float)frameDelta; }
+        /// <summary>
+        /// Background color used for rendering the underlying canvas
+        /// </summary>
         public Color4 FillColor { get; set; }
     }
 }

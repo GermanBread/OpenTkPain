@@ -3,14 +3,11 @@ out vec4 FragColor;
 in vec4 color;
 in vec2 uv;
 
-uniform sampler2D texture0;
+uniform sampler2D texture1;
 
 void main() {
-    float _mixRatio = .5;
-    vec4 _textureCol = texture(texture0, uv);
-
-    // Detecting if there's a texture present
-    if (_textureCol.x == 0)
-        _mixRatio = 1;
-    FragColor = mix(_textureCol, color, _mixRatio);
+    vec4 _textureCol = texture(texture1, uv);
+    if (_textureCol == vec4(0))
+        _textureCol = vec4(1);
+    FragColor = _textureCol * color * FragColor;
 }

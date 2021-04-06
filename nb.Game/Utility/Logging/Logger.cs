@@ -1,18 +1,21 @@
+// System
 using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace nb.Game.Utility.Logging
 {
     public static class Logger
     {
-        public static async Task LogAsync(LogMessage message) {
+        public static async Task LogAsync(LogMessage Message) {
             // Get the output stream
             TextWriter cout = Console.Out;
             
             // Determine the color to use
-            switch (message.severity)
+            switch (Message.Severity)
             {
                 case LogSeverity.Critical:
                 case LogSeverity.Error:
@@ -25,31 +28,37 @@ namespace nb.Game.Utility.Logging
                 case LogSeverity.Info:
                     Console.ForegroundColor = ConsoleColor.Cyan;
                     break;
+                case LogSeverity.Debug:
+                    // Only return if this app does not run in a debugging context
+                    #if !DEBUG
+                    return;
+                    #endif
                 case LogSeverity.Verbose:
+                    // I had to flip DEBUG and VERBOSE
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     break;
             }
-            await cout.WriteAsync($"[{message.severity.ToString(), 8}] ");
+            await cout.WriteAsync($"[{Message.Severity.ToString(), 8}] ");
             Console.ResetColor();
 
             // Source
-            await cout.WriteAsync(message.source);
+            await cout.WriteAsync(Message.Source);
 
             // Spacer
             await cout.WriteAsync(": ");
 
             // Message
-            await cout.WriteLineAsync(message.message);
+            await cout.WriteLineAsync(Message.Message);
 
             // This exception gets displayed on a newline
-            if (message.exception != null) await cout.WriteLineAsync(message.exception.ToString());
+            if (Message.Exception != null) await cout.WriteLineAsync(Message.Exception.ToString());
 
             cout.Close();
             cout.Dispose();
         }
         
-        public static void Log(LogMessage message) {
-            LogAsync(message).Wait();
+        public static void Log(LogMessage Message) {
+            LogAsync(Message).Wait();
         }
     }
 }

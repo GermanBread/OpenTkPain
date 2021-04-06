@@ -22,7 +22,6 @@ namespace nb.Game.Utility.Audio
             clips.Remove(clips.First(x => x.Name == ClipName));
         }
         public static void DeleteClip(AudioClip Clip) {
-            // There should be an easier way to do this, right? Apparently not.
             clips.Remove(Clip);
         }
         public static float GlobalStreamVolume { get => Bass.GlobalStreamVolume / 10000f; set => Bass.GlobalStreamVolume = (int)(value * 10000); }
