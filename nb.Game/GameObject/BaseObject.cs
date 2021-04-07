@@ -13,9 +13,9 @@ using OpenTK.Windowing.Desktop;
 using nb.Game.Rendering;
 using nb.Game.Utility.Scenes;
 using nb.Game.Utility.Globals;
-using nb.Game.Utility.Textures;
 using nb.Game.Utility.Resources;
 using nb.Game.Rendering.Shaders;
+using nb.Game.Rendering.Textures;
 using nb.Game.GameObject.Components;
 
 namespace nb.Game.GameObject
@@ -38,6 +38,10 @@ namespace nb.Game.GameObject
             // Set a default color value
             if (Color == default)
                 Color = Color4.White;
+
+            // No texture? Create a blank one!
+            if (Texture == null)
+                Texture = new Texture(Resource.Empty);
             
             GL.BindVertexArray(vertexHandle);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, elementBufferHandle);
@@ -47,14 +51,17 @@ namespace nb.Game.GameObject
             GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.StaticDraw);
             GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.StaticDraw);
 
-            if (Texture != null)
-                Texture.Use();
+            for (int i = 0; i < _data.Length; i++) {
+                var _uv = Texture.GetUV();
+                _data[i].UV *= _uv.Item2 - _uv.Item1;
+                _data[i].UV += _uv.Item1;
+            }
             
             // Like @Reimnop (GitHub) told me: The pointer must be initialized at the end
             GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 0);
             GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 2 * sizeof(float));
             GL.VertexAttribPointer(2, 4, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 4 * sizeof(float));
-            
+
             GL.EnableVertexAttribArray(0);
             GL.EnableVertexAttribArray(1);
             GL.EnableVertexAttribArray(2);
@@ -77,10 +84,14 @@ namespace nb.Game.GameObject
             
             Shader.Use();
             
-            if (Texture != null)
-                Texture.Use();
-
             var _data = transform.CompileData(Color);
+            
+            for (int i = 0; i < _data.Length; i++) {
+                var _uv = Texture.GetUV();
+                _data[i].UV *= _uv.Item2 - _uv.Item1;
+                _data[i].UV += _uv.Item1;
+            }
+            
             GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.StaticDraw);
             GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.StaticDraw);
 

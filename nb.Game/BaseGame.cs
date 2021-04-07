@@ -22,6 +22,7 @@ using nb.Game.Utility.Audio;
 using nb.Game.Utility.Scenes;
 using nb.Game.Utility.Globals;
 using nb.Game.Utility.Logging;
+using nb.Game.Utility.Attributes;
 
 namespace nb.Game
 {
@@ -118,7 +119,7 @@ namespace nb.Game
             // Now draw
             foreach (var go in _objects)
                 go.Draw();
-
+            
             Context.SwapBuffers();
         }
 
@@ -144,37 +145,38 @@ namespace nb.Game
         /// </summary>
         private void Invoke(string MethodName) {
             try {
-                // First we check if our cache already contains the method we want to invoke (reflection is slow!)
                 MethodInfo _method;
+                
+                // First we check if our cache already contains the method we want to invoke (reflection is slow!)
                 bool _presentInCache = reflectionCache.ContainsKey(MethodName);
                 if (_presentInCache)
                     _method = reflectionCache[MethodName];
                 else
                     _method = childObject.GetMethod(MethodName);
+
+                bool _canTimeOut = _method.CustomAttributes.FirstOrDefault(x
+                 => x.AttributeType.Equals(typeof(NoTimeout))) == null;
                 
-                Logger.Log(new LogMessage(LogSeverity.Debug, $"Invoking {MethodName}"));
                 // Invoke the child method and run it as a Task
+                Logger.Log(new LogMessage(LogSeverity.Debug, $"Invoking {MethodName}"));
                 Task _loadInvoke;
                 _loadInvoke = new TaskFactory().StartNew(()
                  => _method.Invoke(this, null));
                 
                 // Add the method to our cache
-                if (_presentInCache)
-                    reflectionCache.Add(_method.Name, _method);
+                if (!_presentInCache)
+                    reflectionCache.Add(MethodName, _method);
 
                 // Wait 1 second
-                if (!_loadInvoke.Wait(1000)) {
+                if (!_loadInvoke.Wait(1000) && _canTimeOut) {
                     // If it timed out, display a warning message
                     Logger.Log(new LogMessage(LogSeverity.Warning, "Invoke exceeded time limit"));
-                    _loadInvoke.Wait();
                 }
+                _loadInvoke.Wait();
                 
-                // If the task completed, dispose
-                //Logger.Log(new LogMessage("BaseGame", LogSeverity.Info, "Invoke done"));
                 _loadInvoke.Dispose();
             } catch (Exception e) {
-                // Log any errors happening
-                Logger.Log(new LogMessage(LogSeverity.Error, "Invoke failed", e));
+                Logger.Log(new LogMessage(LogSeverity.Error, "Invoke failed", e.GetType() == typeof(AggregateException) ? e.InnerException : e));
             }
         }
 

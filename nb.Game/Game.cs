@@ -13,8 +13,9 @@ using nb.Game.GameObject;
 using nb.Game.Utility.Audio;
 using nb.Game.Utility.Scenes;
 using nb.Game.Utility.Logging;
-using nb.Game.Utility.Textures;
 using nb.Game.Utility.Resources;
+using nb.Game.Rendering.Textures;
+using nb.Game.Utility.Attributes;
 using nb.Game.GameObject.Components;
 
 namespace nb.Game
@@ -40,17 +41,21 @@ namespace nb.Game
         };
         List<Rectangle> visualisers;
         float counter = 0;
+        [NoTimeout]
         public void Init() {
             // The resource manager allows us to create aliases for files on the user's file system. In the future I plan on enforcing the use of the resource manager.
             ResourceManager.LoadResource("cool intro", "cool intro song.mp3");
             ResourceManager.LoadResource("chungus", "bigbigchungus.jpg");
             ResourceManager.LoadResource("tonk", "tonk.png");
 
-            Logger.Log(new LogMessage(LogSeverity.Info, "Creating texture [1/2]"));
+            Logger.Log(new LogMessage(LogSeverity.Info, "Creating texture [1/4]"));
             var _texture = new Texture(ResourceManager.GetResource("chungus"));
-            Logger.Log(new LogMessage(LogSeverity.Info, "Creating texture [2/2]"));
+            Logger.Log(new LogMessage(LogSeverity.Info, "Creating texture [2/4]"));
             new Texture(ResourceManager.GetResource("tonk"));
-            _texture.Use();
+            Logger.Log(new LogMessage(LogSeverity.Info, "Creating texture [3/4]"));
+            new Texture(ResourceManager.GetResource("eggs.jpg"));
+            Logger.Log(new LogMessage(LogSeverity.Info, "Creating texture [4/4]"));
+            new Texture(ResourceManager.GetResource("arch btw.png"));
             Texture.DumpAtlas();
 
             first = new Rectangle {

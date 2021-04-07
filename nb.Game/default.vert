@@ -9,6 +9,7 @@ out vec2 uv;
 void main()
 {
     color = aColor;
+    
     uv = UV;
     
     gl_Position = vec4(aPosition, 0.0, 1.0);

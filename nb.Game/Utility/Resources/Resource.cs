@@ -13,6 +13,11 @@ namespace nb.Game.Utility.Resources
         public string Name;
         public string Path;
         public IO.StreamReader Stream;
-        public static Resource Empty { get => new Resource(null, null, null); }
+        /// <summary>
+        /// A resource with no data, pass this instead of null
+        /// </summary>
+        public static Resource Empty { get => uniqueEmtpyInstance; }
+        // Only gets instantiated once, allows for comparison.
+        private static Resource uniqueEmtpyInstance = new(null, null, null);
     }
 }
