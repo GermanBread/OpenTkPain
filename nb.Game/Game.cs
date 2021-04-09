@@ -48,13 +48,9 @@ namespace nb.Game
             ResourceManager.LoadResource("chungus", "bigbigchungus.jpg");
             ResourceManager.LoadResource("tonk", "tonk.png");
 
-            Logger.Log(new LogMessage(LogSeverity.Info, "Creating texture [1/4]"));
             var _texture = new Texture(ResourceManager.GetResource("chungus"));
-            Logger.Log(new LogMessage(LogSeverity.Info, "Creating texture [2/4]"));
             new Texture(ResourceManager.GetResource("tonk"));
-            Logger.Log(new LogMessage(LogSeverity.Info, "Creating texture [3/4]"));
             new Texture(ResourceManager.GetResource("eggs.jpg"));
-            Logger.Log(new LogMessage(LogSeverity.Info, "Creating texture [4/4]"));
             new Texture(ResourceManager.GetResource("arch btw.png"));
             Texture.DumpAtlas();
 

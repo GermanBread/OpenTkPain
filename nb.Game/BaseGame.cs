@@ -22,6 +22,7 @@ using nb.Game.Utility.Audio;
 using nb.Game.Utility.Scenes;
 using nb.Game.Utility.Globals;
 using nb.Game.Utility.Logging;
+using nb.Game.Utility.Debugging;
 using nb.Game.Utility.Attributes;
 
 namespace nb.Game
@@ -42,6 +43,11 @@ namespace nb.Game
         }
         protected override void OnLoad() {
             base.OnLoad();
+
+            #if DEBUG
+            // Prepare GL callbacks
+            GL_Callback.Init();
+            #endif
 
             // Create a buffer where we feed out vertices into
             arrayBufferHandle = GL.GenBuffer();
