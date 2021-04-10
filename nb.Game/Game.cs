@@ -27,7 +27,7 @@ namespace nb.Game
         Rectangle first;
         Triangle second = new() {
             Size = new Vector2(150),
-            Anchor = Anchor.BottomRight
+            Anchor = Anchor.BottomRight,
         };
         Rectangle third = new() {
             Position = new Vector2(0, 80),

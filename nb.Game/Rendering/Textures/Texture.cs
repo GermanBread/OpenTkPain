@@ -22,7 +22,7 @@ namespace nb.Game.Rendering.Textures
     public class Texture
     {
         private static bool initialized = false;
-        private static int handle;
+        private static int handle = -1;
         public Resource Resource;
         // We're putting those in an atlas, so we need the coordinates too
         // To prevent exceptions, we create a default texture. This texture will also be used to display pure color
@@ -38,6 +38,12 @@ namespace nb.Game.Rendering.Textures
             // We don't want the same texture wasting VRAM space
             if (coordinates.Keys.Any(x => x.Equals(TextureResource)))
                 return;
+
+            // Generate a texture handle
+            if (!initialized) {
+                handle = GL.GenTexture();
+                initialized = true;
+            }
             
             Logger.Log(new LogMessage(LogSeverity.Verbose, "Adding texture to atlas, this will most likely trigger a timeout message"));
 
@@ -101,21 +107,18 @@ namespace nb.Game.Rendering.Textures
             Logger.Log(new LogMessage(LogSeverity.Debug, $"Created new texture: {_bytes.Count / 4} pixels, dimensions {_image.Size()}, start coordinates at {_atlasSize}; ends at {_atlasSize + _imageSize}"));
 
             // Create the texture
-            GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, handle);
-            GL.TexImage2D(TextureTarget.Texture1D, 0, PixelInternalFormat.Rgba, atlas.Width, atlas.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, _bytes.ToArray());
-
-            // Generate a texture handle
-            if (!initialized) {
-                handle = GL.GenTexture();
-                initialized = true;
-            }
+            GL.ActiveTexture(TextureUnit.Texture1);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, atlas.Width, atlas.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, _bytes.ToArray());
+            GL.BindTexture(TextureTarget.Texture2D, handle);
         }
         /// <summary>
         /// Applies the texture to texture channel 1
         /// </summary>
         /// <returns>1: UV start. 2: UV end.</returns>
         public (Vector2, Vector2) GetUV() {
+            GL.BindTexture(TextureTarget.Texture2D, handle);
+            
             // Ima stop you right there.
             // Since we don't use the incorrect way of storing coordinates as UV, we need to convert them HERE
             var _data = coordinates[Resource];

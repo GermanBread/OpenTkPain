@@ -25,32 +25,34 @@ namespace nb.Game.Utility.Resources
         /// <summary>
         /// Loads a resource
         /// </summary>
-        public static void LoadResource(string Name, string Path) {
-            Logger.Log(new LogMessage(LogSeverity.Debug, $"Loading resource {Name}, path {Path ?? "null"}"));
+        public static void LoadResource(string Name, string FilePath) {
+            Logger.Log(new LogMessage(LogSeverity.Debug, $"Loading resource {Name}, path {FilePath ?? "null"}"));
             // FIXME: I was not able to properly implement this using reflection ... so this will have to do for now...
 
             // Fallback
             var _files = Directory.GetFiles(Environment.CurrentDirectory);
 
             // Silently replace the output
-            var _selected = Path ?? _files.FirstOrDefault(x => x.Contains(Name));
+            var _selected = Path.GetFullPath(FilePath ?? _files.FirstOrDefault(x => x.Contains(Name)));
             
             // Null-checking
-            if (_selected == null || !File.Exists(_selected)) {
+            if (!File.Exists(_selected)) {
                 // Try again with a different directory
                 _files = Directory.GetFiles(AppContext.BaseDirectory);
                 _selected = _files.FirstOrDefault(x => x.Contains(Name));
+                if (_selected != null)
+                    _selected = Path.GetFullPath(_selected);
                 
                 // We couldn't locate the resource referenced
                 if (_selected == null) {
-                    Logger.Log(new LogMessage(LogSeverity.Error, $"Failed to load resource {Name}, path {Path ?? "null"}"));
+                    Logger.Log(new LogMessage(LogSeverity.Error, $"Failed to load resource {Name}, path {FilePath ?? "null"}"));
                     return;
                 }
             }
             
             var _resource = new Resource(Name, _selected, new StreamReader(_selected));
             resources.Add(_resource);
-            Logger.Log(new LogMessage(LogSeverity.Debug, $"Loaded resource {Name}, path {Path ?? "null"}"));
+            Logger.Log(new LogMessage(LogSeverity.Debug, $"Loaded resource {Name}, path {FilePath ?? "null"}"));
         }
     }
 }

@@ -24,15 +24,15 @@ namespace nb.Game.Utility.Scenes
             GetSceneOfObject(GameObject).GameObjects.Remove(GameObject);
         }
         public static void RemoveFromScene(BaseObject[] GameObjects) {
-            foreach (var gameObject in GameObjects) {
+            foreach (var gameObject in GameObjects)
                 GetSceneOfObject(gameObject).GameObjects.Remove(gameObject);
-            }
         }
         public static void RemoveFromScene(BaseObject GameObject, string SceneName) {
             GetScene(SceneName).GameObjects.Remove(GameObject);
         }
         public static void RemoveFromScene(BaseObject[] GameObjects, string SceneName) {
-
+            foreach (var gameObject in GameObjects)
+                GetScene(SceneName).GameObjects.Remove(gameObject);
         }
 
         // Getting the scene a object is located in

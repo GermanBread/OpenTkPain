@@ -29,7 +29,8 @@ namespace nb.Game.GameObject
             if (Layer == int.MinValue)
                 Layer = Scene.GameObjects.IndexOf(this);
             
-            Shader = new Shader(ResourceManager.GetResource("default.vert"), ResourceManager.GetResource("default.frag")); /* basic Shader */
+            if (Shader == null)
+                Shader = Shader.BaseShader;
             
             vertexHandle = GL.GenVertexArray();
             elementBufferHandle = GL.GenBuffer();
@@ -53,6 +54,8 @@ namespace nb.Game.GameObject
 
             for (int i = 0; i < _data.Length; i++) {
                 var _uv = Texture.GetUV();
+                Console.WriteLine(_uv.Item1);
+                Console.WriteLine(_uv.Item2);
                 _data[i].UV *= _uv.Item2 - _uv.Item1;
                 _data[i].UV += _uv.Item1;
             }
@@ -92,8 +95,8 @@ namespace nb.Game.GameObject
                 _data[i].UV += _uv.Item1;
             }
             
-            GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.StaticDraw);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.DynamicDraw);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.DynamicDraw);
 
             GL.DrawElements(PrimitiveType.Triangles, transform.Indices.Length, DrawElementsType.UnsignedInt, 0);
         }

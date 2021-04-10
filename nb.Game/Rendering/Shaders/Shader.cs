@@ -36,16 +36,21 @@ namespace nb.Game.Rendering.Shaders
 
             // Get error messages
             string _vertexCompilationResult = GL.GetShaderInfoLog(vertexShaderHandle);
-            string _fragmentCompilationREsult = GL.GetShaderInfoLog(fragmentShaderHandle);
+            string _fragmentCompilationResult = GL.GetShaderInfoLog(fragmentShaderHandle);
 
             // If there are any, log them
             if (!string.IsNullOrEmpty(_vertexCompilationResult))
                 Logger.Log(new LogMessage(LogSeverity.Error, "Failed to compile vertex shader", new ShaderCompilationException(_vertexCompilationResult)));
-            if (!string.IsNullOrEmpty(_fragmentCompilationREsult))
-                Logger.Log(new LogMessage(LogSeverity.Error, "Failed to compile fragment shader", new ShaderCompilationException(_fragmentCompilationREsult)));
+            if (!string.IsNullOrEmpty(_fragmentCompilationResult))
+                Logger.Log(new LogMessage(LogSeverity.Error, "Failed to compile fragment shader", new ShaderCompilationException(_fragmentCompilationResult)));
 
             // Now we're making the shader usable
             ShaderHandle = GL.CreateProgram();
+
+            // Attach a label to our shader
+            string _label = $"Shader {ShaderHandle} (vert: {VertexShader.Name}, frag: {FragmentShader.Name})";
+            GL.ObjectLabel(ObjectLabelIdentifier.Program, ShaderHandle, _label.Length, _label);
+
             GL.AttachShader(ShaderHandle, vertexShaderHandle);
             GL.AttachShader(ShaderHandle, fragmentShaderHandle);
             GL.LinkProgram(ShaderHandle);
@@ -58,6 +63,7 @@ namespace nb.Game.Rendering.Shaders
         }
 
         public void Use() {
+            Logger.Log(new LogMessage(LogSeverity.Debug, $"Using shader {ShaderHandle} (vert: {vertexShaderHandle}, frag: {fragmentShaderHandle})"));
             GL.UseProgram(ShaderHandle);
         }
 
@@ -74,5 +80,16 @@ namespace nb.Game.Rendering.Shaders
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
+        private static Shader baseShader;
+        /// <summary>
+        /// Returns a basic shader that can be used
+        /// </summary>
+        public static Shader BaseShader { get {
+            // TODO: Apply the same principle from Texture.cs here...
+            if (baseShader == null)
+                baseShader = new(ResourceManager.GetResource("default vertex shader"), ResourceManager.GetResource("default fragment shader"));
+            return baseShader;
+        } }
     }
 }

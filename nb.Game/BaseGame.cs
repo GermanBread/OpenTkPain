@@ -22,6 +22,7 @@ using nb.Game.Utility.Audio;
 using nb.Game.Utility.Scenes;
 using nb.Game.Utility.Globals;
 using nb.Game.Utility.Logging;
+using nb.Game.Utility.Resources;
 using nb.Game.Utility.Debugging;
 using nb.Game.Utility.Attributes;
 
@@ -55,6 +56,10 @@ namespace nb.Game
 
             GL.ClearColor(Color4.DarkGray);
             GL.Clear(ClearBufferMask.ColorBufferBit);
+
+            // Prepare default shaders
+            ResourceManager.LoadResource("default vertex shader", "default.vert");
+            ResourceManager.LoadResource("default fragment shader", "default.frag");
 
             // Prepare BASS
             AudioManager.Init();
