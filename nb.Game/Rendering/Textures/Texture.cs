@@ -29,7 +29,7 @@ namespace nb.Game.Rendering.Textures
         private static Dictionary<Resource, (Vector2, Vector2)> coordinates = new() { { Resource.Empty, (Vector2.Zero, Vector2.One) } };
         private static Image<Rgba32> atlas = new Image<Rgba32>(1, 1, Color.White);
         public Texture(Resource TextureResource) {
-            if (TextureResource == null)
+            if (TextureResource == default)
                 throw new NullReferenceException("Passing NULL as a parameter is not permitted, use Resource.Empty instead");
 
             // Store it so that we can refer to it later
@@ -44,7 +44,7 @@ namespace nb.Game.Rendering.Textures
                 handle = GL.GenTexture();
                 initialized = true;
             }
-            
+
             Logger.Log(new LogMessage(LogSeverity.Verbose, "Adding texture to atlas, this will most likely trigger a timeout message"));
 
             Logger.Log(new LogMessage(LogSeverity.Debug, $"Loading texture {TextureResource.Name}"));
@@ -99,18 +99,17 @@ namespace nb.Game.Rendering.Textures
             }
 
             coordinates.Add(TextureResource, (
-                // I should avoid passing a new variable to the shader and instead just "crop" the UV coordinate
+                // I should avoid passing a new variable to the shader and instead just "crop" the UV coordinate when needed
                 _atlasSize,
                 _atlasSize + _imageSize
             ));
 
             Logger.Log(new LogMessage(LogSeverity.Debug, $"Created new texture: {_bytes.Count / 4} pixels, dimensions {_image.Size()}, start coordinates at {_atlasSize}; ends at {_atlasSize + _imageSize}"));
-
+           
             // Create the texture
-            GL.BindTexture(TextureTarget.Texture2D, handle);
             GL.ActiveTexture(TextureUnit.Texture1);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, atlas.Width, atlas.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, _bytes.ToArray());
             GL.BindTexture(TextureTarget.Texture2D, handle);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, atlas.Width, atlas.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, _bytes.ToArray());
         }
         /// <summary>
         /// Applies the texture to texture channel 1

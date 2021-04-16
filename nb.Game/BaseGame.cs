@@ -18,6 +18,7 @@ using ManagedBass;
 
 // New Beginnings
 using nb.Game.GameObject;
+using nb.Game.Utility.Input;
 using nb.Game.Utility.Audio;
 using nb.Game.Utility.Scenes;
 using nb.Game.Utility.Globals;
@@ -60,6 +61,8 @@ namespace nb.Game
             // Prepare default shaders
             ResourceManager.LoadResource("default vertex shader", "default.vert");
             ResourceManager.LoadResource("default fragment shader", "default.frag");
+            ResourceManager.LoadResource("multipass vertex shader", "multipass.vert");
+            ResourceManager.LoadResource("multipass fragment shader", "multipass.frag");
 
             // Prepare BASS
             AudioManager.Init();
@@ -85,6 +88,7 @@ namespace nb.Game
             
             // Initialize our objects for loading
             SceneManager.LoadScene("default");
+            SceneManager.LoadScene("ui");
             foreach (var scene in EngineGlobals.Scenes.Where(x => x.IsLoaded))
             {
                 scene.GameObjects.Sort((val1, val2) => val1.Layer.CompareTo(val2.Layer));
@@ -110,8 +114,10 @@ namespace nb.Game
             // We want "update" to not mess with the timing
             Invoke("Update");
             
-            GL.ClearColor(FillColor);
+            GL.ClearColor(Color4.Black);
             GL.Clear(ClearBufferMask.ColorBufferBit);
+
+            InputManager.PerformMultipassRender();
 
             // Create out two lists
             var _scenes = EngineGlobals.Scenes.Where(x => x.IsLoaded);
@@ -127,10 +133,13 @@ namespace nb.Game
             // Sort
             _objects.Sort((o1, o2) => o1.Layer.CompareTo(o2.Layer));
 
+            GL.ClearColor(FillColor);
+            GL.Clear(ClearBufferMask.ColorBufferBit);
+            
             // Now draw
             foreach (var go in _objects)
                 go.Draw();
-            
+
             Context.SwapBuffers();
         }
 

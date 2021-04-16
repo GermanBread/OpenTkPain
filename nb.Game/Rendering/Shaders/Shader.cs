@@ -91,5 +91,15 @@ namespace nb.Game.Rendering.Shaders
                 baseShader = new(ResourceManager.GetResource("default vertex shader"), ResourceManager.GetResource("default fragment shader"));
             return baseShader;
         } }
+        private static Shader multipassShader;
+        /// <summary>
+        /// Returns a basic shader that can be used for multipass rendering
+        /// </summary>
+        public static Shader MultipassShader { get {
+            // TODO: Apply the same principle from Texture.cs here...
+            if (multipassShader == null)
+                multipassShader = new(ResourceManager.GetResource("multipass vertex shader"), ResourceManager.GetResource("multipass fragment shader"));
+            return multipassShader;
+        } }
     }
 }

@@ -1,3 +1,4 @@
+using System.Globalization;
 // System
 using System;
 using System.Linq;
@@ -19,32 +20,53 @@ namespace nb.Game.GameObject.Components
         public Vertex[] CompileData(Color4 ObjectColor) {
             Vector2[] _coordinates = Vertices;
             
+            Matrix2.CreateRotation(Rotation, out var _rotMatrix);
+            Matrix2.CreateRotation(-Camera.Rotation, out var _posMatrix);
+            // Normalization should happen before the processing
+            Vector2 _normalisationHelper = new Vector2(MathF.Max(Camera.Resolution.X, Camera.Resolution.Y));
+            Vector2 _aspectRatioHelper = new Vector2(1, (float)Camera.Resolution.X / Camera.Resolution.Y);
+            Vector2 _adjustedSkew = Vector2.Divide(Skew, _normalisationHelper);
+            Vector2 _adjustedSize = Vector2.Divide(Size, _normalisationHelper);
+            Vector2 _adjustedPosition = Vector2.Divide(Position, _normalisationHelper);
+            Vector2 _adjustedCameraPosition = Vector2.Divide(Camera.Position, _normalisationHelper);
+            
             // Skewing; Must be RELATIVE to the center of the object!
             _coordinates = Array.ConvertAll(_coordinates, vec
-             => Vector2.Add(vec, new Vector2(
-                    (vec.Y - Position.Y / EngineGlobals.CurrentResolution.X) * Skew.X / Size.X,
-                    (vec.X - Position.X / EngineGlobals.CurrentResolution.Y) * Skew.Y / Size.Y
-                )
-            ));
+             => {
+                    Vector2 _output = Vector2.Add(vec, new Vector2(
+                        (vec.Y - Position.Y / _normalisationHelper.X) * Skew.X / Size.X,
+                        (vec.X - Position.X / _normalisationHelper.Y) * Skew.Y / Size.Y
+                    ));
+                    return _output;
+                }
+            );
             // Rotation
             _coordinates = Array.ConvertAll(_coordinates, vec => {
-                Matrix2.CreateRotation(Rotation + MathF.Atan2(vec.X, vec.Y) + Camera.Rotation, out var _rotMatrix);
-                return _rotMatrix.Column0 * vec.LengthFast;
+                return vec * _rotMatrix;
             });
             // Size
             _coordinates = Array.ConvertAll(_coordinates, vec
-             => Vector2.Divide(
-                    vec * Size,
-                    EngineGlobals.CurrentResolution
-                ) * Camera.Zoom
+             => {
+                    Vector2 _output = vec * _adjustedSize;
+                    _output *= Camera.Zoom;
+                    return _output;
+                }
             );
             // Positioning
-            // TODO rotating the camera should also move the objects around
             _coordinates = Array.ConvertAll(_coordinates, vec
-             => Vector2.Divide(
-                    Position - Size * Anchor.Xy - Camera.Position, 
-                    EngineGlobals.CurrentResolution
-                ) + vec + Anchor.Xy * Camera.Zoom
+             => {
+                    Vector2 _anchorPos = Vector2.Divide(Anchor.Xy, _aspectRatioHelper);
+                    Vector2 _output = _adjustedPosition - _adjustedSize * Anchor.Xy - _adjustedCameraPosition + vec + _anchorPos;
+                    _output *= _posMatrix;
+                    return _output;
+                }
+            );
+            // Finishing pass
+            _coordinates = Array.ConvertAll(_coordinates, vec
+             => {
+                    Vector2 _output = vec * _aspectRatioHelper;
+                    return _output;
+                }
             );
 
             List<Vertex> _output = new(); // New C# 9 syntax, nice!
@@ -58,11 +80,11 @@ namespace nb.Game.GameObject.Components
             return _output.ToArray();
         }
         /// <summary>
-        /// Position in 2D space, scaled with screen resolution
+        /// Position in 2D space
         /// </summary>
         public Vector2 Position;
         /// <summary>
-        /// 2D size, scaled with screen resolution
+        /// 2D size
         /// </summary>
         public Vector2 Size;
         /// <summary>

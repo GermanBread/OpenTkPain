@@ -31,13 +31,19 @@ namespace nb.Game
         };
         Rectangle third = new() {
             Position = new Vector2(0, 80),
-            Size = new Vector2(50),
+            Size = new Vector2(50, 25),
             Anchor = Anchor.Left
         };
-        Rectangle fourth = new() {
+        Rectangle fourth = new("ui") {
             Size = new Vector2(25),
             Color = Color4.Black,
             Layer = int.MaxValue - 1
+        };
+        Rectangle fifth = new() {
+            Size = new Vector2(10),
+            Anchor = Anchor.BottomRight,
+            Color = Color4.Orange,
+            Layer = int.MaxValue - 2
         };
         List<Rectangle> visualisers;
         float counter = 0;
@@ -52,10 +58,9 @@ namespace nb.Game
             new Texture(ResourceManager.GetResource("tonk"));
             new Texture(ResourceManager.GetResource("eggs.jpg"));
             new Texture(ResourceManager.GetResource("arch btw.png"));
-            Texture.DumpAtlas();
 
             first = new Rectangle {
-                Size = new Vector2(250),
+                Size = new Vector2(250, 750),
                 Anchor = Anchor.TopRight,
                 Position = new Vector2(-10),
                 Color = Color4.Beige,
@@ -71,7 +76,7 @@ namespace nb.Game
             visualisers = new List<Rectangle>();
             for (int i = 0; i < Size.X / 5; i++) {
                 visualisers.Add(new Rectangle("visualisers") {
-                    Position = new Vector2(i * 5, 0),
+                    Position = new Vector2(i * 10, 0),
                     Size = new Vector2(4, 5),
                     Anchor = Anchor.BottomLeft,
                     Color = Color4.Crimson,
@@ -92,14 +97,22 @@ namespace nb.Game
             var _mouseCoords = _normalizedMouseCoords * Size;
 
             parallax = Vector2.Lerp(parallax, _mouseCoords, 2.5f * FrameDelta);
-            Camera.Position = parallax;
+            //Camera.Position = parallax;
+            if (KeyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Right))
+                Camera.Rotation += FrameDelta;
+            else if (KeyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Left))
+                Camera.Rotation -= FrameDelta;
 
-            fourth.Position = _mouseCoords * 3;
+            fourth.Position = Camera.ScreenToWorldSpace((Vector2i)MousePosition);
             fourth.Color = counter % .5 < .25 ? Color4.White : Color4.Black;
             fourth.Rotation += (MathF.Sin(counter) + 1) * FrameDelta;
             fourth.Size = new Vector2(MathF.Sqrt(Size.X * Size.Y) * .05f);
             
             first.Skew = new Vector2(MathF.Sin(counter * 10) * 20f);
+            if (first.IsHovered)
+                first.Color = Color4.Red;
+            else
+                first.Color = Color4.Beige;
             second.Position = new Vector2(MathF.Sin(counter * 5) * 20f - 20f, 0f);
             second.Rotation += FrameDelta;
             third.Position = new Vector2(0f, MathF.Sin(counter * 3) * 50f + 80f);
@@ -110,6 +123,10 @@ namespace nb.Game
             var _data = _clip.GetWaveform(visualisers.Count);
             var _fft = _data.Item1;
             for (int i = 0; i < _fft.Length; i++) {
+                if (visualisers[i].IsHovered)
+                    visualisers[i].Color = Color4.Violet;
+                else
+                    visualisers[i].Color = Color4.Crimson;
                 visualisers[i].Size = new Vector2(visualisers[i].Size.X, 5f + _fft[i] * 100f);
             }
         }

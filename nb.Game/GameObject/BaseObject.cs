@@ -9,8 +9,10 @@ using System.Runtime.CompilerServices;
 using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Windowing.Desktop;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 using nb.Game.Rendering;
+using nb.Game.Utility.Input;
 using nb.Game.Utility.Scenes;
 using nb.Game.Utility.Globals;
 using nb.Game.Utility.Resources;
@@ -94,6 +96,34 @@ namespace nb.Game.GameObject
                 _data[i].UV *= _uv.Item2 - _uv.Item1;
                 _data[i].UV += _uv.Item1;
             }
+
+            // Let me just hijack the Draw() method to fire an event
+            // This is pretty much the same if I were to create a Update() method
+            if (InputManager.HoveredObject == this)
+                IsHovered = true;
+            else
+                IsHovered = false;
+            
+            if (IsHovered && EngineGlobals.Window.MouseState.IsButtonDown(MouseButton.Left))
+                Clicked.Invoke();
+            
+            GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.DynamicDraw);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.DynamicDraw);
+
+            GL.DrawElements(PrimitiveType.Triangles, transform.Indices.Length, DrawElementsType.UnsignedInt, 0);
+        }
+        public void MultipassDraw(Color4 Override) {
+            // Small optimization: Don't perform a draw call if the object is 100% transparent
+            if (Color.A == 0)
+                return;
+            
+            var _data = transform.CompileData(Override);
+            
+            for (int i = 0; i < _data.Length; i++) {
+                var _uv = Texture.GetUV();
+                _data[i].UV *= _uv.Item2 - _uv.Item1;
+                _data[i].UV += _uv.Item1;
+            }
             
             GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.DynamicDraw);
             GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.DynamicDraw);
@@ -164,6 +194,15 @@ namespace nb.Game.GameObject
         /// The texture currently in use
         /// </summary>
         public Texture Texture;
+        /// <summary>
+        /// If a cursor is hovering above this object
+        /// </summary>
+        public bool IsHovered { get; private set; }
+        public delegate void OnClicked();
+        /// <summary>
+        /// Fired when this object is clicked
+        /// </summary>
+        public event OnClicked Clicked;
         private int vertexHandle;
         private int vertexBufferHandle;
         private int elementBufferHandle;
