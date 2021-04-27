@@ -10,29 +10,45 @@ namespace nb.Game.Utility.Scenes
     public static class SceneManager
     {
         // Adding objects to scenes
-        public static void AddToScene(BaseObject GameObject, string SceneName) {
+        public static Scene AddToScene(BaseObject GameObject, string SceneName) {
             var _scene = GetScene(SceneName);
             _scene.GameObjects.Add(GameObject);
+            return _scene;
         }
-        public static void AddToScene(BaseObject[] GameObjects, string SceneName) {
+        public static Scene AddToScene(BaseObject[] GameObjects, string SceneName) {
             var _scene = GetScene(SceneName);
             _scene.GameObjects.AddRange(GameObjects);
+            return _scene;
         }
         
         // Removing
-        public static void RemoveFromScene(BaseObject GameObject) {
-            GetSceneOfObject(GameObject).GameObjects.Remove(GameObject);
+        public static Scene RemoveFromScene(BaseObject GameObject) {
+            var _scene = GetSceneOfObject(GameObject);
+            _scene.GameObjects.Remove(GameObject);
+            return _scene;
         }
-        public static void RemoveFromScene(BaseObject[] GameObjects) {
-            foreach (var gameObject in GameObjects)
-                GetSceneOfObject(gameObject).GameObjects.Remove(gameObject);
+        public static Dictionary<BaseObject, Scene> RemoveFromScene(BaseObject[] GameObjects) {
+            Dictionary<BaseObject, Scene> _dict = new();
+            foreach (var gameObject in GameObjects) {
+                var _scene = GetSceneOfObject(gameObject);
+                _scene.GameObjects.Remove(gameObject);
+                _dict.Add(gameObject, _scene);
+            }
+            return _dict;
         }
-        public static void RemoveFromScene(BaseObject GameObject, string SceneName) {
-            GetScene(SceneName).GameObjects.Remove(GameObject);
+        public static Scene RemoveFromScene(BaseObject GameObject, string SceneName) {
+            var _scene = GetScene(SceneName);
+            _scene.GameObjects.Remove(GameObject);
+            return _scene;
         }
-        public static void RemoveFromScene(BaseObject[] GameObjects, string SceneName) {
-            foreach (var gameObject in GameObjects)
-                GetScene(SceneName).GameObjects.Remove(gameObject);
+        public static Dictionary<BaseObject, Scene> RemoveFromScene(BaseObject[] GameObjects, string SceneName) {
+            Dictionary<BaseObject, Scene> _dict = new();
+            foreach (var gameObject in GameObjects) {
+                var _scene = GetScene(SceneName);
+                _scene.GameObjects.Remove(gameObject);
+                _dict.Add(gameObject, _scene);
+            }
+            return _dict;
         }
 
         // Getting the scene a object is located in
@@ -65,10 +81,20 @@ namespace nb.Game.Utility.Scenes
         // Actual scene management
         public static void UnloadScene(string name) {
             var _scene = GetScene(name);
+            if (!_scene.IsLoaded)
+                return;
             _scene.Unload();
         }
         public static void LoadScene(string name) {
             var _scene = GetScene(name);
+            if (_scene.IsLoaded)
+                return;
+            //_scene.GameObjects.Sort((val1, val2) => val1.Layer.CompareTo(val2.Layer));
+            _scene.GameObjects.ForEach(x => {
+                if (!x.IsInitialized)
+                    // FIXME: That's great and all, but what do we do if an object gets created after the scene loaded?
+                    x.Init();
+            });
             _scene.Load();
         }
     }

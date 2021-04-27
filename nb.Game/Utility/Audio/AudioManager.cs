@@ -15,7 +15,7 @@ namespace nb.Game.Utility.Audio
         public static List<AudioClip> AudioClips { get => clips; }
         private static List<AudioClip> clips = new List<AudioClip>();
         public static AudioClip GetClip(string ClipName) {
-            return clips.First(x => x.Name == ClipName);
+            return clips.FirstOrDefault(x => x.Name == ClipName);
         }
         public static void DeleteClip(string ClipName) {
             // There should be an easier way to do this, right? Apparently not.
@@ -35,9 +35,11 @@ namespace nb.Game.Utility.Audio
             clips.Add(_clip);
             return _clip;
         }
-        /// </inheritdoc>
         public static AudioClip CreateClip(Resource Resource) {
-            var _clip = new AudioClip(Resource.Name);
+            AudioClip _clip = null;
+            if (Resource == null)
+                return null;
+            _clip = new AudioClip(Resource.Name);
             _clip.Open(Resource.Path);
             clips.Add(_clip);
             return _clip;

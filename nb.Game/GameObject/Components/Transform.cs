@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using OpenTK.Mathematics;
 
 using nb.Game.Rendering;
-using nb.Game.Utility.Globals;
+using nb.Game.Utility.Scenes;
 
 namespace nb.Game.GameObject.Components
 {
@@ -17,17 +17,17 @@ namespace nb.Game.GameObject.Components
         /// <summary>
         /// Compiles all data necessary for rendering into a Vertex object
         /// </summary>
-        public Vertex[] CompileData(Color4 ObjectColor) {
+        public Vertex[] CompileData(Color4 ObjectColor, Scene Scene) {
             Vector2[] _coordinates = Vertices;
             
             Matrix2.CreateRotation(Rotation, out var _rotMatrix);
-            Matrix2.CreateRotation(-Camera.Rotation, out var _posMatrix);
+            Matrix2.CreateRotation(-Camera.Rotation - Scene.Rotation, out var _posMatrix);
             // Normalization should happen before the processing
             Vector2 _normalisationHelper = new Vector2(MathF.Max(Camera.Resolution.X, Camera.Resolution.Y));
             Vector2 _aspectRatioHelper = new Vector2(1, (float)Camera.Resolution.X / Camera.Resolution.Y);
             Vector2 _adjustedSkew = Vector2.Divide(Skew, _normalisationHelper);
-            Vector2 _adjustedSize = Vector2.Divide(Size, _normalisationHelper);
-            Vector2 _adjustedPosition = Vector2.Divide(Position, _normalisationHelper);
+            Vector2 _adjustedSize = Vector2.Divide(Size, _normalisationHelper * 2);
+            Vector2 _adjustedPosition = Vector2.Divide(Position + Scene.Position, _normalisationHelper);
             Vector2 _adjustedCameraPosition = Vector2.Divide(Camera.Position, _normalisationHelper);
             
             // Skewing; Must be RELATIVE to the center of the object!
@@ -41,9 +41,7 @@ namespace nb.Game.GameObject.Components
                 }
             );
             // Rotation
-            _coordinates = Array.ConvertAll(_coordinates, vec => {
-                return vec * _rotMatrix;
-            });
+            _coordinates = Array.ConvertAll(_coordinates, vec => vec * _rotMatrix);
             // Size
             _coordinates = Array.ConvertAll(_coordinates, vec
              => {
@@ -65,6 +63,8 @@ namespace nb.Game.GameObject.Components
             _coordinates = Array.ConvertAll(_coordinates, vec
              => {
                     Vector2 _output = vec * _aspectRatioHelper;
+                    _output *= Scene.Scale;
+                    _output *= Camera.Zoom;
                     return _output;
                 }
             );
@@ -82,15 +82,15 @@ namespace nb.Game.GameObject.Components
         /// <summary>
         /// Position in 2D space
         /// </summary>
-        public Vector2 Position;
+        public Vector2 Position = Vector2.Zero;
         /// <summary>
         /// 2D size
         /// </summary>
-        public Vector2 Size;
+        public Vector2 Size = Vector2.One;
         /// <summary>
         /// Skew along the x and y axis
         /// </summary>
-        public Vector2 Skew;
+        public Vector2 Skew = Vector2.Zero;
         /// <summary>
         /// Rotation around the Z-axis
         /// </summary>

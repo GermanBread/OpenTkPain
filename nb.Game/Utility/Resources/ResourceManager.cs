@@ -19,7 +19,7 @@ namespace nb.Game.Utility.Resources
             if (_firstResult == default)
                 // Resource not present in List? Load it!
                 LoadResource(Name, null);
-            var _output = resources.First(x => x.Name == Name);
+            var _output = resources.FirstOrDefault(x => x.Name == Name);
             return _output;
         }
         /// <summary>
@@ -33,7 +33,12 @@ namespace nb.Game.Utility.Resources
             var _files = Directory.GetFiles(Environment.CurrentDirectory);
 
             // Silently replace the output
-            var _selected = Path.GetFullPath(FilePath ?? _files.FirstOrDefault(x => x.Contains(Name)));
+            string _file = FilePath ?? _files.FirstOrDefault(x => x.Contains(Name));
+            if (string.IsNullOrEmpty(_file)) {
+                Logger.Log(new LogMessage(LogSeverity.Error, $"Failed to load resource {Name}, path {FilePath ?? "null"}"));
+                return;
+            }
+            var _selected = Path.GetFullPath(_file);
             
             // Null-checking
             if (!File.Exists(_selected)) {

@@ -84,35 +84,46 @@ namespace nb.Game
                     Close();
             };
 
+            FocusedChanged += (FocusedChangedEventArgs e) => {
+                if (e.IsFocused)
+                    Logger.Log(new LogMessage(LogSeverity.Debug, "Focus changed: Focused"));
+                else
+                    Logger.Log(new LogMessage(LogSeverity.Debug, "Focus changed: Unfocused"));
+            };
+
             Invoke("Init");
+            Invoke("Update");
             
-            // Initialize our objects for loading
+            //EngineGlobals.Scenes.ForEach(x => x.GameObjects.ForEach(y => y.Init()));
+
+            // Initialize our objects / scenes
             SceneManager.LoadScene("default");
-            SceneManager.LoadScene("ui");
-            foreach (var scene in EngineGlobals.Scenes.Where(x => x.IsLoaded))
-            {
-                scene.GameObjects.Sort((val1, val2) => val1.Layer.CompareTo(val2.Layer));
-                scene.GameObjects.ForEach(x => {
-                    x.Init();
-                });
-            }
+            SceneManager.LoadScene("overlay");
         }
 
         protected override void OnRenderFrame(FrameEventArgs e) {
             base.OnRenderFrame(e);
-            
+
             frameDelta = e.Time;
             int FPS = -1;
             if (frameDelta > double.Epsilon)
                 FPS = (int)Math.Ceiling(1 / frameDelta);
-            Logger.Log(new LogMessage(LogSeverity.Debug, $"Frame delta: {frameDelta}  | FPS: {(FPS > 0 ? FPS : "Not Applicable")}"));
-
             // Loop audio when applicable
-            foreach (var clip in AudioManager.AudioClips.Where(x => x.Loop && x.IsPlaying && x.ClipStatus == PlaybackState.Stopped))
-                clip.Play();
+            if (IsFocused || !PauseOnLostFocus) {
+                Logger.Log(new LogMessage(LogSeverity.Debug, $"Frame delta: {frameDelta}  | FPS: {(FPS > 0 ? FPS : "Not Applicable")}"));
+                // FIXME: Does not loop audio for some reason
+                foreach (var clip in AudioManager.AudioClips.Where(x => (x.Loop && x.IsPlaying && x.ClipStatus == PlaybackState.Stopped)))
+                    clip.Play();
+            }
+            if (PauseOnLostFocus && IsFocused) {
+                Bass.Start();
+            }
+            else if (PauseOnLostFocus)
+                Bass.Pause();
 
             // We want "update" to not mess with the timing
-            Invoke("Update");
+            if (IsFocused || !PauseOnLostFocus)
+                Invoke("Update");
             
             GL.ClearColor(Color4.Black);
             GL.Clear(ClearBufferMask.ColorBufferBit);
@@ -141,6 +152,8 @@ namespace nb.Game
                 go.Draw();
 
             Context.SwapBuffers();
+
+            return;
         }
 
         protected override void OnUnload() {
@@ -213,5 +226,6 @@ namespace nb.Game
         /// Background color used for rendering the underlying canvas
         /// </summary>
         public Color4 FillColor { get; set; }
+        public bool PauseOnLostFocus = false;
     }
 }

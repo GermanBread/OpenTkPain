@@ -18,6 +18,11 @@ namespace nb.Game.Rendering.Shaders
         private string vertexSourceCode;
         private string fragmentSourceCode;
         public Shader(Resource VertexShader, Resource FragmentShader) {
+            if (VertexShader == null || FragmentShader == null) {
+                Logger.Log(new LogMessage(LogSeverity.Error, "Failed to compile vert/frag shader, either one of their associated resources is null"));
+                return;
+            }
+            
             // Read the shader code
             vertexSourceCode = VertexShader.Stream.ReadToEnd();
             fragmentSourceCode = FragmentShader.Stream.ReadToEnd();
@@ -63,8 +68,15 @@ namespace nb.Game.Rendering.Shaders
         }
 
         public void Use() {
-            Logger.Log(new LogMessage(LogSeverity.Debug, $"Using shader {ShaderHandle} (vert: {vertexShaderHandle}, frag: {fragmentShaderHandle})"));
+            //Logger.Log(new LogMessage(LogSeverity.Debug, $"Using shader {ShaderHandle} (vert: {vertexShaderHandle}, frag: {fragmentShaderHandle})"));
             GL.UseProgram(ShaderHandle);
+        }
+
+        public void SetInt(string Name, int Value)
+        {
+            int _location = GL.GetUniformLocation(ShaderHandle, Name);
+
+            GL.Uniform1(_location, Value);
         }
 
         // Disposing
@@ -77,6 +89,9 @@ namespace nb.Game.Rendering.Shaders
             }
         }
         public void Dispose() {
+            if (this == BaseShader || this == MultipassShader) {
+                Logger.Log(new LogMessage(LogSeverity.Error, "Something attemped to dispose the base shaders!"));
+            }
             Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -86,7 +101,6 @@ namespace nb.Game.Rendering.Shaders
         /// Returns a basic shader that can be used
         /// </summary>
         public static Shader BaseShader { get {
-            // TODO: Apply the same principle from Texture.cs here...
             if (baseShader == null)
                 baseShader = new(ResourceManager.GetResource("default vertex shader"), ResourceManager.GetResource("default fragment shader"));
             return baseShader;
@@ -96,7 +110,6 @@ namespace nb.Game.Rendering.Shaders
         /// Returns a basic shader that can be used for multipass rendering
         /// </summary>
         public static Shader MultipassShader { get {
-            // TODO: Apply the same principle from Texture.cs here...
             if (multipassShader == null)
                 multipassShader = new(ResourceManager.GetResource("multipass vertex shader"), ResourceManager.GetResource("multipass fragment shader"));
             return multipassShader;

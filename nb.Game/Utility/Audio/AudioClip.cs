@@ -6,6 +6,8 @@ using System.Linq;
 // BASS
 using ManagedBass;
 
+using nb.Game.Utility.Logging;
+
 namespace nb.Game.Utility.Audio
 {
     public class AudioClip : IDisposable
@@ -18,26 +20,16 @@ namespace nb.Game.Utility.Audio
         } }
         public double ClipPosition { get {
             long BytePosition = Bass.ChannelGetPosition(handle);
-            if (BytePosition == -1)
-                throw new BassException();
             double SecondsPosition = Bass.ChannelBytes2Seconds(handle, BytePosition);
-            if (SecondsPosition < 0)
-                throw new BassException();
             return SecondsPosition;
         } set {
             long BytePosition = Bass.ChannelSeconds2Bytes(handle, value);
-            if (BytePosition == -1)
-                throw new BassException();
             if (!Bass.ChannelSetPosition(handle, BytePosition))
-                throw new BassException();
+                Logger.Log(new LogMessage(LogSeverity.Error, $"Failed to seek {new BassException().Message}"));
         } }
         public double ClipLength { get {
             long BytePosition = Bass.ChannelGetLength(handle);
-            if (BytePosition == -1)
-                throw new BassException();
             double SecondsPosition = Bass.ChannelBytes2Seconds(handle, BytePosition);
-            if (SecondsPosition < 0)
-                throw new BassException();
             return SecondsPosition;
         } }
         public bool Loop { get; set; }
@@ -51,23 +43,20 @@ namespace nb.Game.Utility.Audio
         public void Open(string File) {
             handle = Bass.CreateStream(File);
             if (handle == 0)
-                throw new BassException();
+                Logger.Log(new LogMessage(LogSeverity.Error, $"Failed to load file {new BassException().Message}"));
             FilePath = Path.GetFullPath(File);
         }
         public void Play() {
             if (!Bass.ChannelPlay(handle))
-                throw new BassException();
-            IsPlaying = true;
+                IsPlaying = true;
         }
         public void Pause() {
             if (!Bass.ChannelPause(handle))
-                throw new BassException();
-            IsPlaying = false;
+                IsPlaying = false;
         }
         public void Stop() {
             if (!Bass.ChannelStop(handle))
-                throw new BassException();
-            IsPlaying = false;
+                IsPlaying = false;
         }
         /// <summary>
         /// Gets the raw waveform

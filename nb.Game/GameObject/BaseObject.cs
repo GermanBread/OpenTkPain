@@ -15,6 +15,7 @@ using nb.Game.Rendering;
 using nb.Game.Utility.Input;
 using nb.Game.Utility.Scenes;
 using nb.Game.Utility.Globals;
+using nb.Game.Utility.Logging;
 using nb.Game.Utility.Resources;
 using nb.Game.Rendering.Shaders;
 using nb.Game.Rendering.Textures;
@@ -24,16 +25,25 @@ namespace nb.Game.GameObject
 {
     public class BaseObject : IDisposable
     {
-        public BaseObject(string scene) {
-            SceneManager.AddToScene(this, scene ?? "default");
+        public BaseObject(string scene)
+        {
+            Scene = SceneManager.AddToScene(this, scene ?? "default");
         }
-        public void Init() {
+        public void Init()
+        {
+            gameWindow.Context.MakeCurrent();
+
+            if (isInitialized)
+            {
+                Logger.Log(new LogMessage(LogSeverity.Warning, "Init() was called even though this object was already initialized!"));
+                return;
+            }
+
             if (Layer == int.MinValue)
                 Layer = Scene.GameObjects.IndexOf(this);
-            
             if (Shader == null)
                 Shader = Shader.BaseShader;
-            
+
             vertexHandle = GL.GenVertexArray();
             elementBufferHandle = GL.GenBuffer();
             vertexBufferHandle = GL.GenBuffer();
@@ -45,23 +55,15 @@ namespace nb.Game.GameObject
             // No texture? Create a blank one!
             if (Texture == null)
                 Texture = new Texture(Resource.Empty);
-            
+
             GL.BindVertexArray(vertexHandle);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, elementBufferHandle);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, vertexBufferHandle); // I was missing a VBO here... how did I miss it?
 
-            var _data = transform.CompileData(Color);
+            /*var _data = transform.CompileData(Color);
             GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.StaticDraw);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.StaticDraw);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.StaticDraw);*/
 
-            for (int i = 0; i < _data.Length; i++) {
-                var _uv = Texture.GetUV();
-                Console.WriteLine(_uv.Item1);
-                Console.WriteLine(_uv.Item2);
-                _data[i].UV *= _uv.Item2 - _uv.Item1;
-                _data[i].UV += _uv.Item1;
-            }
-            
             // Like @Reimnop (GitHub) told me: The pointer must be initialized at the end
             GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 0);
             GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 2 * sizeof(float));
@@ -70,28 +72,40 @@ namespace nb.Game.GameObject
             GL.EnableVertexAttribArray(0);
             GL.EnableVertexAttribArray(1);
             GL.EnableVertexAttribArray(2);
+
+            // Dummy event handler that prevents a nullref
+            Clicked += () => { };
+
+            isInitialized = true;
         }
-        /// <summary>
-        /// Get the scene this object is located in
-        /// </summary>
-        public Scene Scene { get => SceneManager.GetSceneOfObject(this); }
-        /// <summary>
-        /// Alias to EngineGlobals.Window
-        /// </summary>
-        protected GameWindow gameWindow { get => EngineGlobals.Window; }
         /// <summary>
         /// Draws the object
         /// </summary>
-        public void Draw() {
+        public void Draw()
+        {
+            if (!isInitialized)
+            {
+                Logger.Log(new LogMessage(LogSeverity.Error, "Not initialized; refusing to render object! Was Init() not called?"));
+                return;
+            }
+
             // Small optimization: Don't perform a draw call if the object is 100% transparent
             if (Color.A == 0)
                 return;
-            
+
+            if (Color.A < 1) {
+                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+                GL.BlendEquation(BlendEquationMode.FuncAdd);
+                GL.Enable(EnableCap.Blend);
+            }
+
+            Texture.Use();
             Shader.Use();
-            
-            var _data = transform.CompileData(Color);
-            
-            for (int i = 0; i < _data.Length; i++) {
+
+            var _data = transform.CompileData(Color, Scene);
+
+            for (int i = 0; i < _data.Length; i++)
+            {
                 var _uv = Texture.GetUV();
                 _data[i].UV *= _uv.Item2 - _uv.Item1;
                 _data[i].UV += _uv.Item1;
@@ -103,28 +117,25 @@ namespace nb.Game.GameObject
                 IsHovered = true;
             else
                 IsHovered = false;
-            
-            if (IsHovered && EngineGlobals.Window.MouseState.IsButtonDown(MouseButton.Left))
+
+            if (IsHovered && (!EngineGlobals.Window.MouseState.WasButtonDown(MouseButton.Left) && EngineGlobals.Window.MouseState.IsButtonDown(MouseButton.Left)))
                 Clicked.Invoke();
-            
+
             GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.DynamicDraw);
             GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.DynamicDraw);
 
             GL.DrawElements(PrimitiveType.Triangles, transform.Indices.Length, DrawElementsType.UnsignedInt, 0);
+
+            GL.Disable(EnableCap.Blend);
         }
-        public void MultipassDraw(Color4 Override) {
+        public void MultipassDraw(Color4 Override)
+        {
             // Small optimization: Don't perform a draw call if the object is 100% transparent
             if (Color.A == 0)
                 return;
-            
-            var _data = transform.CompileData(Override);
-            
-            for (int i = 0; i < _data.Length; i++) {
-                var _uv = Texture.GetUV();
-                _data[i].UV *= _uv.Item2 - _uv.Item1;
-                _data[i].UV += _uv.Item1;
-            }
-            
+
+            var _data = transform.CompileData(Override, Scene);
+
             GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.DynamicDraw);
             GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.DynamicDraw);
 
@@ -133,7 +144,8 @@ namespace nb.Game.GameObject
         /// <summary>
         /// Frees any resources used by this Object
         /// </summary>
-        public void Dispose() {
+        public void Dispose()
+        {
             Dispose(true);
             GC.SuppressFinalize(true);
         }
@@ -142,7 +154,6 @@ namespace nb.Game.GameObject
         {
             if (!disposed)
             {
-                Shader.Dispose();
                 GL.DeleteVertexArray(vertexHandle);
                 GL.DeleteBuffer(vertexBufferHandle);
                 GL.DeleteBuffer(elementBufferHandle);
@@ -151,9 +162,21 @@ namespace nb.Game.GameObject
             }
         }
         /// <summary>
+        /// Get the scene this object is located in
+        /// </summary>
+        public Scene Scene;
+        /// <summary>
+        /// Alias to EngineGlobals.Window
+        /// </summary>
+        protected GameWindow gameWindow { get => EngineGlobals.Window; }
+        /// <summary>
         /// Contains all children of this object
         /// </summary>
         public List<BaseObject> Children = new List<BaseObject>();
+        /// <summary>
+        /// The current parent of the object
+        /// </summary>
+        public BaseObject Parent;
         /// <summary>
         /// Contains all information related to size, position and rotation
         /// </summary>
@@ -203,6 +226,8 @@ namespace nb.Game.GameObject
         /// Fired when this object is clicked
         /// </summary>
         public event OnClicked Clicked;
+        public bool IsInitialized { get => isInitialized; }
+        private bool isInitialized = false;
         private int vertexHandle;
         private int vertexBufferHandle;
         private int elementBufferHandle;

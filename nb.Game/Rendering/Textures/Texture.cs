@@ -106,18 +106,19 @@ namespace nb.Game.Rendering.Textures
 
             Logger.Log(new LogMessage(LogSeverity.Debug, $"Created new texture: {_bytes.Count / 4} pixels, dimensions {_image.Size()}, start coordinates at {_atlasSize}; ends at {_atlasSize + _imageSize}"));
            
-            // Create the texture
+            // Final step: create the texture
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, atlas.Width, atlas.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, _bytes.ToArray());
+            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+        }
+        public void Use() {
             GL.ActiveTexture(TextureUnit.Texture1);
             GL.BindTexture(TextureTarget.Texture2D, handle);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, atlas.Width, atlas.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, _bytes.ToArray());
         }
         /// <summary>
-        /// Applies the texture to texture channel 1
+        /// Retrieve UV coordinates
         /// </summary>
         /// <returns>1: UV start. 2: UV end.</returns>
         public (Vector2, Vector2) GetUV() {
-            GL.BindTexture(TextureTarget.Texture2D, handle);
-            
             // Ima stop you right there.
             // Since we don't use the incorrect way of storing coordinates as UV, we need to convert them HERE
             var _data = coordinates[Resource];
@@ -127,7 +128,7 @@ namespace nb.Game.Rendering.Textures
             atlas.Size().Deconstruct(out _atlasSize.X, out _atlasSize.Y);
             
             _data.Item1 = Vector2.Divide(_data.Item1, _atlasSize);
-            _data.Item1 = Vector2.Divide(_data.Item1, _atlasSize);
+            _data.Item2 = Vector2.Divide(_data.Item2, _atlasSize);
             
             return _data;
         }

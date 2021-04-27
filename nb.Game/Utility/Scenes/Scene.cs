@@ -2,6 +2,9 @@
 using System;
 using System.Collections.Generic;
 
+// OpenTK
+using OpenTK.Mathematics;
+
 using nb.Game.GameObject;
 
 namespace nb.Game.Utility.Scenes
@@ -11,6 +14,9 @@ namespace nb.Game.Utility.Scenes
         public string SceneName;
         public List<BaseObject> GameObjects;
         public bool IsLoaded { get; private set; }
+        public Vector2 Position = Vector2.Zero;
+        public Vector2 Scale = Vector2.One;
+        public float Rotation = 0;
         public void Unload() {
             IsLoaded = false;
         }

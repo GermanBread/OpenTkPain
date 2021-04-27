@@ -1,7 +1,11 @@
-﻿// OpenTK
+﻿// System
+using System;
+
+// OpenTK
 using OpenTK.Windowing.Desktop;
 
 using nb.Game.Utility.Globals;
+using nb.Game.Utility.Logging;
 
 namespace nb.Game
 {
@@ -9,6 +13,7 @@ namespace nb.Game
     {
         static void Main(string[] args)
         {
+            EngineGlobals.CLArgs = args;
             using (Game window = new Game(new GameWindowSettings { 
                 RenderFrequency = 60, 
                 UpdateFrequency = 120
@@ -16,7 +21,12 @@ namespace nb.Game
                 Title = "Unsigned Framework Dev."
             })) {
                 EngineGlobals.Window = window;
-                window.Run();
+                try {
+                    window.Run();
+                }
+                catch (Exception ex) {
+                    Logger.Log(new LogMessage(LogSeverity.Critical, "Something is wrong in the process!", ex));
+                }
                 window.Dispose();
             }
 
@@ -24,8 +34,7 @@ namespace nb.Game
             // [DIFFICULTY] lower = easier; scale 1-10
             
             // Working on it:            
-            // [2] Input helper (must also be able to determine the object clicked)
-            // [5] Fix shaders (see last point in "To be done")
+            
             
             // To be done
             // [5] Parenting
@@ -33,10 +42,12 @@ namespace nb.Game
             // [2] Working textures (i got the atlas working, does this count? ...no?)
             // [4] Text (pass an array to the shader pointing to the characters, no no don't do that)
             // [3] Animation system
-            // [8] Fix some issues SPECIFIC TO WINDOWS (Accessviolation in Init() method. Most likely caused during texture load. I'm starting to hate Windows more and more each second...)
+            // [5] Fix shaders (see last point in "To be done")
+            // [8] Fix some issues SPECIFIC TO WINDOWS (Accessviolation in Init() method. Most likely caused during texture load)
             //!    2021-04-09: This is caused by a bug in Shader.cs (probably)
 
             // Done
+            // [2] Input helper (must also be able to determine the object clicked)
             // [1] Camera (must be able to convert between camera-coordinates, world-coordinates and cursor-coordinates)
             // [4] Texture atlas (applies to text too!) [DONE!]
         }

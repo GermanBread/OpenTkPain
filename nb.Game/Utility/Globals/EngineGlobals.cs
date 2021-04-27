@@ -14,5 +14,6 @@ namespace nb.Game.Utility.Globals
         public static List<Scene> Scenes = new List<Scene>();
         // A reference to the active game window
         public static GameWindow Window;
+        public static string[] CLArgs;
     }
 }

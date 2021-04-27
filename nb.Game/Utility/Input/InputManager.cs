@@ -18,7 +18,7 @@ namespace nb.Game.Utility.Input
 {
     public class InputManager
     {
-        public static List<string> SceneBlackList = new() { "ui" };
+        public static List<string> SceneBlackList = new() { "overlay" };
         public static BaseObject HoveredObject;
         public static void PerformMultipassRender() {
             List<Scene> _scenes = EngineGlobals.Scenes.Where(x => !SceneBlackList.Contains(x.SceneName)).ToList();
@@ -52,5 +52,25 @@ namespace nb.Game.Utility.Input
             else
                 HoveredObject = null;
         }
+        public static MouseButton? PressedMouseButton { get {
+            MouseButton? _button = null;
+            for (int i = 0; i < 8; i++) {
+                if (EngineGlobals.Window.MouseState.IsButtonDown((MouseButton)i)) {
+                    _button = (MouseButton)i;
+                    break;
+                }
+            }
+            return _button;
+        } }
+        public static Keys? PressedKey { get {
+            Keys? _key = null;
+            for (int i = 0; i < 349; i++) {
+                if (EngineGlobals.Window.KeyboardState.IsKeyDown((Keys)i)) {
+                    _key = (Keys)i;
+                    break;
+                }
+            }
+            return _key;
+        } }
     }
 }

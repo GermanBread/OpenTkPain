@@ -13,6 +13,7 @@ using nb.Game.GameObject;
 using nb.Game.Utility.Audio;
 using nb.Game.Utility.Scenes;
 using nb.Game.Utility.Logging;
+using nb.Game.Utility.Globals;
 using nb.Game.Utility.Resources;
 using nb.Game.Rendering.Textures;
 using nb.Game.Utility.Attributes;
@@ -34,7 +35,7 @@ namespace nb.Game
             Size = new Vector2(50, 25),
             Anchor = Anchor.Left
         };
-        Rectangle fourth = new("ui") {
+        Rectangle fourth = new("overlay") {
             Size = new Vector2(25),
             Color = Color4.Black,
             Layer = int.MaxValue - 1
@@ -45,19 +46,34 @@ namespace nb.Game
             Color = Color4.Orange,
             Layer = int.MaxValue - 2
         };
+        ComplexShape sixth = new() {
+            Vertices = new Vector2[] {
+                new Vector2( 0, 1),
+                new Vector2( 1, 1),
+                new Vector2(-1, 1),
+                new Vector2(-1, -1),
+                new Vector2( 1, -1),
+                new Vector2(-.5f, .5f),
+                new Vector2( .5f,-.5f),
+                new Vector2( 0, -.5f),
+            },
+            Size = new Vector2(100),
+            Color = Color4.Red,
+            Anchor = Anchor.Center
+        };
         List<Rectangle> visualisers;
         float counter = 0;
         [NoTimeout]
         public void Init() {
+            PauseOnLostFocus = !EngineGlobals.CLArgs.Contains("--no-pause");
+     
             // The resource manager allows us to create aliases for files on the user's file system. In the future I plan on enforcing the use of the resource manager.
-            ResourceManager.LoadResource("cool intro", "cool intro song.mp3");
-            ResourceManager.LoadResource("chungus", "bigbigchungus.jpg");
+            ResourceManager.LoadResource("music", "TempleOS Hymn Risen (Remix) - Dave Eddy-IdYMA6hY_74.wav");
             ResourceManager.LoadResource("tonk", "tonk.png");
 
-            var _texture = new Texture(ResourceManager.GetResource("chungus"));
-            new Texture(ResourceManager.GetResource("tonk"));
-            new Texture(ResourceManager.GetResource("eggs.jpg"));
+            var _texture = new Texture(ResourceManager.GetResource("tonk"));
             new Texture(ResourceManager.GetResource("arch btw.png"));
+            Texture.DumpAtlas();
 
             first = new Rectangle {
                 Size = new Vector2(250, 750),
@@ -67,19 +83,17 @@ namespace nb.Game
                 Layer = 1,
                 Texture = _texture
             };
-
-            AudioManager.GlobalStreamVolume = .5f;
             
-            var _clip = AudioManager.CreateClip(ResourceManager.GetResource("cool intro"));
-            _clip.Play();
+            var _clip = AudioManager.CreateClip(ResourceManager.GetResource("music"));
             _clip.Loop = true;
+            _clip?.Play();
+            
             visualisers = new List<Rectangle>();
-            for (int i = 0; i < Size.X / 5; i++) {
+            for (int i = 0; i < Size.X / 2; i++) {
                 visualisers.Add(new Rectangle("visualisers") {
-                    Position = new Vector2(i * 10, 0),
-                    Size = new Vector2(4, 5),
+                    Position = new Vector2(i, 0),
+                    Size = new Vector2(1, 5),
                     Anchor = Anchor.BottomLeft,
-                    Color = Color4.Crimson,
                     Layer = 500
                 });
             }
@@ -97,14 +111,27 @@ namespace nb.Game
             var _mouseCoords = _normalizedMouseCoords * Size;
 
             parallax = Vector2.Lerp(parallax, _mouseCoords, 2.5f * FrameDelta);
-            //Camera.Position = parallax;
-            if (KeyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Right))
+            Camera.Position = parallax;
+            if (KeyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Right)) {
                 Camera.Rotation += FrameDelta;
-            else if (KeyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Left))
+                first.Scene.Rotation -= FrameDelta;
+            }
+            else if (KeyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Left)) {
                 Camera.Rotation -= FrameDelta;
+                first.Scene.Rotation += FrameDelta;
+            }
+            if (KeyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Up)) {
+                Camera.Zoom += Vector2.One * FrameDelta;
+                first.Scene.Scale -= Vector2.One * FrameDelta;
+            }
+            else if (KeyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Down)) {
+                Camera.Zoom -= Vector2.One * FrameDelta;
+                first.Scene.Scale += Vector2.One * FrameDelta;
+            }
+                
 
             fourth.Position = Camera.ScreenToWorldSpace((Vector2i)MousePosition);
-            fourth.Color = counter % .5 < .25 ? Color4.White : Color4.Black;
+            fourth.Color = counter % .5 < .25 ? Color4.White : new Color4(0, 0, 0, 100);
             fourth.Rotation += (MathF.Sin(counter) + 1) * FrameDelta;
             fourth.Size = new Vector2(MathF.Sqrt(Size.X * Size.Y) * .05f);
             
@@ -119,14 +146,16 @@ namespace nb.Game
             second.Color = Color4.FromHsv(new Vector4(counter / 2f % 1, 1f, 1f, 1f));
             FillColor = Color4.FromHsv(new Vector4(counter / 5f % 1, 1f, .5f, 1f));
 
-            var _clip = AudioManager.GetClip("cool intro");
-            var _data = _clip.GetWaveform(visualisers.Count);
+            var _clip = AudioManager.GetClip("music");
+            var _data = (new float[0], -1);
+            if (_clip != null)
+                _data = _clip.GetWaveform(visualisers.Count);
             var _fft = _data.Item1;
             for (int i = 0; i < _fft.Length; i++) {
                 if (visualisers[i].IsHovered)
                     visualisers[i].Color = Color4.Violet;
                 else
-                    visualisers[i].Color = Color4.Crimson;
+                    visualisers[i].Color = new Color4(255, 50, 20, 100);
                 visualisers[i].Size = new Vector2(visualisers[i].Size.X, 5f + _fft[i] * 100f);
             }
         }
