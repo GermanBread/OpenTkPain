@@ -29,8 +29,7 @@ namespace nb.Game.Rendering.Textures
         private static Dictionary<Resource, (Vector2, Vector2)> coordinates = new() { { Resource.Empty, (Vector2.Zero, Vector2.One) } };
         private static Image<Rgba32> atlas = new Image<Rgba32>(1, 1, Color.White);
         public Texture(Resource TextureResource) {
-            if (TextureResource == default)
-                throw new NullReferenceException("Passing NULL as a parameter is not permitted, use Resource.Empty instead");
+            TextureResource ??= Resource.Empty;
 
             // Store it so that we can refer to it later
             Resource = TextureResource;

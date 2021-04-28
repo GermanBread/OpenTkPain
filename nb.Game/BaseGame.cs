@@ -1,3 +1,4 @@
+using System.Net.Mime;
 // System
 using System;
 using System.Linq;
@@ -91,7 +92,8 @@ namespace nb.Game
                     Logger.Log(new LogMessage(LogSeverity.Debug, "Focus changed: Unfocused"));
             };
 
-            Invoke("Init");
+            if (!Invoke("Init"))
+                Panic();
             Invoke("Update");
             
             //EngineGlobals.Scenes.ForEach(x => x.GameObjects.ForEach(y => y.Init()));
@@ -176,7 +178,7 @@ namespace nb.Game
         /// <summary>
         /// Invoke a child method
         /// </summary>
-        private void Invoke(string MethodName) {
+        private bool Invoke(string MethodName) {
             try {
                 MethodInfo _method;
                 
@@ -208,9 +210,17 @@ namespace nb.Game
                 _loadInvoke.Wait();
                 
                 _loadInvoke.Dispose();
+                return true;
             } catch (Exception e) {
-                Logger.Log(new LogMessage(LogSeverity.Error, "Invoke failed", e.GetType() == typeof(AggregateException) ? e.InnerException : e));
+                Logger.Log(new LogMessage(LogSeverity.Error, "Invoke failed", e));
+                return false;
             }
+        }
+        protected void Panic(Exception ex = default) {
+            StackTrace _st = new();
+            StackFrame _sf = _st.GetFrame(1);
+            Logger.Log(new LogMessage(LogSeverity.Critical, $"[OVER HERE! EVERYTHING ABOVE THIS IS RELEVANT (this message too!)] Panic has been invoked by {_sf.GetMethod().Name}.", ex ?? new Exception("No exception has been provided, look at the messages above")));
+            Environment.Exit(1);
         }
 
         // Variables

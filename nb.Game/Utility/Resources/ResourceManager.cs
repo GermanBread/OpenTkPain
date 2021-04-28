@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 // System
 using System;
 using System.IO;
@@ -16,7 +17,7 @@ namespace nb.Game.Utility.Resources
         /// </summary>
         public static Resource GetResource(string Name) {
             var _firstResult = resources.FirstOrDefault(x => x.Name == Name);
-            if (_firstResult == default)
+            if (_firstResult == default(Resource))
                 // Resource not present in List? Load it!
                 LoadResource(Name, null);
             var _output = resources.FirstOrDefault(x => x.Name == Name);

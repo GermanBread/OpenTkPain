@@ -47,6 +47,7 @@ namespace nb.Game.Utility.Audio
             FilePath = Path.GetFullPath(File);
         }
         public void Play() {
+            // FIXME: IsPlaying never gets set to true...
             if (!Bass.ChannelPlay(handle))
                 IsPlaying = true;
         }

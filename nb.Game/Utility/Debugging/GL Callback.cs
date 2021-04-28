@@ -3,7 +3,7 @@ using System;
 using System.Runtime.InteropServices;
 
 // OpenTK
-using OpenTK.Graphics.OpenGL4;
+using OpenTK.Graphics.OpenGL;
 
 using nb.Game.Utility.Logging;
 

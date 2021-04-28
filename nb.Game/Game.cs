@@ -66,9 +66,10 @@ namespace nb.Game
         [NoTimeout]
         public void Init() {
             PauseOnLostFocus = !EngineGlobals.CLArgs.Contains("--no-pause");
-     
+
             // The resource manager allows us to create aliases for files on the user's file system. In the future I plan on enforcing the use of the resource manager.
-            ResourceManager.LoadResource("music", "TempleOS Hymn Risen (Remix) - Dave Eddy-IdYMA6hY_74.wav");
+            //ResourceManager.LoadResource("music", "TempleOS Hymn Risen (Remix) - Dave Eddy-IdYMA6hY_74.wav");
+            ResourceManager.LoadResource("music", "stereo test.mp3");
             ResourceManager.LoadResource("tonk", "tonk.png");
 
             var _texture = new Texture(ResourceManager.GetResource("tonk"));
@@ -85,7 +86,8 @@ namespace nb.Game
             };
             
             var _clip = AudioManager.CreateClip(ResourceManager.GetResource("music"));
-            _clip.Loop = true;
+            if (_clip != default(AudioClip))
+                _clip.Loop = true;
             _clip?.Play();
             
             visualisers = new List<Rectangle>();
