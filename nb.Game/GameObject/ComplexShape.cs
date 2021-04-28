@@ -31,7 +31,7 @@ namespace nb.Game.GameObject
             transform.Indices = new uint[0];
             for (uint i = 0; i < _verts.Length - 2; i++) {
                 // TODO: This needs to be worked on a bit more...
-                transform.Indices = transform.Indices.Append(i).Append(i + 1).Append((uint)_verts.Length - 1).ToArray();
+                transform.Indices = transform.Indices.Append(i).Append(i + 1).Append(i + 2).ToArray();
             }
         } }
     }

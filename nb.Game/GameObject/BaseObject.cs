@@ -31,7 +31,8 @@ namespace nb.Game.GameObject
         }
         public void Init()
         {
-            gameWindow.Context.MakeCurrent();
+            if (!gameWindow.Context.IsCurrent)
+                gameWindow.Context.MakeCurrent();
 
             if (isInitialized)
             {

@@ -43,20 +43,19 @@ namespace nb.Game.Utility.Audio
         public void Open(string File) {
             handle = Bass.CreateStream(File);
             if (handle == 0)
-                Logger.Log(new LogMessage(LogSeverity.Error, $"Failed to load file {new BassException().Message}"));
+                Logger.Log(new LogMessage(LogSeverity.Error, $"Failed to load file", new BassException()));
             FilePath = Path.GetFullPath(File);
         }
         public void Play() {
-            // FIXME: IsPlaying never gets set to true...
-            if (!Bass.ChannelPlay(handle))
+            if (Bass.ChannelPlay(handle))
                 IsPlaying = true;
         }
         public void Pause() {
-            if (!Bass.ChannelPause(handle))
+            if (Bass.ChannelPause(handle))
                 IsPlaying = false;
         }
         public void Stop() {
-            if (!Bass.ChannelStop(handle))
+            if (Bass.ChannelStop(handle))
                 IsPlaying = false;
         }
         /// <summary>

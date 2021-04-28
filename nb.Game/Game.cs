@@ -57,8 +57,9 @@ namespace nb.Game
                 new Vector2( .5f,-.5f),
                 new Vector2( 0, -.5f),
             },
-            Size = new Vector2(100),
-            Color = Color4.Red,
+            Size = new Vector2(50),
+            Position = new Vector2(75),
+            Color = Color4.Cyan,
             Anchor = Anchor.Center
         };
         List<Rectangle> visualisers;
@@ -68,8 +69,9 @@ namespace nb.Game
             PauseOnLostFocus = !EngineGlobals.CLArgs.Contains("--no-pause");
 
             // The resource manager allows us to create aliases for files on the user's file system. In the future I plan on enforcing the use of the resource manager.
-            //ResourceManager.LoadResource("music", "TempleOS Hymn Risen (Remix) - Dave Eddy-IdYMA6hY_74.wav");
-            ResourceManager.LoadResource("music", "stereo test.mp3");
+            ResourceManager.LoadResource("music", "TempleOS Hymn Risen (Remix) - Dave Eddy-IdYMA6hY_74.wav");
+            //ResourceManager.LoadResource("music", "stereo test.mp3");
+            //ResourceManager.LoadResource("music", "sine wave.wav");
             ResourceManager.LoadResource("tonk", "tonk.png");
 
             var _texture = new Texture(ResourceManager.GetResource("tonk"));
@@ -83,6 +85,22 @@ namespace nb.Game
                 Color = Color4.Beige,
                 Layer = 1,
                 Texture = _texture
+            };
+
+            new Rectangle() {
+                Size = new Vector2(50),
+                Position = new Vector2(-10),
+                Color = Color4.Red
+            };
+            new Rectangle() {
+                Position = new Vector2(10),
+                Size = new Vector2(50),
+                Color = Color4.Yellow
+            };
+            new Rectangle() {
+                Position = new Vector2(-10),
+                Size = new Vector2(50),
+                Color = new Color4(255, 0, 0, 127)
             };
             
             var _clip = AudioManager.CreateClip(ResourceManager.GetResource("music"));
