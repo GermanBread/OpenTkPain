@@ -31,8 +31,6 @@ namespace nb.Game.GameObject
         }
         public void Init()
         {
-            gameWindow.Context.MakeCurrent();
-
             if (isInitialized)
             {
                 Logger.Log(new LogMessage(LogSeverity.Warning, "Init() was called even though this object was already initialized!"));
@@ -77,8 +75,6 @@ namespace nb.Game.GameObject
             Clicked += () => { };
 
             isInitialized = true;
-
-            gameWindow.Context.MakeNoneCurrent();
         }
         /// <summary>
         /// Draws the object

@@ -26,7 +26,6 @@ using nb.Game.Utility.Globals;
 using nb.Game.Utility.Logging;
 using nb.Game.Utility.Resources;
 using nb.Game.Utility.Debugging;
-using nb.Game.Utility.Attributes;
 
 namespace nb.Game
 {
@@ -189,27 +188,13 @@ namespace nb.Game
                 else
                     _method = childObject.GetMethod(MethodName);
 
-                bool _canTimeOut = _method.CustomAttributes.FirstOrDefault(x
-                 => x.AttributeType.Equals(typeof(NoTimeout))) == null;
-                
                 // Invoke the child method and run it as a Task
                 Logger.Log(new LogMessage(LogSeverity.Debug, $"Invoking {MethodName}"));
-                Task _loadInvoke;
-                _loadInvoke = new TaskFactory().StartNew(()
-                 => _method.Invoke(this, null));
+                _method.Invoke(this, null);
                 
                 // Add the method to our cache
                 if (!_presentInCache)
                     reflectionCache.Add(MethodName, _method);
-
-                // Wait 1 second
-                if (!_loadInvoke.Wait(1000) && _canTimeOut) {
-                    // If it timed out, display a warning message
-                    Logger.Log(new LogMessage(LogSeverity.Warning, "Invoke exceeded time limit"));
-                }
-                _loadInvoke.Wait();
-                
-                _loadInvoke.Dispose();
                 return true;
             } catch (Exception e) {
                 Logger.Log(new LogMessage(LogSeverity.Error, "Invoke failed", e));
@@ -219,7 +204,7 @@ namespace nb.Game
         protected void Panic(Exception ex = default) {
             StackTrace _st = new();
             StackFrame _sf = _st.GetFrame(1);
-            Logger.Log(new LogMessage(LogSeverity.Critical, $"[OVER HERE! EVERYTHING ABOVE THIS IS RELEVANT (this message too!)] Panic has been invoked by {_sf.GetMethod().Name}.", ex ?? new Exception("No exception has been provided, look at the messages above")));
+            Logger.Log(new LogMessage(LogSeverity.Critical, $"OVER HERE! Panic has been invoked by {_sf.GetMethod().Name}.", ex ?? new Exception("No exception has been provided, look at the messages above")));
             Environment.Exit(1);
         }
 

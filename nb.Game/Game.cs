@@ -16,7 +16,6 @@ using nb.Game.Utility.Logging;
 using nb.Game.Utility.Globals;
 using nb.Game.Utility.Resources;
 using nb.Game.Rendering.Textures;
-using nb.Game.Utility.Attributes;
 using nb.Game.GameObject.Components;
 
 namespace nb.Game
@@ -65,7 +64,6 @@ namespace nb.Game
         };
         List<Rectangle> visualisers;
         float counter = 0;
-        [NoTimeout]
         public void Init() {
             PauseOnLostFocus = !EngineGlobals.CLArgs.Contains("--no-pause");
 
