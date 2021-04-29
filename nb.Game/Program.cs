@@ -15,11 +15,12 @@ namespace nb.Game
         {
             EngineGlobals.CLArgs = args;
             using (Game window = new Game(new GameWindowSettings { 
-                RenderFrequency = 60, 
-                UpdateFrequency = 120
+                /*RenderFrequency = 60, 
+                UpdateFrequency = 120*/
             }, new NativeWindowSettings {
                 Title = "Unsigned Framework Dev."
             })) {
+                window.VSync = OpenTK.Windowing.Common.VSyncMode.Off;
                 EngineGlobals.Window = window;
                 try {
                     window.Run();
@@ -36,7 +37,7 @@ namespace nb.Game
             // Working on it:
             // [8] Fix some issues SPECIFIC TO WINDOWS (Accessviolation in Init() method. Most likely caused during texture load)
             //!    2021-04-09: This is caused by a bug in Shader.cs (probably)
-            //!    2021-04-28: New issue: Context.MakeCurrent() fails because the resource is in use ._.
+            //!    2021-04-28: New issue: Context.MakeCurrent() fails because the resource is in use (._.)
             
             // To be done
             // [5] Parenting (might need recursion)

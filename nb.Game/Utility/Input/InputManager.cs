@@ -24,7 +24,7 @@ namespace nb.Game.Utility.Input
             List<Scene> _scenes = EngineGlobals.Scenes.Where(x => !SceneBlackList.Contains(x.SceneName)).ToList();
             List<BaseObject> _objects = new();
             _scenes.ForEach(x
-             => _objects.AddRange(x.GameObjects));
+             => _objects.AddRange(x.GameObjects.Where(y => y.IsHoverable)));
             
             _objects.Sort((x1, x2) => x1.Layer.CompareTo(x2.Layer));
             Shader.MultipassShader.Use();

@@ -29,6 +29,7 @@ namespace nb.Game
         Triangle second = new() {
             Size = new Vector2(150),
             Anchor = Anchor.BottomRight,
+            //IsHoverable = true
         };
         Rectangle third = new() {
             Position = new Vector2(0, 80),
@@ -114,7 +115,8 @@ namespace nb.Game
                     Position = new Vector2(i, 0),
                     Size = new Vector2(1, 5),
                     Anchor = Anchor.BottomLeft,
-                    Layer = 500
+                    Layer = 500,
+                    IsHoverable = i % 2 == 0
                 });
             }
             SceneManager.LoadScene("visualisers");

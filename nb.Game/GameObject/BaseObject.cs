@@ -31,8 +31,7 @@ namespace nb.Game.GameObject
         }
         public void Init()
         {
-            if (!gameWindow.Context.IsCurrent)
-                gameWindow.Context.MakeCurrent();
+            gameWindow.Context.MakeCurrent();
 
             if (isInitialized)
             {
@@ -78,6 +77,8 @@ namespace nb.Game.GameObject
             Clicked += () => { };
 
             isInitialized = true;
+
+            gameWindow.Context.MakeNoneCurrent();
         }
         /// <summary>
         /// Draws the object
@@ -114,7 +115,7 @@ namespace nb.Game.GameObject
 
             // Let me just hijack the Draw() method to fire an event
             // This is pretty much the same if I were to create a Update() method
-            if (InputManager.HoveredObject == this)
+            if (IsHoverable && InputManager.HoveredObject == this)
                 IsHovered = true;
             else
                 IsHovered = false;
@@ -222,6 +223,7 @@ namespace nb.Game.GameObject
         /// If a cursor is hovering above this object
         /// </summary>
         public bool IsHovered { get; private set; }
+        public bool IsHoverable { get; set; } = false;
         public delegate void OnClicked();
         /// <summary>
         /// Fired when this object is clicked
