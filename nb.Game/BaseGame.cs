@@ -1,4 +1,3 @@
-using System.Net.Mime;
 // System
 using System;
 using System.Linq;
@@ -112,15 +111,16 @@ namespace nb.Game
             // Loop audio when applicable
             if (IsFocused || !PauseOnLostFocus) {
                 Logger.Log(new LogMessage(LogSeverity.Debug, $"Frame delta: {frameDelta}  | FPS: {(FPS > 0 ? FPS : "Not Applicable")}"));
-                // FIXME: Does not loop audio for some reason
-                foreach (var clip in AudioManager.AudioClips.Where(x => (x.Loop && x.IsPlaying && x.ClipStatus == PlaybackState.Stopped)))
-                    clip.Play();
+                if (AudioManager.BASSReady)
+                    foreach (var clip in AudioManager.AudioClips.Where(x => (x.Loop && x.IsPlaying && x.ClipStatus == PlaybackState.Stopped)))
+                        clip.Play();
             }
-            if (PauseOnLostFocus && IsFocused) {
-                Bass.Start();
+            if (AudioManager.BASSReady) {
+                if (PauseOnLostFocus && IsFocused)
+                    Bass.Start();
+                else if (PauseOnLostFocus)
+                    Bass.Pause();
             }
-            else if (PauseOnLostFocus)
-                Bass.Pause();
 
             // We want "update" to not mess with the timing
             if (IsFocused || !PauseOnLostFocus)

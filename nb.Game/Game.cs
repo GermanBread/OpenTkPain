@@ -28,7 +28,7 @@ namespace nb.Game
         Triangle second = new() {
             Size = new Vector2(150),
             Anchor = Anchor.BottomRight,
-            //IsHoverable = true
+            IsHoverable = true
         };
         Rectangle third = new() {
             Position = new Vector2(0, 80),
