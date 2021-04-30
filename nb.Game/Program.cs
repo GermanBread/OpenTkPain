@@ -35,17 +35,19 @@ namespace nb.Game
             // [DIFFICULTY] lower = easier; scale 1-10
             
             // Working on it:
-            // [8] Fix some issues SPECIFIC TO WINDOWS (Accessviolation in Init() method. Most likely caused during texture load)
-            //!    2021-04-09: This is caused by a bug in Shader.cs (probably)
-            //!    2021-04-28: New issue: Context.MakeCurrent() fails because the resource is in use (._.)
+            // [2] Drawing & Multipass: Do not recalculate the list each time, instead invalidate it (i.e. set it to null) when a object in it gets removed/added.
             
             // To be done
+            // [5] Working textures (i got the atlas working, does this count? ...no?)
+            // [3] Rewrite the entire Shader class
             // [5] Parenting (might need recursion)
-            // [2] Working textures (i got the atlas working, does this count? ...no?)
             // [4] Text (pass an array to the shader pointing to the characters, no no don't do that)
             // [3] Animation system
 
             // Done
+            // [8] Fix some issues SPECIFIC TO WINDOWS (Accessviolation in Init() method. Most likely caused during texture load)
+            //!    2021-04-09: This is caused by a bug in Shader.cs (probably)
+            //!    2021-04-28: New issue: Context.MakeCurrent() fails because the resource is in use (._.)
             // [3] Backport to older versions of OpenGL
             // [3] Scene position offset, rotation, scale
             // [2] Input helper (must also be able to determine the object clicked)

@@ -36,11 +36,12 @@ namespace nb.Game
             #endif
 
             #if DEBUG
+            Logger.Log(new LogMessage(LogSeverity.Info, "This app has been configured in DEBUG mode - expect a lot of console output"));
             Title += " (DEBUG)";
             #endif
 
-            // Create a stacktrace and obtain the child class
-            childObject = new StackTrace().GetFrame(1).GetMethod().DeclaringType;
+            // Obtain the class which inherits this one
+            childObject = this.GetType();
         }
         protected override void OnLoad() {
             base.OnLoad();
