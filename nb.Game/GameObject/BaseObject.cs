@@ -28,6 +28,9 @@ namespace nb.Game.GameObject
         public BaseObject(string scene)
         {
             Scene = SceneManager.AddToScene(this, scene ?? "default");
+            // Automatically initialise
+            if (Scene.IsLoaded)
+                Init();
         }
         public void Init()
         {

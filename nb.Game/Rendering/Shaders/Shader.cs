@@ -1,6 +1,7 @@
 // System
 using System;
 using System.IO;
+using System.Collections.Generic;
 
 // OpenTK
 using OpenTK.Graphics.OpenGL;
@@ -17,12 +18,19 @@ namespace nb.Game.Rendering.Shaders
         private int fragmentShaderHandle;
         private string vertexSourceCode;
         private string fragmentSourceCode;
+        private Dictionary<(Resource, Resource), Shader> shaders = new();
         public Shader(Resource VertexShader, Resource FragmentShader) {
             if (VertexShader == null || FragmentShader == null) {
-                Logger.Log(new LogMessage(LogSeverity.Error, "Failed to compile vert/frag shader, either one of their associated resources is null"));
+                ShaderHandle = BaseShader.ShaderHandle;
                 return;
             }
-            
+
+            // The second check makes this dispose-proof (hopefully)
+            if (shaders.ContainsKey((VertexShader, FragmentShader)) && !shaders[(VertexShader, FragmentShader)].disposed) {
+                ShaderHandle = shaders[(VertexShader, FragmentShader)].ShaderHandle;
+                return;
+            }
+
             // Read the shader code
             vertexSourceCode = VertexShader.Stream.ReadToEnd();
             fragmentSourceCode = FragmentShader.Stream.ReadToEnd();

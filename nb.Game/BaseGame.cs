@@ -31,9 +31,7 @@ namespace nb.Game
     public abstract class BaseGame : GameWindow
     {
         public BaseGame(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings) {
-            #if !DISABLE_SPLASH
             Logger.Log(new LogMessage(LogSeverity.Info, "Unsigned Framework - Made by GermanBread#9077"));
-            #endif
 
             #if DEBUG
             Logger.Log(new LogMessage(LogSeverity.Info, "This app has been configured in DEBUG mode - expect a lot of console output"));
@@ -42,6 +40,7 @@ namespace nb.Game
 
             // Obtain the class which inherits this one
             childObject = this.GetType();
+            EngineGlobals.Window = this;
         }
         protected override void OnLoad() {
             base.OnLoad();
@@ -127,30 +126,38 @@ namespace nb.Game
             if (IsFocused || !PauseOnLostFocus)
                 Invoke("Update");
             
-            GL.ClearColor(Color4.Black);
-            GL.Clear(ClearBufferMask.ColorBufferBit);
-
-            InputManager.PerformMultipassRender();
-
-            // Create out two lists
-            var _scenes = EngineGlobals.Scenes.Where(x => x.IsLoaded);
-            List<BaseObject> _objects = new();
-            
-            // Insert the game objects into the _objects list
-            foreach (var scene in _scenes) {
-                foreach (var go in scene.GameObjects) {
-                    _objects.Add(go);
-                }
+            // Only recreate when list has been invalidated. See comment in declaration
+            if (invalidationQueued) {
+                drawableObjects = null;
+                invalidationQueued = false;
             }
 
-            // Sort
-            _objects.Sort((o1, o2) => o1.Layer.CompareTo(o2.Layer));
+            if (drawableObjects == null) {
+                drawableObjects = new();
+                
+                var _scenes = EngineGlobals.Scenes.Where(x => x.IsLoaded);
+            
+                // Insert the game objects into the _objects list
+                foreach (var scene in _scenes) {
+                    foreach (var go in scene.GameObjects) {
+                        drawableObjects.Add(go);
+                    }
+                }
+
+                // Sort
+                drawableObjects.Sort((o1, o2) => o1.Layer.CompareTo(o2.Layer));
+            }
+
+            GL.ClearColor(Color4.Black);
+            GL.Clear(ClearBufferMask.ColorBufferBit);
+            
+            InputManager.PerformMultipassRender(drawableObjects);
 
             GL.ClearColor(FillColor);
             GL.Clear(ClearBufferMask.ColorBufferBit);
             
             // Now draw
-            foreach (var go in _objects)
+            foreach (var go in drawableObjects)
                 go.Draw();
 
             Context.SwapBuffers();
@@ -208,11 +215,16 @@ namespace nb.Game
             Logger.Log(new LogMessage(LogSeverity.Critical, $"OVER HERE! Panic has been invoked by {_sf.GetMethod().Name}.", ex ?? new Exception("No exception has been provided, look at the messages above")));
             Environment.Exit(1);
         }
+        public bool InvalidateObjectsCache() => invalidationQueued = true;
 
         // Variables
         private double frameDelta;
         private int arrayBufferHandle;
+        // Class which inherit this class. Also known as the "child"
         private Type childObject;
+        // Null = invalidated list. Often the result of an object or scene being disabled / enabled or delted / created.
+        private List<BaseObject> drawableObjects = null;
+        private bool invalidationQueued = false;
         private Dictionary<string, MethodInfo> reflectionCache = new();
         /// <summary>
         /// Time it took for the last frame to draw, measured in milliseconds

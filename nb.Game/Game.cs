@@ -27,8 +27,7 @@ namespace nb.Game
         Rectangle first;
         Triangle second = new() {
             Size = new Vector2(150),
-            Anchor = Anchor.BottomRight,
-            IsHoverable = true
+            Anchor = Anchor.BottomRight
         };
         Rectangle third = new() {
             Position = new Vector2(0, 80),
@@ -83,7 +82,8 @@ namespace nb.Game
                 Position = new Vector2(-10),
                 Color = Color4.Beige,
                 Layer = 1,
-                Texture = _texture
+                Texture = _texture,
+                IsHoverable = true
             };
 
             new Rectangle() {

@@ -21,7 +21,6 @@ namespace nb.Game
                 Title = "Unsigned Framework Dev."
             })) {
                 window.VSync = OpenTK.Windowing.Common.VSyncMode.Off;
-                EngineGlobals.Window = window;
                 try {
                     window.Run();
                 }

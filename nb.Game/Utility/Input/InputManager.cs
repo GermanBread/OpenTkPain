@@ -20,16 +20,11 @@ namespace nb.Game.Utility.Input
     {
         public static List<string> SceneBlackList = new() { "overlay" };
         public static BaseObject HoveredObject;
-        public static void PerformMultipassRender() {
-            List<Scene> _scenes = EngineGlobals.Scenes.Where(x => !SceneBlackList.Contains(x.SceneName)).ToList();
-            List<BaseObject> _objects = new();
-            _scenes.ForEach(x
-             => _objects.AddRange(x.GameObjects.Where(y => y.IsHoverable)));
-            
-            _objects.Sort((x1, x2) => x1.Layer.CompareTo(x2.Layer));
+        public static void PerformMultipassRender(List<BaseObject> Objects) {
+            List<BaseObject> _filtered = Objects.Where(x => SceneBlackList.Contains(x.Scene.SceneName) && x.IsHoverable).ToList();
             Shader.MultipassShader.Use();
-            _objects.ForEach(x => {
-                int _index = _objects.IndexOf(x) + 1;
+            _filtered.ForEach(x => {
+                int _index = _filtered.IndexOf(x) + 1;
                 Color4 _color = new Color4(
                     (byte)(_index % byte.MaxValue),
                     (byte)((_index / byte.MaxValue) % byte.MaxValue),
@@ -48,7 +43,7 @@ namespace nb.Game.Utility.Input
             _reassembledData += _data[2] * (int)Math.Pow(byte.MaxValue, 2);
             _reassembledData += _data[3] * (int)Math.Pow(byte.MaxValue, 3);
             if (_reassembledData > 0)
-                HoveredObject = _objects[_reassembledData - 1];
+                HoveredObject = _filtered[_reassembledData - 1];
             else
                 HoveredObject = null;
         }
