@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 // OpenTK
 using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 
@@ -61,21 +62,23 @@ namespace nb.Game.GameObject
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, elementBufferHandle);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, vertexBufferHandle); // I was missing a VBO here... how did I miss it?
 
-            /*var _data = transform.CompileData(Color);
-            GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.StaticDraw);
-            GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.StaticDraw);*/
-
-            // Like @Reimnop (GitHub) told me: The pointer must be initialized at the end
             GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 0);
             GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 2 * sizeof(float));
-            GL.VertexAttribPointer(2, 4, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 4 * sizeof(float));
+            GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 4 * sizeof(float));
+            GL.VertexAttribPointer(3, 4, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 6 * sizeof(float));
 
             GL.EnableVertexAttribArray(0);
             GL.EnableVertexAttribArray(1);
             GL.EnableVertexAttribArray(2);
+            GL.EnableVertexAttribArray(3);
 
+            gameWindow.MouseDown += (e) => {
+                if (IsHovered)
+                    Clicked.Invoke(new ClickedEventArgs(e.Button));
+            };
+            
             // Dummy event handler that prevents a nullref
-            Clicked += () => { };
+            Clicked += (_) => { };
 
             isInitialized = true;
         }
@@ -94,11 +97,11 @@ namespace nb.Game.GameObject
             if (Color.A == 0)
                 return;
 
-            if (Color.A < 1) {
+            //if (Color.A < 1) {
                 GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
                 GL.BlendEquation(BlendEquationMode.FuncAdd);
                 GL.Enable(EnableCap.Blend);
-            }
+            //}
 
             Texture.Use();
             Shader.Use();
@@ -118,9 +121,6 @@ namespace nb.Game.GameObject
                 IsHovered = true;
             else
                 IsHovered = false;
-
-            if (IsHovered && (!EngineGlobals.Window.MouseState.WasButtonDown(MouseButton.Left) && EngineGlobals.Window.MouseState.IsButtonDown(MouseButton.Left)))
-                Clicked.Invoke();
 
             GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.DynamicDraw);
             GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.DynamicDraw);
@@ -165,7 +165,11 @@ namespace nb.Game.GameObject
         /// <summary>
         /// Get the scene this object is located in
         /// </summary>
-        public Scene Scene;
+        public Scene Scene { get => scene; set {
+            EngineGlobals.Window?.InvalidateObjectsCache();
+            scene = value;
+        } }
+        private Scene scene;
         /// <summary>
         /// Alias to EngineGlobals.Window
         /// </summary>
@@ -205,7 +209,11 @@ namespace nb.Game.GameObject
         /// <summary>
         /// Draw order, smaller = drawn earlier
         /// </summary>
-        public int Layer = int.MinValue;
+        public int Layer { get => layer; set {
+            EngineGlobals.Window?.InvalidateObjectsCache();
+            layer = value;
+        } }
+        private int layer = int.MinValue;
         /// <summary>
         /// The shader currently in use
         /// </summary>
@@ -223,7 +231,7 @@ namespace nb.Game.GameObject
         /// </summary>
         public bool IsHovered { get; private set; }
         public bool IsHoverable { get; set; } = false;
-        public delegate void OnClicked();
+        public delegate void OnClicked(ClickedEventArgs e);
         /// <summary>
         /// Fired when this object is clicked
         /// </summary>

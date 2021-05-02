@@ -108,19 +108,8 @@ namespace nb.Game
             int FPS = -1;
             if (frameDelta > double.Epsilon)
                 FPS = (int)Math.Ceiling(1 / frameDelta);
-            // Loop audio when applicable
-            if (IsFocused || !PauseOnLostFocus) {
+            if (IsFocused || !PauseOnLostFocus)
                 Logger.Log(new LogMessage(LogSeverity.Debug, $"Frame delta: {frameDelta}  | FPS: {(FPS > 0 ? FPS : "Not Applicable")}"));
-                if (AudioManager.BASSReady)
-                    foreach (var clip in AudioManager.AudioClips.Where(x => (x.Loop && x.IsPlaying && x.ClipStatus == PlaybackState.Stopped)))
-                        clip.Play();
-            }
-            if (AudioManager.BASSReady) {
-                if (PauseOnLostFocus && IsFocused)
-                    Bass.Start();
-                else if (PauseOnLostFocus)
-                    Bass.Pause();
-            }
 
             // We want "update" to not mess with the timing
             if (IsFocused || !PauseOnLostFocus)
@@ -165,6 +154,29 @@ namespace nb.Game
             return;
         }
 
+        // Pretty much equal to FixedUpdate in Unity
+        protected override void OnUpdateFrame(FrameEventArgs e) {
+            base.OnUpdateFrame(e);
+
+            updateDelta = e.Time;
+            
+            // Loop audio when applicable
+            if (IsFocused || !PauseOnLostFocus) {
+                if (AudioManager.BASSReady)
+                    foreach (var clip in AudioManager.AudioClips.Where(x => (x.Loop && x.IsPlaying && x.ClipStatus == PlaybackState.Stopped)))
+                        clip.Play();
+            }
+            if (AudioManager.BASSReady) {
+                if (PauseOnLostFocus && IsFocused)
+                    Bass.Start();
+                else if (PauseOnLostFocus)
+                    Bass.Pause();
+            }
+            
+            if (IsFocused || !PauseOnLostFocus)
+                Invoke("FixedUpdate");
+        }
+
         protected override void OnUnload() {
             base.OnUnload();
 
@@ -198,7 +210,7 @@ namespace nb.Game
 
                 // Invoke the child method and run it as a Task
                 Logger.Log(new LogMessage(LogSeverity.Debug, $"Invoking {MethodName}"));
-                _method.Invoke(this, null);
+                _method?.Invoke(this, null);
                 
                 // Add the method to our cache
                 if (!_presentInCache)
@@ -219,6 +231,7 @@ namespace nb.Game
 
         // Variables
         private double frameDelta;
+        private double updateDelta;
         private int arrayBufferHandle;
         // Class which inherit this class. Also known as the "child"
         private Type childObject;
@@ -227,9 +240,13 @@ namespace nb.Game
         private bool invalidationQueued = false;
         private Dictionary<string, MethodInfo> reflectionCache = new();
         /// <summary>
-        /// Time it took for the last frame to draw, measured in milliseconds
+        /// Time it took for the last frame to draw, measured in seconds
         /// </summary>
         public float FrameDelta { get => (float)frameDelta; }
+        /// <summary>
+        /// Time it took for FixedUpdate to complete, time in seconds
+        /// </summary>
+        public float UpdateDelta { get => (float)updateDelta; }
         /// <summary>
         /// Background color used for rendering the underlying canvas
         /// </summary>

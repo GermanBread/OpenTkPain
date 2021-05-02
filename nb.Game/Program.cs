@@ -14,6 +14,7 @@ namespace nb.Game
         static void Main(string[] args)
         {
             EngineGlobals.CLArgs = args;
+            
             using (Game window = new Game(new GameWindowSettings { 
                 /*RenderFrequency = 60, 
                 UpdateFrequency = 120*/
@@ -27,23 +28,31 @@ namespace nb.Game
                 catch (Exception ex) {
                     Logger.Log(new LogMessage(LogSeverity.Critical, "Something is wrong in the process!", ex));
                 }
-                window.Dispose();
             }
 
+            // Troubleshooting steps when something doesn't work:
+            // Make sure everything runs in one thread
+            
             // TODO
             // [DIFFICULTY] lower = easier; scale 1-10
             
             // Working on it:
-            // [2] Drawing & Multipass: Do not recalculate the list each time, instead invalidate it (i.e. set it to null) when a object in it gets removed/added.
+            
             
             // To be done
-            // [5] Working textures (i got the atlas working, does this count? ...no?)
-            // [3] Rewrite the entire Shader class
             // [5] Parenting (might need recursion)
-            // [4] Text (pass an array to the shader pointing to the characters, no no don't do that)
-            // [3] Animation system
+            // [5] Animation system
+            // [6] Rework Audio: Split Music / Sound streams. FFT Sample should request blocks in size of 2^x
+            //!    Volume can be set with Bass.SampleSetInfo(); !
+            // [2] Move drawable objects list from BaseGame.cs to SceneManager.cs
+            // [3] Drawing & Multipass: Instead of invalidating the list when am element changes, remove/add that object/scene from the list.
+            // [8] Text
+            // [?] Integrate ImGUI.Net
 
             // Done
+            // [4] Textures (atlas)
+            // [3] Rewrite the entire Shader class
+            // [2] Multipass aka cursor detection
             // [8] Fix some issues SPECIFIC TO WINDOWS (Accessviolation in Init() method. Most likely caused during texture load)
             //!    2021-04-09: This is caused by a bug in Shader.cs (probably)
             //!    2021-04-28: New issue: Context.MakeCurrent() fails because the resource is in use (._.)

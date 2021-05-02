@@ -74,6 +74,7 @@ namespace nb.Game.GameObject.Components
                 _output.Add(new Vertex {
                     Coordinate = _coordinates[i],
                     UV = UV[i],
+                    InnerPosition = UV[i],
                     Color = ObjectColor
                 });
             }

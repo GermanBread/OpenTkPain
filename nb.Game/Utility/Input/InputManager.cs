@@ -19,9 +19,9 @@ namespace nb.Game.Utility.Input
     public class InputManager
     {
         public static List<string> SceneBlackList = new() { "overlay" };
-        public static BaseObject HoveredObject;
+        public static BaseObject HoveredObject { get; private set; }
         public static void PerformMultipassRender(List<BaseObject> Objects) {
-            List<BaseObject> _filtered = Objects.Where(x => SceneBlackList.Contains(x.Scene.SceneName) && x.IsHoverable).ToList();
+            List<BaseObject> _filtered = Objects.Where(x => !SceneBlackList.Contains(x.Scene.SceneName) && x.IsHoverable).ToList();
             Shader.MultipassShader.Use();
             _filtered.ForEach(x => {
                 int _index = _filtered.IndexOf(x) + 1;

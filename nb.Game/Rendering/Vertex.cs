@@ -12,6 +12,7 @@ namespace nb.Game.Rendering
     {
         public Vector2 Coordinate;
         public Vector2 UV;
+        public Vector2 InnerPosition;
         public Color4 Color;
     }
 }

@@ -59,21 +59,24 @@ namespace nb.Game.Utility.Audio
                 IsPlaying = false;
         }
         /// <summary>
-        /// Gets the raw waveform
+        /// Gets the raw waveform within 0hz-20.000hz
         /// </summary>
-        /// <param name="Count">The amount of data</param>
         /// <returns>A tuple, value 1 is the data (semi-normalized) and value 2 is the actual size of the array (how much has been read)</returns>
-        public (float[], int) GetWaveform(int Count) {
-            // FIXME: I doubt that this works like I think it does
-            int[] _buffer = new int[Count];
-            int _read = Bass.ChannelGetData(handle, _buffer, Count * 4);
+        public (float[], int) GetWaveform() {
+            SampleInfo _info = new();
+            Bass.SampleGetInfo(handle, ref _info);
+            
+            int _size = 20000;
+            float[] _buffer = new float[_size];
+            
+            // Note to self: Bass.ChannelGetData = single speaker
+            int _read = Bass.ChannelGetData(handle, _buffer, _size);
             if (_read == -1)
-                return (new float[Count], 0);
-            float[] _output = new float[_buffer.Length];
-            float _divisor = 1000000000f;
-            _output = Array.ConvertAll<int, float>(_buffer, x => x / _divisor);
-            _output = Array.ConvertAll(_output, x => x - _output.Min());
-            return (_output, _read);
+                return (new float[_size], 0);
+
+            _buffer = Array.ConvertAll(_buffer, elem => elem / (_info.Frequency * _info.Channels));
+            _buffer = Array.ConvertAll(_buffer, elem => Math.Abs(elem));
+            return (_buffer, _read);
         }
         
         /// <summary>

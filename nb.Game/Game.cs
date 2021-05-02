@@ -73,8 +73,6 @@ namespace nb.Game
             ResourceManager.LoadResource("tonk", "tonk.png");
 
             var _texture = new Texture(ResourceManager.GetResource("tonk"));
-            new Texture(ResourceManager.GetResource("arch btw.png"));
-            Texture.DumpAtlas();
 
             first = new Rectangle {
                 Size = new Vector2(250, 750),
@@ -85,6 +83,10 @@ namespace nb.Game
                 Texture = _texture,
                 IsHoverable = true
             };
+
+            fourth.Texture = new Texture(ResourceManager.GetResource("arch btw.png"));
+
+            Texture.DumpAtlas();
 
             new Rectangle() {
                 Size = new Vector2(50),
@@ -120,6 +122,10 @@ namespace nb.Game
             SceneManager.LoadScene("visualisers");
 
             CursorVisible = false;
+
+            first.Clicked += (e) => {
+                first.Size += new Vector2(e.MouseButton == 0 ? 5 : -5);
+            };
         }
 
         Vector2 parallax;
@@ -169,14 +175,14 @@ namespace nb.Game
             var _clip = AudioManager.GetClip("music");
             var _data = (new float[0], -1);
             if (_clip != null)
-                _data = _clip.GetWaveform(visualisers.Count);
+                _data = _clip.GetWaveform();
             var _fft = _data.Item1;
-            for (int i = 0; i < _fft.Length; i++) {
+            for (int i = 0; i < visualisers.Count; i++) {
                 if (visualisers[i].IsHovered)
                     visualisers[i].Color = Color4.Violet;
                 else
                     visualisers[i].Color = new Color4(255, 50, 20, 100);
-                visualisers[i].Size = new Vector2(visualisers[i].Size.X, 5f + _fft[i] * 100f);
+                visualisers[i].Size = new Vector2(visualisers[i].Size.X, 5f + _fft[i * (_fft.Length / visualisers.Count)] * 100f);
             }
         }
     }
