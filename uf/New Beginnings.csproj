@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!--<RuntimeIdentifier>linux-x64</RuntimeIdentifier>-->
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <!--<PublishSingleFile>true</PublishSingleFile>
+    <PublishTrimmed>true</PublishTrimmed>
+    <SelfContained>true</SelfContained>-->
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <RootNamespace>Unsigned_Framework</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ManagedBass" Version="3.0.0" />
+    <PackageReference Include="OpenTK" Version="4.6.3" />
+    <PackageReference Include="ppy.osu.Framework.NativeLibs" Version="2021.115.0" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.3" />
+    <ProjectReference Include="../uf.Resources/uf.Resources.csproj" Version="0.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="default.frag">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="default.vert">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="multipass.frag">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="multipass.vert">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
