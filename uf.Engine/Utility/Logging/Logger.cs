@@ -38,7 +38,7 @@ namespace uf.Utility.Logging
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     break;
             }
-            await cout.WriteAsync($"[{Message.Severity.ToString(), 8}] ");
+            await cout.WriteAsync($"[{Message.Severity, 8}] ");
             Console.ResetColor();
 
             // Source

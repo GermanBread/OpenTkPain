@@ -99,7 +99,7 @@ namespace uf.Utility.Audio
         /// </summary>
         public void Dispose() {
             Dispose(true);
-            GC.SuppressFinalize(true);
+            GC.SuppressFinalize(this);
         }
         private bool disposed = false;
         protected virtual void Dispose(bool disposing) {

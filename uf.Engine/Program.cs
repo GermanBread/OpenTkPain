@@ -2,6 +2,7 @@
 using System;
 
 // OpenTK
+using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 
 using uf.Utility.Globals;
@@ -15,13 +16,14 @@ namespace uf
         {
             EngineGlobals.CLArgs = args;
             
-            using (Game window = new Game(new GameWindowSettings { 
-                /*RenderFrequency = 60, 
-                UpdateFrequency = 120*/
+            using (Game window = new(new GameWindowSettings {
+                //RenderFrequency = 60, 
+                //UpdateFrequency = 120,
             }, new NativeWindowSettings {
-                Title = "Unsigned Framework Dev."
+                Title = "Unsigned Framework Dev.",
+                Profile = ContextProfile.Any
             })) {
-                window.VSync = OpenTK.Windowing.Common.VSyncMode.Off;
+                window.VSync = VSyncMode.Off;
                 try {
                     window.Run();
                 }
@@ -35,20 +37,26 @@ namespace uf
             
             // TODO
             // [DIFFICULTY] lower = easier; scale 1-10
-            
+
             // Working on it:
-            // [5] Parenting (might need recursion)
+            // [6] Rework Audio: Split Music / Sound streams. FFT Sample should request blocks in size of 2^x
+            //!    Volume can be set with Bass.SampleSetInfo();
             
             // To be done
-            // [6] Rework Audio: Split Music / Sound streams. FFT Sample should request blocks in size of 2^x
-            //!    Volume can be set with Bass.SampleSetInfo(); !
             // [5] Animation system
+            // [8] Text
+            // [5] Rewrite Transform.cs to feature less spaghetti
+            // [3] Change LoadScene() to not load the scenes directly. Instead it should be done by the main thread!
+            // [6] Make multithreading easy
+            //!    Provide a class that can be used to launch code in a seperate thread
+            //!    Race conditions should be avoided!
             // [2] Move drawable objects list from BaseGame.cs to SceneManager.cs
             // [3] Drawing & Multipass: Instead of invalidating the list when am element changes, remove/add that object/scene from the list.
-            // [8] Text
             // [?] Integrate ImGUI.Net
+            // [1] LAST STEP: Convert to library
 
             // Done
+            // [5] Parenting (might need recursion)
             // [4] Textures (atlas)
             // [3] Rewrite the entire Shader class
             // [2] Multipass aka cursor detection

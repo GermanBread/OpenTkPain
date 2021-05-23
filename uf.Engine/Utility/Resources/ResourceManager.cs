@@ -11,7 +11,7 @@ namespace uf.Utility.Resources
 {
     public static class ResourceManager
     {
-        private static List<Resource> resources = new List<Resource>();
+        private static  List<Resource> resources = new();
         /// <summary>
         /// Retrieves a resource. If the specified resource does not exist, the parameter will be treated as a file path and subsequently LoadResource will be called.
         /// </summary>

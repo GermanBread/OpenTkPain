@@ -31,13 +31,14 @@ namespace uf.GameObject
         {
             Scene = SceneManager.AddToScene(this, scene ?? "default");
             // Automatically initialise
-            if (Scene.IsLoaded)
+            if (Scene.IsLoaded) {
                 Init();
+                gameWindow?.InvalidateObjectsCache();
+            }
         }
         public void Init()
         {
-            if (isInitialized)
-            {
+            if (isInitialized) {
                 Logger.Log(new LogMessage(LogSeverity.Warning, "Init() was called even though this object was already initialized!"));
                 return;
             }
@@ -79,7 +80,7 @@ namespace uf.GameObject
             // Dummy event handler that prevents a nullref
             Clicked += (_) => { };
 
-            Children.CollectionChanged += (_, _) => {
+            Children.CollectionChanged += (_, e) => {
                 foreach (var child in Children)
                     child.Parent = this;
             };
@@ -87,7 +88,7 @@ namespace uf.GameObject
             isInitialized = true;
         }
         /// <summary>
-        /// Draws the object
+        /// Draws the object. Should only be called once per frame.
         /// </summary>
         public void Draw()
         {
@@ -152,7 +153,7 @@ namespace uf.GameObject
         public void Dispose()
         {
             Dispose(true);
-            GC.SuppressFinalize(true);
+            GC.SuppressFinalize(this);
         }
         private bool disposed = false;
         protected virtual void Dispose(bool disposing)
@@ -170,18 +171,18 @@ namespace uf.GameObject
         /// Get the scene this object is located in
         /// </summary>
         public Scene Scene { get => scene; set {
-            EngineGlobals.Window?.InvalidateObjectsCache();
+            gameWindow?.InvalidateObjectsCache();
             scene = value;
         } }
         private Scene scene;
         /// <summary>
         /// Alias to EngineGlobals.Window
         /// </summary>
-        protected GameWindow gameWindow { get => EngineGlobals.Window; }
+        protected static BaseGame gameWindow { get => EngineGlobals.Window; }
         /// <summary>
         /// Contains all information related to size, position and rotation
         /// </summary>
-        protected Transform transform = new Transform();
+        protected Transform transform = new();
         /// <summary>
         /// Alias to transform.Skew
         /// </summary>
@@ -234,7 +235,7 @@ namespace uf.GameObject
         /// Draw order, smaller = drawn earlier
         /// </summary>
         public int Layer { get => layer; set {
-            EngineGlobals.Window?.InvalidateObjectsCache();
+            gameWindow?.InvalidateObjectsCache();
             layer = value;
         } }
         private int layer = int.MinValue;

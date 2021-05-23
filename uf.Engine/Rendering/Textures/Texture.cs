@@ -19,35 +19,37 @@ using uf.Utility.Resources;
 
 namespace uf.Rendering.Textures
 {
-    public class Texture
+    public class Texture : IDisposable
     {
         private static bool initialized = false;
         private static int handle = -1;
         public Resource Resource;
         // We're putting those in an atlas, so we need the coordinates too
         // To prevent exceptions, we create a default texture. This texture will also be used to display pure color
-        private static Dictionary<Resource, (Vector2, Vector2)> coordinates = new() { { Resource.Empty, (Vector2.Zero, new Vector2(5)) } };
-        private static Image<Rgba32> atlas = new Image<Rgba32>(5, 5, Color.White);
+        private static readonly Dictionary<Resource, (Vector2, Vector2)> coordinates = new();
+        private static Image<Rgba32> atlas;
         public Texture(Resource TextureResource) {
             TextureResource ??= Resource.Empty;
 
             // Store it so that we can refer to it later
             Resource = TextureResource;
             
-            // We don't want the same texture wasting VRAM space
+            // We don't want the same texture wasting precious VRAM space
             if (coordinates.ContainsKey(TextureResource))
                 return;
 
             // Generate a texture handle
-            if (!initialized) {
+            if (!initialized)
                 handle = GL.GenTexture();
-                initialized = true;
-            }
 
             Logger.Log(new LogMessage(LogSeverity.Verbose, "Adding texture to atlas, this will most likely trigger a timeout message"));
 
             Logger.Log(new LogMessage(LogSeverity.Debug, $"Loading texture {TextureResource.Name}"));
-            Image<Rgba32> _image = Image.Load<Rgba32>(TextureResource.Path);
+            Image<Rgba32> _image = null;
+            if (TextureResource.Path != null)
+                _image = Image.Load<Rgba32>(TextureResource.Path);
+            _image ??= new (1, 1, Rgba32.ParseHex("FFFFFF"));
+            atlas ??= new (1, 1, Rgba32.ParseHex("FFFFFF"));
 
             Logger.Log(new LogMessage(LogSeverity.Debug, $"Resizing texture to 512x?"));
             // Resize & convert to OGL address space
@@ -76,8 +78,10 @@ namespace uf.Rendering.Textures
             
             // Copy the new atlas to the old one
             // Before we copy, make sure to release the memory used by the other one
-            atlas.Dispose();
-            atlas = _newAtlas.Clone();
+            if (initialized) {
+                atlas.Dispose();
+                atlas = _newAtlas.Clone();
+            }
             
             // Free resources
             _newAtlas.Dispose();
@@ -109,8 +113,12 @@ namespace uf.Rendering.Textures
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMagFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+
+            initialized = true;
         }
-        public void Use(TextureUnit Unit = TextureUnit.Texture1) {
+        public static void Use(TextureUnit Unit = TextureUnit.Texture1) {
+            if (handle == -1)
+                return;
             GL.ActiveTexture(Unit);
             GL.BindTexture(TextureTarget.Texture2D, handle);
         }

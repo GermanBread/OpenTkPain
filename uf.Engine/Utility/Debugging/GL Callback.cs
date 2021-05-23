@@ -18,7 +18,7 @@ namespace uf.Utility.Debugging
             GL.Enable(EnableCap.DebugOutput);
             GL.Enable(EnableCap.DebugOutputSynchronous);
         }
-        private static DebugProc debugProcCallback = debugCallback;
+        private static readonly DebugProc debugProcCallback = debugCallback;
         private static GCHandle debugProcCallbackHandle;
         private static void debugCallback(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam) {
             string _messageString = Marshal.PtrToStringAnsi(message, length);

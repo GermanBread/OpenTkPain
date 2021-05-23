@@ -11,7 +11,7 @@ namespace uf.Utility.Globals
 {
     public static class EngineGlobals
     {
-        public static List<Scene> Scenes = new List<Scene>();
+        public static List<Scene> Scenes = new();
         // A reference to the active game window
         public static BaseGame Window;
         public static string[] CLArgs;

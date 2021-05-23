@@ -65,6 +65,8 @@ namespace uf
         float counter = 0;
         public void Init() {
             PauseOnLostFocus = !EngineGlobals.CLArgs.Contains("--no-pause");
+            if (EngineGlobals.CLArgs.Contains("--no-audio"))
+                AudioManager.GlobalVolume = 0;
 
             // The resource manager allows us to create aliases for files on the user's file system. In the future I plan on enforcing the use of the resource manager.
             ResourceManager.LoadResource("music", "TempleOS Hymn Risen (Remix) - Dave Eddy-IdYMA6hY_74.wav");
@@ -101,6 +103,13 @@ namespace uf
                 Size = new Vector2(50),
                 Color = new Color4(255, 0, 0, 127)
             };
+
+            new Rectangle("overlay") {
+                Position = new Vector2(25),
+                Size = new Vector2(50),
+                Color = Color4.OrangeRed,
+                Parent = fourth
+            };
             
             var _clip = AudioManager.CreateClip(ResourceManager.GetResource("music"));
             if (_clip != default(AudioClip))
@@ -132,7 +141,7 @@ namespace uf
         public void Update() {
             counter += FrameDelta;
             
-            // Nornalize the coordinate to (-1,-1)-( 1, 1)
+            // Normalize the coordinate to (-1,-1)-( 1, 1)
             var _normalizedMouseCoords = (Vector2.Divide(MousePosition, Size) - new Vector2(.5f)) * new Vector2( 1,-1);
             var _mouseCoords = _normalizedMouseCoords * Size;
 
@@ -173,7 +182,7 @@ namespace uf
             FillColor = Color4.FromHsv(new Vector4(counter / 5f % 1, 1f, .5f, 1f));
 
             var _clip = AudioManager.GetClip("music");
-            var _data = (new float[0], -1);
+            var _data = (Array.Empty<float>(), -1);
             if (_clip != null)
                 _data = _clip.GetWaveform();
             var _fft = _data.Item1;

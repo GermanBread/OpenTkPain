@@ -17,8 +17,8 @@ namespace uf.Utility.Audio
         private static bool isInitialized;
         public static bool BASSReady { get => isInitialized; }
         public static List<AudioClip> AudioClips { get => clips; }
-        private static List<AudioClip> clips = new List<AudioClip>();
-        public static float GlobalVolume { get => (float)Bass.Volume; set => Bass.Volume = (double)value; }
+        private static  List<AudioClip> clips = new();
+        public static float GlobalVolume { get => (float)Bass.GlobalStreamVolume / 10000f; set => Bass.GlobalStreamVolume = (int)Math.Round(value * 10000f); }
         public static void SetVolume(string Group, float Volume) {
             foreach (var clip in clips.Where(x => x.Group == Group)) {
                 clip.Volume = Volume;
@@ -34,14 +34,13 @@ namespace uf.Utility.Audio
         public static void DeleteClip(AudioClip Clip) {
             clips.Remove(Clip);
         }
-        public static float GlobalStreamVolume { get => Bass.GlobalStreamVolume / 10000f; set => Bass.GlobalStreamVolume = (int)(value * 10000); }
         /// <summary>
         /// Creates an audio clip and returns a reference
         /// </summary>
         /// <returns>Reference to the audio clip</returns>
         public static AudioClip CreateClip(string ClipName, string SoundFilePath) {
             if (!isInitialized)
-                return default(AudioClip);
+                return default;
             var _clip = new AudioClip(ClipName);
             _clip.Open(SoundFilePath);
             clips.Add(_clip);
@@ -49,8 +48,8 @@ namespace uf.Utility.Audio
         }
         public static AudioClip CreateClip(Resource Resource) {
             if (!isInitialized)
-                return default(AudioClip);
-            AudioClip _clip = default(AudioClip);
+                return default;
+            AudioClip _clip;
             if (Resource == null)
                 return null;
             _clip = new AudioClip(Resource.Name);

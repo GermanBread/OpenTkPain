@@ -25,6 +25,7 @@ using uf.Utility.Globals;
 using uf.Utility.Logging;
 using uf.Utility.Resources;
 using uf.Utility.Debugging;
+using uf.Rendering.Textures;
 
 namespace uf
 {
@@ -50,10 +51,11 @@ namespace uf
             GL_Callback.Init();
             #endif
 
-            // Create a buffer where we feed out vertices into
+            // We will use this buffer for basically everything we do
             arrayBufferHandle = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ArrayBuffer, arrayBufferHandle);
 
+            // Dark gray because users think that black = bad
             GL.ClearColor(Color4.DarkGray);
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
@@ -62,6 +64,9 @@ namespace uf
             ResourceManager.LoadResource("default fragment shader", "default.frag");
             ResourceManager.LoadResource("multipass vertex shader", "multipass.vert");
             ResourceManager.LoadResource("multipass fragment shader", "multipass.frag");
+
+            // Create a blank texture (often used for fallback)
+            _ = new Texture(null);
 
             // Prepare BASS
             AudioManager.Init();
@@ -94,9 +99,10 @@ namespace uf
                 Panic();
             Invoke("Update");
             
+            // This is old code that won't be run anymore. To be removed...
             //EngineGlobals.Scenes.ForEach(x => x.GameObjects.ForEach(y => y.Init()));
 
-            // Initialize our objects / scenes
+            // This will be the proper way of initializing objects
             SceneManager.LoadScene("default");
             SceneManager.LoadScene("overlay");
         }
@@ -137,11 +143,13 @@ namespace uf
                 drawableObjects.Sort((o1, o2) => o1.Layer.CompareTo(o2.Layer));
             }
 
+            // Black because that's how the multipass system works.
             GL.ClearColor(Color4.Black);
             GL.Clear(ClearBufferMask.ColorBufferBit);
             
             InputManager.PerformMultipassRender(drawableObjects);
 
+            // Can be used for troubleshooting
             //Context.SwapBuffers();
 
             GL.ClearColor(FillColor);
@@ -223,7 +231,7 @@ namespace uf
                 return false;
             }
         }
-        protected void Panic(Exception ex = default) {
+        protected static void Panic(Exception ex = default) {
             StackTrace _st = new();
             StackFrame _sf = _st.GetFrame(1);
             Logger.Log(new LogMessage(LogSeverity.Critical, $"OVER HERE! Panic has been invoked by {_sf.GetMethod().Name}.", ex ?? new Exception("No exception has been provided, look at the messages above")));
@@ -236,11 +244,11 @@ namespace uf
         private double updateDelta;
         private int arrayBufferHandle;
         // Class which inherit this class. Also known as the "child"
-        private Type childObject;
+        private readonly Type childObject;
         // Null = invalidated list. Often the result of an object or scene being disabled / enabled or delted / created.
         private List<BaseObject> drawableObjects = null;
         private bool invalidationQueued = false;
-        private Dictionary<string, MethodInfo> reflectionCache = new();
+        private readonly Dictionary<string, MethodInfo> reflectionCache = new();
         /// <summary>
         /// Time it took for the last frame to draw, measured in seconds
         /// </summary>

@@ -25,7 +25,7 @@ namespace uf.Utility.Input
             Shader.MultipassShader.Use();
             _filtered.ForEach(x => {
                 int _index = _filtered.IndexOf(x) + 1;
-                Color4 _color = new Color4(
+                Color4 _color = new(
                     (byte)(_index % byte.MaxValue),
                     (byte)((_index / byte.MaxValue) % byte.MaxValue),
                     (byte)((_index / (int)Math.Pow(byte.MaxValue, 2)) % byte.MaxValue),

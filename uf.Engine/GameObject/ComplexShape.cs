@@ -28,7 +28,7 @@ namespace uf.GameObject
 
             transform.UV = Array.ConvertAll(_verts, vert => Vector2.Divide(Vector2.Add(vert, Vector2.One), 2));
             
-            transform.Indices = new uint[0];
+            transform.Indices = Array.Empty<uint>();
             for (uint i = 0; i < _verts.Length - 2; i++) {
                 // TODO: This needs to be worked on a bit more...
                 transform.Indices = transform.Indices.Append(i).Append(i + 1).Append(i + 2).ToArray();

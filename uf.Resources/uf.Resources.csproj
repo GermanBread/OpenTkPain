@@ -4,20 +4,16 @@
     <OutputType>Library</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <AssemblyTitle>Unsigned Framework resources</AssemblyTitle>
-    <AssemblyName>nb.Resources</AssemblyName>
+    <AssemblyName>uf.Resources</AssemblyName>
     <RootNamespace>Unsigned_Framework</RootNamespace>
   </PropertyGroup>
   
   <ItemGroup>
-    <None Include="runtimes\**\*">
-      <Pack>true</Pack>
-      <PackagePath>runtimes</PackagePath>
-    </None>
-    <None Include="runtimes\*">
-      <Pack>true</Pack>
-      <PackagePath>runtimes</PackagePath>
-    </None>
     <None Include="shaders\*">
+      <Pack>true</Pack>
+      <PackagePath>shaders</PackagePath>
+    </None>
+    <None Include="shaders\**\*">
       <Pack>true</Pack>
       <PackagePath>shaders</PackagePath>
     </None>

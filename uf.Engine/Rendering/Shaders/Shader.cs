@@ -14,11 +14,11 @@ namespace uf.Rendering.Shaders
     public class Shader : IDisposable
     {
         public int ShaderHandle;
-        private int vertexShaderHandle;
-        private int fragmentShaderHandle;
-        private string vertexSourceCode;
-        private string fragmentSourceCode;
-        private Dictionary<(Resource, Resource), Shader> shaders = new();
+        private readonly int vertexShaderHandle;
+        private readonly int fragmentShaderHandle;
+        private readonly string vertexSourceCode;
+        private readonly string fragmentSourceCode;
+        private readonly Dictionary<(Resource, Resource), Shader> shaders = new();
         public Shader(Resource VertexShader, Resource FragmentShader) {
             if (VertexShader == null || FragmentShader == null) {
                 ShaderHandle = BaseShader.ShaderHandle;

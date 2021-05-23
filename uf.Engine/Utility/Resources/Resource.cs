@@ -19,6 +19,6 @@ namespace uf.Utility.Resources
         /// </summary>
         public static Resource Empty { get => uniqueEmtpyInstance; }
         // Only gets instantiated once, allows for comparison.
-        private static Resource uniqueEmtpyInstance = new(null, null, null);
+        private static readonly Resource uniqueEmtpyInstance = new(null, null, null);
     }
 }

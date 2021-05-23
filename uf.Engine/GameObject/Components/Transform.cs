@@ -19,17 +19,20 @@ namespace uf.GameObject.Components
         /// </summary>
         public Vertex[] CompileData(Color4 ObjectColor, Scene Scene) {
             Vector2[] _coordinates = Vertices;
-            
+
             Matrix2.CreateRotation(Rotation, out var _rotMatrix);
+            Matrix2.CreateRotation(ParentObject?.Rotation ?? 0, out var _parentRotMatrix);
             Matrix2.CreateRotation(-Camera.Rotation - Scene.Rotation, out var _posMatrix);
             // Normalization should happen before the processing
-            Vector2 _normalisationHelper = new Vector2(MathF.Max(Camera.Resolution.X, Camera.Resolution.Y));
-            Vector2 _aspectRatioHelper = new Vector2(1, (float)Camera.Resolution.X / Camera.Resolution.Y);
+            Vector2 _normalisationHelper = new(MathF.Max(Camera.Resolution.X, Camera.Resolution.Y));
+            Vector2 _aspectRatioHelper = new(1, (float)Camera.Resolution.X / Camera.Resolution.Y);
             Vector2 _adjustedSkew = Vector2.Divide(Skew, _normalisationHelper);
             Vector2 _adjustedSize = Vector2.Divide(Size, _normalisationHelper * 2);
+            Vector2 _adjustedParentSize = Vector2.Divide(ParentObject?.Size ?? _normalisationHelper * 2, _normalisationHelper * 2);
             Vector2 _adjustedPosition = Vector2.Divide(Position + Scene.Position, _normalisationHelper);
+            Vector2 _adjustedParentPosition = Vector2.Divide(ParentObject?.Position ?? Vector2.Zero, _normalisationHelper);
             Vector2 _adjustedCameraPosition = Vector2.Divide(Camera.Position, _normalisationHelper);
-            
+
             // Skewing; Must be RELATIVE to the center of the object!
             _coordinates = Array.ConvertAll(_coordinates, vec
              => {
@@ -46,7 +49,6 @@ namespace uf.GameObject.Components
             _coordinates = Array.ConvertAll(_coordinates, vec
              => {
                     Vector2 _output = vec * _adjustedSize;
-                    _output *= Camera.Zoom;
                     return _output;
                 }
             );
@@ -54,11 +56,21 @@ namespace uf.GameObject.Components
             _coordinates = Array.ConvertAll(_coordinates, vec
              => {
                     Vector2 _anchorPos = Vector2.Divide(Anchor.Xy, _aspectRatioHelper);
-                    Vector2 _output = _adjustedPosition - _adjustedSize * Anchor.Xy - _adjustedCameraPosition + vec + _anchorPos;
+                    Vector2 _output = _adjustedPosition - _adjustedSize * Anchor.Xy + vec + _anchorPos;
+                    
+                    // Parenting part
+                    if (ParentObject != null)
+                        _output *= _adjustedParentSize * Size;
+                    _output *= _parentRotMatrix;
+                    _output += _adjustedParentPosition;
+                    
+                    // Camera
                     _output *= _posMatrix;
+                    _output -= _adjustedCameraPosition;
                     return _output;
                 }
             );
+
             // Finishing pass
             _coordinates = Array.ConvertAll(_coordinates, vec
              => {
