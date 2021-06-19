@@ -39,7 +39,7 @@ namespace uf
             Title += " (DEBUG)";
             #endif
 
-            // Obtain the class which inherits this one
+            // Obtain the class which inherits this one, since BaseGame is abstract we will always get a reference to the child class
             childObject = this.GetType();
             EngineGlobals.Window = this;
         }
@@ -65,10 +65,10 @@ namespace uf
             ResourceManager.LoadResource("multipass vertex shader", "multipass.vert");
             ResourceManager.LoadResource("multipass fragment shader", "multipass.frag");
 
-            // Create a blank texture (often used for fallback)
+            // Create a blank texture (used as fallback texture)
             _ = new Texture(null);
 
-            // Prepare BASS
+            // Prepare Audio
             AudioManager.Init();
 
             // ALT + ENTER, F11 = toggle fullscreen
@@ -168,15 +168,20 @@ namespace uf
         protected override void OnUpdateFrame(FrameEventArgs e) {
             base.OnUpdateFrame(e);
 
+            for (int i = 0; i < SceneLoadQueue.Count; i++) {
+                SceneManager.OperateOnScene(SceneLoadQueue[i]);
+            }
+            SceneLoadQueue.Clear();
+
             updateDelta = e.Time;
             
             // Loop audio when applicable
             if (IsFocused || !PauseOnLostFocus) {
-                if (AudioManager.BASSReady)
+                if (AudioManager.Ready)
                     foreach (var clip in AudioManager.AudioClips.Where(x => (x.Loop && x.IsPlaying && x.ClipStatus == PlaybackState.Stopped)))
                         clip.Play();
             }
-            if (AudioManager.BASSReady) {
+            if (AudioManager.Ready) {
                 if (PauseOnLostFocus && IsFocused)
                     Bass.Start();
                 else if (PauseOnLostFocus)
@@ -262,5 +267,6 @@ namespace uf
         /// </summary>
         public Color4 FillColor { get; set; }
         public bool PauseOnLostFocus = false;
+        readonly internal List<(Scene, SceneAction)> SceneLoadQueue = new();
     }
 }

@@ -21,11 +21,12 @@ using uf.Utility.Logging;
 using uf.Utility.Resources;
 using uf.Rendering.Shaders;
 using uf.Rendering.Textures;
+using uf.Rendering.Animations;
 using uf.GameObject.Components;
 
 namespace uf.GameObject
 {
-    public class BaseObject : IDisposable
+    public class BaseObject
     {
         public BaseObject(string scene)
         {
@@ -136,10 +137,6 @@ namespace uf.GameObject
         }
         public void MultipassDraw(Color4 Override)
         {
-            // Small optimization: Don't perform a draw call if the object is 100% transparent
-            if (Color.A == 0)
-                return;
-
             var _data = transform.CompileData(Override, Scene);
 
             GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.DynamicDraw);
@@ -148,24 +145,15 @@ namespace uf.GameObject
             GL.DrawElements(PrimitiveType.Triangles, transform.Indices.Length, DrawElementsType.UnsignedInt, 0);
         }
         /// <summary>
-        /// Frees any resources used by this Object
+        /// Frees any resources used by this Object and preps it for reinitialization
         /// </summary>
         public void Dispose()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        private bool disposed = false;
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposed)
-            {
-                GL.DeleteVertexArray(vertexHandle);
-                GL.DeleteBuffer(vertexBufferHandle);
-                GL.DeleteBuffer(elementBufferHandle);
-                SceneManager.RemoveFromScene(this);
-                disposed = true;
-            }
+            // Jokes on you, we're not actually disposing this object
+            GL.DeleteVertexArray(vertexHandle);
+            GL.DeleteBuffer(vertexBufferHandle);
+            GL.DeleteBuffer(elementBufferHandle);
+            isInitialized = false;
         }
         /// <summary>
         /// Get the scene this object is located in

@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.6.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uf.Resources", "uf.Resources\uf.Resources.csproj", "{12C95C81-8777-4E4A-878D-F268070772B7}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unsigned Framework", "uf.Engine\Unsigned Framework.csproj", "{ED3FAA67-76CC-4981-BD94-B5523D1DD462}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Glide", "glide\Glide.csproj", "{73FFE593-1E5D-4710-A772-DFC654442336}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,18 +20,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{12C95C81-8777-4E4A-878D-F268070772B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{12C95C81-8777-4E4A-878D-F268070772B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{12C95C81-8777-4E4A-878D-F268070772B7}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{12C95C81-8777-4E4A-878D-F268070772B7}.Debug|x64.Build.0 = Debug|Any CPU
-		{12C95C81-8777-4E4A-878D-F268070772B7}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{12C95C81-8777-4E4A-878D-F268070772B7}.Debug|x86.Build.0 = Debug|Any CPU
-		{12C95C81-8777-4E4A-878D-F268070772B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{12C95C81-8777-4E4A-878D-F268070772B7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{12C95C81-8777-4E4A-878D-F268070772B7}.Release|x64.ActiveCfg = Release|Any CPU
-		{12C95C81-8777-4E4A-878D-F268070772B7}.Release|x64.Build.0 = Release|Any CPU
-		{12C95C81-8777-4E4A-878D-F268070772B7}.Release|x86.ActiveCfg = Release|Any CPU
-		{12C95C81-8777-4E4A-878D-F268070772B7}.Release|x86.Build.0 = Release|Any CPU
 		{ED3FAA67-76CC-4981-BD94-B5523D1DD462}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{ED3FAA67-76CC-4981-BD94-B5523D1DD462}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED3FAA67-76CC-4981-BD94-B5523D1DD462}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -44,5 +32,17 @@ Global
 		{ED3FAA67-76CC-4981-BD94-B5523D1DD462}.Release|x64.Build.0 = Release|Any CPU
 		{ED3FAA67-76CC-4981-BD94-B5523D1DD462}.Release|x86.ActiveCfg = Release|Any CPU
 		{ED3FAA67-76CC-4981-BD94-B5523D1DD462}.Release|x86.Build.0 = Release|Any CPU
+		{73FFE593-1E5D-4710-A772-DFC654442336}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73FFE593-1E5D-4710-A772-DFC654442336}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73FFE593-1E5D-4710-A772-DFC654442336}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{73FFE593-1E5D-4710-A772-DFC654442336}.Debug|x64.Build.0 = Debug|Any CPU
+		{73FFE593-1E5D-4710-A772-DFC654442336}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{73FFE593-1E5D-4710-A772-DFC654442336}.Debug|x86.Build.0 = Debug|Any CPU
+		{73FFE593-1E5D-4710-A772-DFC654442336}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73FFE593-1E5D-4710-A772-DFC654442336}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73FFE593-1E5D-4710-A772-DFC654442336}.Release|x64.ActiveCfg = Release|Any CPU
+		{73FFE593-1E5D-4710-A772-DFC654442336}.Release|x64.Build.0 = Release|Any CPU
+		{73FFE593-1E5D-4710-A772-DFC654442336}.Release|x86.ActiveCfg = Release|Any CPU
+		{73FFE593-1E5D-4710-A772-DFC654442336}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

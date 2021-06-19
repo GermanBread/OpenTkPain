@@ -24,7 +24,7 @@ namespace uf.GameObject.Components
             Matrix2.CreateRotation(ParentObject?.Rotation ?? 0, out var _parentRotMatrix);
             Matrix2.CreateRotation(-Camera.Rotation - Scene.Rotation, out var _posMatrix);
             // Normalization should happen before the processing
-            Vector2 _normalisationHelper = new(MathF.Max(Camera.Resolution.X, Camera.Resolution.Y));
+            Vector2 _normalisationHelper = Camera.GetNormalizationFactor();
             Vector2 _aspectRatioHelper = new(1, (float)Camera.Resolution.X / Camera.Resolution.Y);
             Vector2 _adjustedSkew = Vector2.Divide(Skew, _normalisationHelper);
             Vector2 _adjustedSize = Vector2.Divide(Size, _normalisationHelper * 2);

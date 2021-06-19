@@ -12,14 +12,13 @@ namespace uf.Utility.Debugging
     public class GL_Callback
     {
         public static void Init() {
-            debugProcCallbackHandle = GCHandle.Alloc(debugProcCallback);
+            GCHandle.Alloc(debugProcCallback);
 
             GL.DebugMessageCallback(debugProcCallback, IntPtr.Zero);
             GL.Enable(EnableCap.DebugOutput);
             GL.Enable(EnableCap.DebugOutputSynchronous);
         }
         private static readonly DebugProc debugProcCallback = debugCallback;
-        private static GCHandle debugProcCallbackHandle;
         private static void debugCallback(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam) {
             string _messageString = Marshal.PtrToStringAnsi(message, length);
             string _messageSource = source.ToString().Remove(0, 11);

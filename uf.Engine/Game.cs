@@ -16,6 +16,7 @@ using uf.Utility.Logging;
 using uf.Utility.Globals;
 using uf.Utility.Resources;
 using uf.Rendering.Textures;
+using uf.Rendering.Animations;
 using uf.GameObject.Components;
 
 namespace uf
@@ -61,7 +62,7 @@ namespace uf
             Color = Color4.Cyan,
             Anchor = Anchor.Center
         };
-        List<Rectangle> visualisers;
+        //List<Rectangle> visualisers;
         float counter = 0;
         public void Init() {
             PauseOnLostFocus = !EngineGlobals.CLArgs.Contains("--no-pause");
@@ -69,7 +70,8 @@ namespace uf
                 AudioManager.GlobalVolume = 0;
 
             // The resource manager allows us to create aliases for files on the user's file system. In the future I plan on enforcing the use of the resource manager.
-            ResourceManager.LoadResource("music", "TempleOS Hymn Risen (Remix) - Dave Eddy-IdYMA6hY_74.wav");
+            //ResourceManager.LoadResource("music", "results.mp3");
+            ResourceManager.LoadResource("music", "old_results.mp3");
             //ResourceManager.LoadResource("music", "stereo test.mp3");
             //ResourceManager.LoadResource("music", "sine wave.wav");
             ResourceManager.LoadResource("tonk", "tonk.png");
@@ -86,37 +88,48 @@ namespace uf
                 IsHoverable = true
             };
 
+            // Implied resource loading
             fourth.Texture = new Texture(ResourceManager.GetResource("arch btw.png"));
 
-            new Rectangle() {
+            _ = new Rectangle() {
                 Size = new Vector2(50),
                 Position = new Vector2(-10),
                 Color = Color4.Red
             };
-            new Rectangle() {
+            _ = new Rectangle() {
                 Position = new Vector2(10),
                 Size = new Vector2(50),
                 Color = Color4.Yellow
             };
-            new Rectangle() {
+            _ = new Rectangle() {
                 Position = new Vector2(-10),
                 Size = new Vector2(50),
                 Color = new Color4(255, 0, 0, 127)
             };
 
-            new Rectangle("overlay") {
+            _ = new Rectangle("overlay") {
                 Position = new Vector2(25),
                 Size = new Vector2(50),
                 Color = Color4.OrangeRed,
                 Parent = fourth
             };
-            
+
             var _clip = AudioManager.CreateClip(ResourceManager.GetResource("music"));
             if (_clip != default(AudioClip))
                 _clip.Loop = true;
             _clip?.Play();
+
+            Animation _anim = new("testanim", new Keyframe[] {
+                new Keyframe {
+                    Size = new Vector2(50, 100),
+                },
+                new Keyframe {
+                    Size = new Vector2(100, 50)
+                }
+            }, first, true);
+            _anim.Play();
             
-            visualisers = new List<Rectangle>();
+            /*visualisers = new List<Rectangle>();
             for (int i = 0; i < Size.X / 2; i++) {
                 visualisers.Add(new Rectangle("visualisers") {
                     Position = new Vector2(i, 0),
@@ -126,42 +139,50 @@ namespace uf
                     IsHoverable = i % 2 == 0
                 });
             }
-            SceneManager.LoadScene("visualisers");
+            SceneManager.LoadScene("visualisers");*/
 
             CursorVisible = false;
 
             first.Clicked += (e) => {
-                first.Size += new Vector2(e.MouseButton == 0 ? 5 : -5);
+                first.Size *= new Vector2(e.MouseButton == 0 ? 1.5f : .5f);
             };
 
-            Texture.DumpAtlas();
+            // Spam (V)RAM
+            /*List<Vector2> _verticeSpam = new();
+            int _count = 1000;
+            for (int i = 0; i < _count; i++) {
+                _verticeSpam.Add(new Vector2(MathF.Sin(i / _count), MathF.Cos(i / _count)));
+            }
+            for (int i = 0; i < _count; i++)
+                _ = new ComplexShape("trolled") {
+                    Vertices = _verticeSpam.ToArray(),
+                    Size = new Vector2(100),
+                    Color = Color4.AliceBlue
+                };*/
         }
 
-        Vector2 parallax;
+        //Vector2 parallax;
         public void Update() {
             counter += FrameDelta;
             
-            // Normalize the coordinate to (-1,-1)-( 1, 1)
-            var _normalizedMouseCoords = (Vector2.Divide(MousePosition, Size) - new Vector2(.5f)) * new Vector2( 1,-1);
-            var _mouseCoords = _normalizedMouseCoords * Size;
-
-            parallax = Vector2.Lerp(parallax, _mouseCoords, 2.5f * FrameDelta);
-            Camera.Position = parallax;
+            //parallax = Vector2.Lerp(parallax, Camera.ScreenToWorldSpace(MousePosition), 2.5f * FrameDelta);
+            //parallax = Vector2.Clamp(parallax, new Vector2(-50), new Vector2(50));
+            //Camera.Position = parallax;
             if (KeyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Right)) {
                 Camera.Rotation += FrameDelta;
-                first.Scene.Rotation -= FrameDelta;
+                //first.Scene.Rotation -= FrameDelta;
             }
             else if (KeyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Left)) {
                 Camera.Rotation -= FrameDelta;
-                first.Scene.Rotation += FrameDelta;
+                //first.Scene.Rotation += FrameDelta;
             }
             if (KeyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Up)) {
                 Camera.Zoom += Vector2.One * FrameDelta;
-                first.Scene.Scale -= Vector2.One * FrameDelta;
+                //first.Scene.Scale -= Vector2.One * FrameDelta;
             }
             else if (KeyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Down)) {
                 Camera.Zoom -= Vector2.One * FrameDelta;
-                first.Scene.Scale += Vector2.One * FrameDelta;
+                //first.Scene.Scale += Vector2.One * FrameDelta;
             }
                 
 
@@ -181,7 +202,7 @@ namespace uf
             second.Color = Color4.FromHsv(new Vector4(counter / 2f % 1, 1f, 1f, 1f));
             FillColor = Color4.FromHsv(new Vector4(counter / 5f % 1, 1f, .5f, 1f));
 
-            var _clip = AudioManager.GetClip("music");
+            /*var _clip = AudioManager.GetClip("music");
             var _data = (Array.Empty<float>(), -1);
             if (_clip != null)
                 _data = _clip.GetWaveform();
@@ -192,7 +213,7 @@ namespace uf
                 else
                     visualisers[i].Color = new Color4(255, 50, 20, 100);
                 visualisers[i].Size = new Vector2(visualisers[i].Size.X, 5f + _fft[i * (_fft.Length / visualisers.Count)] * 100f);
-            }
+            }*/
         }
     }
 }

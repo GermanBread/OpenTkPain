@@ -15,9 +15,9 @@ namespace uf.Utility.Audio
     public static class AudioManager
     {
         private static bool isInitialized;
-        public static bool BASSReady { get => isInitialized; }
+        public static bool Ready { get => isInitialized; }
         public static List<AudioClip> AudioClips { get => clips; }
-        private static  List<AudioClip> clips = new();
+        private static readonly List<AudioClip> clips = new();
         public static float GlobalVolume { get => (float)Bass.GlobalStreamVolume / 10000f; set => Bass.GlobalStreamVolume = (int)Math.Round(value * 10000f); }
         public static void SetVolume(string Group, float Volume) {
             foreach (var clip in clips.Where(x => x.Group == Group)) {
@@ -58,6 +58,8 @@ namespace uf.Utility.Audio
             return _clip;
         }
         public static void Init() {
+            if (isInitialized)
+                return;
             try {
                 Bass.Init();
                 isInitialized = true;

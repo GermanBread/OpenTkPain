@@ -59,24 +59,24 @@ namespace uf.Utility.Scenes
 
         // Getting the scene a object is located in
         public static Scene GetSceneOfObject(BaseObject GameObject) {
-            return Globals.EngineGlobals.Scenes.FirstOrDefault(x => x.GameObjects.Contains(GameObject));
+            return EngineGlobals.Scenes.FirstOrDefault(x => x.GameObjects.Contains(GameObject));
         }
         
         // Adding scenes
         public static void AddScene(Scene sceneObject) {
-            Globals.EngineGlobals.Scenes.Add(sceneObject);
+            EngineGlobals.Scenes.Add(sceneObject);
             EngineGlobals.Window?.InvalidateObjectsCache();
         }
 
         // Removing scenes
         public static void RemoveScene(string name) {
-            Globals.EngineGlobals.Scenes.Remove(GetScene(name));
+            EngineGlobals.Scenes.Remove(GetScene(name));
             EngineGlobals.Window?.InvalidateObjectsCache();
         }
 
         // Retrieving Scenes
         public static Scene GetScene(string name) {
-            var _scene = Globals.EngineGlobals.Scenes.FirstOrDefault(x => x.SceneName == name);
+            var _scene = EngineGlobals.Scenes.FirstOrDefault(x => x.SceneName == name);
             // Check if the value is a default value
             if (_scene == default(Scene)) {
                 _scene = new Scene(name, new List<BaseObject>());
@@ -89,22 +89,39 @@ namespace uf.Utility.Scenes
         // Actual scene management
         public static void UnloadScene(string name) {
             var _scene = GetScene(name);
-            if (!_scene.IsLoaded)
-                return;
-            _scene.Unload();
-            EngineGlobals.Window?.InvalidateObjectsCache();
+            EngineGlobals.Window?.SceneLoadQueue.Add((_scene, SceneAction.Unload));
         }
         public static void LoadScene(string name) {
             var _scene = GetScene(name);
-            if (_scene.IsLoaded)
-                return;
-            //_scene.GameObjects.Sort((val1, val2) => val1.Layer.CompareTo(val2.Layer));
-            _scene.GameObjects.ForEach(x => {
-                if (!x.IsInitialized)
-                    // FIXME: That's great and all, but what do we do if an object gets created after the scene loaded?
-                    x.Init();
-            });
-            _scene.Load();
+            // Queue the loading / unloading until the next Update tick (will then run on the main thread)
+            EngineGlobals.Window?.SceneLoadQueue.Add((_scene, SceneAction.Load));
+        }
+
+        internal static void OperateOnScene((Scene, SceneAction) ActionTuple) {
+            OperateOnScene(ActionTuple.Item1, ActionTuple.Item2);
+        }
+        internal static void OperateOnScene(Scene SceneObject, SceneAction Operation) {
+            switch (Operation)
+            {
+                case SceneAction.Load:
+                    if (SceneObject.IsLoaded)
+                        return;
+                    SceneObject.GameObjects.ForEach(x => {
+                        if (!x.IsInitialized)
+                            x.Init();
+                    });
+                    SceneObject.Load();
+                    break;
+                case SceneAction.Unload:
+                    if (!SceneObject.IsLoaded)
+                        return;
+                    SceneObject.GameObjects.ForEach(x => {
+                        if (x.IsInitialized)
+                            x.Dispose();
+                    });
+                    SceneObject.Unload();
+                    break;
+            }
             EngineGlobals.Window?.InvalidateObjectsCache();
         }
     }

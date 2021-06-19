@@ -16,7 +16,7 @@
     <PackageReference Include="OpenTK" Version="4.6.3" />
     <PackageReference Include="ppy.osu.Framework.NativeLibs" Version="2021.115.0" />
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.3" />
-    <ProjectReference Include="../uf.Resources/uf.Resources.csproj" Version="0.0.0" />
+    <ProjectReference Include="../glide/Glide.csproj" />
   </ItemGroup>
 
   <ItemGroup>
