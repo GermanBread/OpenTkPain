@@ -24,7 +24,6 @@ namespace uf.Utility.Logging
                 case LogSeverity.Warning:
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     break;
-                case LogSeverity.Normal:
                 case LogSeverity.Info:
                     Console.ForegroundColor = ConsoleColor.Cyan;
                     break;
@@ -33,6 +32,7 @@ namespace uf.Utility.Logging
                     #if !DEBUG
                     return;
                     #endif
+                // This was put below Debug so that I can let the case fall through
                 case LogSeverity.Verbose:
                     // I had to flip DEBUG and VERBOSE
                     Console.ForegroundColor = ConsoleColor.DarkGray;

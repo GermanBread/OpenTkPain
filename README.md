@@ -1,7 +1,7 @@
-# OpenTk Pain
+# Unsigned Framework
 
-*Pain and suffering*
+*My first attempt at creating a usable 2D game engine*
 
-### This project is my first attempt at creating a 2D engine.
+I plan on using this in some of my future projects, though I will probably rewrite it sooner or later (for simplicity sake). *Perhaps a approach that is not object oriented?*
 
-xd
+You can view the development progress in [Program.cs](Program.cs)

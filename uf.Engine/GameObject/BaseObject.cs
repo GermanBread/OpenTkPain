@@ -26,7 +26,7 @@ using uf.GameObject.Components;
 
 namespace uf.GameObject
 {
-    public class BaseObject
+    public abstract class BaseObject
     {
         public BaseObject(string scene)
         {
@@ -37,7 +37,7 @@ namespace uf.GameObject
                 gameWindow?.InvalidateObjectsCache();
             }
         }
-        public void Init()
+        public virtual void Init()
         {
             if (isInitialized) {
                 Logger.Log(new LogMessage(LogSeverity.Warning, "Init() was called even though this object was already initialized!"));
@@ -89,12 +89,20 @@ namespace uf.GameObject
             isInitialized = true;
         }
         /// <summary>
-        /// Draws the object. Should only be called once per frame.
+        /// Update the object's state
         /// </summary>
-        public void Draw()
+        internal virtual void Update() {
+            if (IsHoverable && InputManager.HoveredObject == this)
+                IsHovered = true;
+            else
+                IsHovered = false;
+        }
+        /// <summary>
+        /// Draws the object. Should be called once per frame.
+        /// </summary>
+        internal virtual void Draw()
         {
-            if (!isInitialized)
-            {
+            if (!IsInitialized) {
                 Logger.Log(new LogMessage(LogSeverity.Error, "Not initialized; refusing to render object! Was Init() not called?"));
                 return;
             }
@@ -109,24 +117,15 @@ namespace uf.GameObject
                 GL.Enable(EnableCap.Blend);
             //}
 
-            Texture.Use();
             Shader.Use();
 
             var _data = transform.CompileData(Color, Scene);
 
-            for (int i = 0; i < _data.Length; i++)
-            {
+            for (int i = 0; i < _data.Length; i++) {
                 var _uv = Texture.GetUV();
                 _data[i].UV *= _uv.Item2 - _uv.Item1;
                 _data[i].UV += _uv.Item1;
             }
-
-            // Let me just hijack the Draw() method to fire an event
-            // This is pretty much the same if I were to create a Update() method
-            if (IsHoverable && InputManager.HoveredObject == this)
-                IsHovered = true;
-            else
-                IsHovered = false;
 
             GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.DynamicDraw);
             GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.DynamicDraw);
@@ -135,8 +134,13 @@ namespace uf.GameObject
 
             GL.Disable(EnableCap.Blend);
         }
-        public void MultipassDraw(Color4 Override)
+        internal virtual void MultipassDraw(Color4 Override)
         {
+            if (!IsInitialized) {
+                Logger.Log(new LogMessage(LogSeverity.Error, "Not initialized; refusing to render object! Was Init() not called?"));
+                return;
+            }
+            
             var _data = transform.CompileData(Override, Scene);
 
             GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.DynamicDraw);

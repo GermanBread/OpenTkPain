@@ -9,7 +9,7 @@ using uf.Utility.Logging;
 
 namespace uf.Utility.Debugging
 {
-    public class GL_Callback
+    public class GLCallback
     {
         public static void Init() {
             GCHandle.Alloc(debugProcCallback);

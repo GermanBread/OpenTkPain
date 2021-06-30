@@ -1,0 +1,241 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Unsigned Framework</name>
+    </assembly>
+    <members>
+        <member name="M:uf.BaseGame.Invoke(System.String)">
+            <summary>
+            Invoke a child method
+            </summary>
+        </member>
+        <member name="P:uf.BaseGame.FrameDelta">
+            <summary>
+            Time it took for the last frame to draw, measured in seconds
+            </summary>
+        </member>
+        <member name="P:uf.BaseGame.UpdateDelta">
+            <summary>
+            Time it took for FixedUpdate to complete, time in seconds
+            </summary>
+        </member>
+        <member name="P:uf.BaseGame.FillColor">
+            <summary>
+            Background color used for rendering the underlying canvas
+            </summary>
+        </member>
+        <member name="M:uf.GameObject.BaseObject.Update">
+            <summary>
+            Update the object's state
+            </summary>
+        </member>
+        <member name="M:uf.GameObject.BaseObject.Draw">
+            <summary>
+            Draws the object. Should be called once per frame.
+            </summary>
+        </member>
+        <member name="M:uf.GameObject.BaseObject.Dispose">
+            <summary>
+            Frees any resources used by this Object and preps it for reinitialization
+            </summary>
+        </member>
+        <member name="P:uf.GameObject.BaseObject.Scene">
+            <summary>
+            Get the scene this object is located in
+            </summary>
+        </member>
+        <member name="P:uf.GameObject.BaseObject.gameWindow">
+            <summary>
+            Alias to EngineGlobals.Window
+            </summary>
+        </member>
+        <member name="F:uf.GameObject.BaseObject.transform">
+            <summary>
+            Contains all information related to size, position and rotation
+            </summary>
+        </member>
+        <member name="P:uf.GameObject.BaseObject.Skew">
+            <summary>
+            Alias to transform.Skew
+            </summary>
+        </member>
+        <member name="P:uf.GameObject.BaseObject.Size">
+            <summary>
+            Alias to transform.Size
+            </summary>
+        </member>
+        <member name="P:uf.GameObject.BaseObject.Position">
+            <summary>
+            Alias to transform.Position
+            </summary>
+        </member>
+        <member name="P:uf.GameObject.BaseObject.Rotation">
+            <summary>
+            Alias to transform.Rotation
+            </summary>
+        </member>
+        <member name="P:uf.GameObject.BaseObject.Anchor">
+            <summary>
+            Alias to transform.Anchor
+            </summary>
+        </member>
+        <member name="P:uf.GameObject.BaseObject.Children">
+            <summary>
+            Contains all children of this object
+            </summary>
+        </member>
+        <member name="P:uf.GameObject.BaseObject.Parent">
+            <summary>
+            The current parent of the object
+            </summary>
+        </member>
+        <member name="P:uf.GameObject.BaseObject.Layer">
+            <summary>
+            Draw order, smaller = drawn earlier
+            </summary>
+        </member>
+        <member name="F:uf.GameObject.BaseObject.Shader">
+            <summary>
+            The shader currently in use
+            </summary>
+        </member>
+        <member name="F:uf.GameObject.BaseObject.Color">
+            <summary>
+            Default color of the object
+            </summary>
+        </member>
+        <member name="F:uf.GameObject.BaseObject.Texture">
+            <summary>
+            The texture currently in use
+            </summary>
+        </member>
+        <member name="P:uf.GameObject.BaseObject.IsHovered">
+            <summary>
+            If a cursor is hovering above this object
+            </summary>
+        </member>
+        <member name="E:uf.GameObject.BaseObject.Clicked">
+            <summary>
+            Fired when this object is clicked
+            </summary>
+        </member>
+        <member name="T:uf.GameObject.ComplexShape">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:uf.GameObject.Components.Transform.CompileData(OpenTK.Mathematics.Color4,uf.Utility.Scenes.Scene)">
+            <summary>
+            Compiles all data necessary for rendering into a Vertex object
+            </summary>
+        </member>
+        <member name="F:uf.GameObject.Components.Transform.Position">
+            <summary>
+            Position in 2D space
+            </summary>
+        </member>
+        <member name="F:uf.GameObject.Components.Transform.Size">
+            <summary>
+            2D size
+            </summary>
+        </member>
+        <member name="F:uf.GameObject.Components.Transform.Skew">
+            <summary>
+            Skew along the x and y axis
+            </summary>
+        </member>
+        <member name="F:uf.GameObject.Components.Transform.Rotation">
+            <summary>
+            Rotation around the Z-axis
+            </summary>
+        </member>
+        <member name="F:uf.GameObject.Components.Transform.Anchor">
+            <summary>
+            The Anchor of the object. Used for positioning
+            </summary>
+        </member>
+        <member name="M:uf.Rendering.Camera.ScreenToWorldSpace(OpenTK.Mathematics.Vector2)">
+            <summary>
+            Translates the mouse coordinate into world space. For your convenience of course.
+            Be warned that this does not rotate your objects!
+            </summary>
+            <param name="ScreenCoordiante">Mouse position</param>
+            <returns>A coordinate in world space</returns>
+        </member>
+        <member name="P:uf.Rendering.Shaders.Shader.BaseShader">
+            <summary>
+            Returns a basic shader that can be used
+            </summary>
+        </member>
+        <member name="P:uf.Rendering.Shaders.Shader.MultipassShader">
+            <summary>
+            Returns a basic shader that can be used for multipass rendering
+            </summary>
+        </member>
+        <member name="F:uf.Rendering.Text.Text.Font">
+            <summary>
+            Either the name of a font or the path to a font file
+            </summary>
+        </member>
+        <member name="M:uf.Rendering.Textures.Texture.GetUV">
+            <summary>
+            Retrieve UV coordinates
+            </summary>
+            <returns>1: UV start. 2: UV end.</returns>
+        </member>
+        <member name="P:uf.Utility.Audio.AudioClip.Volume">
+            <summary>
+            Volume, ranges from 0 to 1
+            </summary>
+        </member>
+        <member name="M:uf.Utility.Audio.AudioClip.GetWaveform">
+            <summary>
+            Gets the raw waveform within 0hz-20.000hz
+            </summary>
+            <returns>A tuple, value 1 is the data (semi-normalized) and value 2 is the actual size of the array (how much has been read)</returns>
+        </member>
+        <member name="M:uf.Utility.Audio.AudioClip.Dispose">
+            <summary>
+            Free unused resources
+            </summary>
+        </member>
+        <member name="M:uf.Utility.Audio.AudioManager.CreateClip(System.String,System.String)">
+            <summary>
+            Creates an audio clip and returns a reference
+            </summary>
+            <returns>Reference to the audio clip</returns>
+        </member>
+        <member name="M:uf.Utility.Logging.LogMessage.#ctor(uf.Utility.Logging.LogSeverity,System.String,System.Exception,System.String)">
+            <summary>
+            Create a log message from scratch
+            </summary>
+            <param name="Severity">Severity</param>
+            <param name="Message">The message (should be meaningful)</param>
+            <param name="Exception">The caught exception</param>
+            <param name="Source">Do not set this, it is automatically set by the .NET runtime!</param>
+        </member>
+        <member name="M:uf.Utility.Logging.LogMessage.#ctor(uf.Utility.Logging.LogSeverity,System.String,System.String)">
+            <summary>
+            Create a log message from scratch
+            </summary>
+            <param name="Severity">Severity</param>
+            <param name="Message">The message (should be meaningful)</param>
+            <param name="Source">Do not set this, it is automatically set by the .NET runtime!</param>
+        </member>
+        <member name="P:uf.Utility.Resources.Resource.Empty">
+            <summary>
+            A resource with no data, pass this instead of null
+            </summary>
+        </member>
+        <member name="M:uf.Utility.Resources.ResourceManager.GetFile(System.String)">
+            <summary>
+            Retrieves a resource. If the specified resource does not exist, the parameter will be treated as a file path and subsequently LoadResource will be called.
+            </summary>
+        </member>
+        <member name="M:uf.Utility.Resources.ResourceManager.LoadFile(System.String,System.String)">
+            <summary>
+            Loads a resource
+            </summary>
+        </member>
+    </members>
+</doc>

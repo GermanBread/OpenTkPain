@@ -121,13 +121,11 @@ namespace uf.Rendering.Textures
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
-            initialized = true;
-        }
-        public static void Use(TextureUnit Unit = TextureUnit.Texture1) {
-            if (handle == -1)
-                return;
-            GL.ActiveTexture(Unit);
+            // This will stay here until I get multiple atlases working
+            GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, handle);
+
+            initialized = true;
         }
         /// <summary>
         /// Retrieve UV coordinates

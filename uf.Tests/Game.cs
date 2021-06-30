@@ -68,15 +68,22 @@ namespace uf
             PauseOnLostFocus = !EngineGlobals.CLArgs.Contains("--no-pause");
             if (EngineGlobals.CLArgs.Contains("--no-audio"))
                 AudioManager.GlobalVolume = 0;
+            
+            Logger.Log(new LogMessage(LogSeverity.Debug, "Logging is cool"));
+            Logger.Log(new LogMessage(LogSeverity.Verbose, "Logging is cool"));
+            Logger.Log(new LogMessage(LogSeverity.Info, "Logging is cool"));
+            Logger.Log(new LogMessage(LogSeverity.Warning, "Logging is cool"));
+            Logger.Log(new LogMessage(LogSeverity.Error, "Logging is cool"));
+            Logger.Log(new LogMessage(LogSeverity.Critical, "Logging is cool"));
 
             // The resource manager allows us to create aliases for files on the user's file system. In the future I plan on enforcing the use of the resource manager.
-            //ResourceManager.LoadResource("music", "results.mp3");
+            ResourceManager.LoadResource("E", "results.mp3");
             ResourceManager.LoadResource("music", "old_results.mp3");
-            //ResourceManager.LoadResource("music", "stereo test.mp3");
-            //ResourceManager.LoadResource("music", "sine wave.wav");
-            ResourceManager.LoadResource("tonk", "tonk.png");
+            ResourceManager.LoadResource("music E", "stereo test.mp3");
+            ResourceManager.LoadResource("ignore these errors, they are intentional", "sine wave.wav");
+            ResourceManager.LoadFile("tonk", "tonk.png");
 
-            var _texture = new Texture(ResourceManager.GetResource("tonk"));
+            var _texture = new Texture(ResourceManager.GetFile("tonk"));
 
             first = new Rectangle {
                 Size = new Vector2(250, 750),
@@ -89,7 +96,7 @@ namespace uf
             };
 
             // Implied resource loading
-            fourth.Texture = new Texture(ResourceManager.GetResource("arch btw.png"));
+            fourth.Texture = new Texture(ResourceManager.GetFile("arch btw.png"));
 
             _ = new Rectangle() {
                 Size = new Vector2(50),
@@ -114,7 +121,7 @@ namespace uf
                 Parent = fourth
             };
 
-            var _clip = AudioManager.CreateClip(ResourceManager.GetResource("music"));
+            var _clip = AudioManager.CreateClip(ResourceManager.GetFile("music"));
             if (_clip != default(AudioClip))
                 _clip.Loop = true;
             _clip?.Play();
@@ -127,7 +134,7 @@ namespace uf
                     Size = new Vector2(100, 50)
                 }
             }, first, true);
-            _anim.Play();
+            //_anim.Play();
             
             /*visualisers = new List<Rectangle>();
             for (int i = 0; i < Size.X / 2; i++) {
@@ -177,11 +184,11 @@ namespace uf
                 //first.Scene.Rotation += FrameDelta;
             }
             if (KeyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Up)) {
-                Camera.Zoom += Vector2.One * FrameDelta;
+                Camera.Zoom += Camera.Zoom * FrameDelta;
                 //first.Scene.Scale -= Vector2.One * FrameDelta;
             }
             else if (KeyboardState.IsKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys.Down)) {
-                Camera.Zoom -= Vector2.One * FrameDelta;
+                Camera.Zoom -= Camera.Zoom * FrameDelta;
                 //first.Scene.Scale += Vector2.One * FrameDelta;
             }
                 

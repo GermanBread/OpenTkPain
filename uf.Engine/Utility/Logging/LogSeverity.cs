@@ -5,9 +5,8 @@ namespace uf.Utility.Logging
         Critical = 0,
         Error = 1,
         Warning = 2,
-        Normal = 3,
-        Info = 4,
-        Verbose = 5,
-        Debug = 6,
+        Info = 3,
+        Verbose = 4,
+        Debug = 5,
     }
 }

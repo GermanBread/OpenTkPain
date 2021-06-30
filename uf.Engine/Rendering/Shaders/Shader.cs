@@ -110,7 +110,7 @@ namespace uf.Rendering.Shaders
         /// </summary>
         public static Shader BaseShader { get {
             if (baseShader == null)
-                baseShader = new(ResourceManager.GetResource("default vertex shader"), ResourceManager.GetResource("default fragment shader"));
+                baseShader = new(ResourceManager.GetFile("default vertex shader"), ResourceManager.GetFile("default fragment shader"));
             return baseShader;
         } }
         private static Shader multipassShader;
@@ -119,7 +119,7 @@ namespace uf.Rendering.Shaders
         /// </summary>
         public static Shader MultipassShader { get {
             if (multipassShader == null)
-                multipassShader = new(ResourceManager.GetResource("multipass vertex shader"), ResourceManager.GetResource("multipass fragment shader"));
+                multipassShader = new(ResourceManager.GetFile("multipass vertex shader"), ResourceManager.GetFile("multipass fragment shader"));
             return multipassShader;
         } }
     }

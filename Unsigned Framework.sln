@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unsigned Framework", "uf.En
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Glide", "glide\Glide.csproj", "{73FFE593-1E5D-4710-A772-DFC654442336}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "uf.Tests", "uf.Tests\uf.Tests.csproj", "{59640DF7-B98C-407E-8EE7-FFBA00C0DDD6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,5 +46,17 @@ Global
 		{73FFE593-1E5D-4710-A772-DFC654442336}.Release|x64.Build.0 = Release|Any CPU
 		{73FFE593-1E5D-4710-A772-DFC654442336}.Release|x86.ActiveCfg = Release|Any CPU
 		{73FFE593-1E5D-4710-A772-DFC654442336}.Release|x86.Build.0 = Release|Any CPU
+		{59640DF7-B98C-407E-8EE7-FFBA00C0DDD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59640DF7-B98C-407E-8EE7-FFBA00C0DDD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59640DF7-B98C-407E-8EE7-FFBA00C0DDD6}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{59640DF7-B98C-407E-8EE7-FFBA00C0DDD6}.Debug|x64.Build.0 = Debug|Any CPU
+		{59640DF7-B98C-407E-8EE7-FFBA00C0DDD6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{59640DF7-B98C-407E-8EE7-FFBA00C0DDD6}.Debug|x86.Build.0 = Debug|Any CPU
+		{59640DF7-B98C-407E-8EE7-FFBA00C0DDD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59640DF7-B98C-407E-8EE7-FFBA00C0DDD6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59640DF7-B98C-407E-8EE7-FFBA00C0DDD6}.Release|x64.ActiveCfg = Release|Any CPU
+		{59640DF7-B98C-407E-8EE7-FFBA00C0DDD6}.Release|x64.Build.0 = Release|Any CPU
+		{59640DF7-B98C-407E-8EE7-FFBA00C0DDD6}.Release|x86.ActiveCfg = Release|Any CPU
+		{59640DF7-B98C-407E-8EE7-FFBA00C0DDD6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

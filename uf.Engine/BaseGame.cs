@@ -48,7 +48,7 @@ namespace uf
 
             #if DEBUG
             // Prepare GL callbacks
-            GL_Callback.Init();
+            GLCallback.Init();
             #endif
 
             // We will use this buffer for basically everything we do
@@ -60,10 +60,10 @@ namespace uf
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
             // Prepare default shaders
-            ResourceManager.LoadResource("default vertex shader", "default.vert");
-            ResourceManager.LoadResource("default fragment shader", "default.frag");
-            ResourceManager.LoadResource("multipass vertex shader", "multipass.vert");
-            ResourceManager.LoadResource("multipass fragment shader", "multipass.frag");
+            ResourceManager.LoadFile("default vertex shader", "default.vert");
+            ResourceManager.LoadFile("default fragment shader", "default.frag");
+            ResourceManager.LoadFile("multipass vertex shader", "multipass.vert");
+            ResourceManager.LoadFile("multipass fragment shader", "multipass.frag");
 
             // Create a blank texture (used as fallback texture)
             _ = new Texture(null);
@@ -168,10 +168,13 @@ namespace uf
         protected override void OnUpdateFrame(FrameEventArgs e) {
             base.OnUpdateFrame(e);
 
-            for (int i = 0; i < SceneLoadQueue.Count; i++) {
-                SceneManager.OperateOnScene(SceneLoadQueue[i]);
+            if (SceneLoadQueue.Any()) {
+                Logger.Log(new LogMessage(LogSeverity.Debug, "Executing Scene queue"));
+                for (int i = 0; i < SceneLoadQueue.Count; i++) {
+                    SceneManager.OperateOnScene(SceneLoadQueue[i]);
+                }
+                SceneLoadQueue.Clear();
             }
-            SceneLoadQueue.Clear();
 
             updateDelta = e.Time;
             
@@ -187,6 +190,10 @@ namespace uf
                 else if (PauseOnLostFocus)
                     Bass.Pause();
             }
+
+            // Run update on each object
+            foreach (var go in drawableObjects ?? new())
+                go.Update();
             
             if (IsFocused || !PauseOnLostFocus)
                 Invoke("FixedUpdate");
