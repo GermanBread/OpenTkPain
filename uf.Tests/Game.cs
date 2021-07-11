@@ -27,21 +27,21 @@ namespace uf
 
         Rectangle first;
         Triangle second = new() {
-            Size = new Vector2(150),
+            Size = new Vector2(1.5f),
             Anchor = Anchor.BottomRight
         };
         Rectangle third = new() {
-            Position = new Vector2(0, 80),
-            Size = new Vector2(50, 25),
+            Position = new Vector2(0, 8),
+            Size = new Vector2(.5f, .25f),
             Anchor = Anchor.Left
         };
         Rectangle fourth = new("overlay") {
-            Size = new Vector2(25),
+            Size = new Vector2(.25f),
             Color = Color4.Black,
             Layer = 500
         };
         Rectangle fifth = new() {
-            Size = new Vector2(10),
+            Size = new Vector2(.1f),
             Anchor = Anchor.BottomRight,
             Color = Color4.Orange,
             Layer = 499
@@ -57,8 +57,8 @@ namespace uf
                 new Vector2( .5f,-.5f),
                 new Vector2( 0, -.5f),
             },
-            Size = new Vector2(50),
-            Position = new Vector2(75),
+            Size = new Vector2(.5f),
+            Position = new Vector2(.75f),
             Color = Color4.Cyan,
             Anchor = Anchor.Center
         };
@@ -86,9 +86,9 @@ namespace uf
             var _texture = new Texture(ResourceManager.GetFile("tonk"));
 
             first = new Rectangle {
-                Size = new Vector2(250, 750),
+                Size = new Vector2(2.5f, 7.5f),
                 Anchor = Anchor.TopRight,
-                Position = new Vector2(-10),
+                Position = new Vector2(-1),
                 Color = Color4.Beige,
                 Layer = 1,
                 Texture = _texture,
@@ -98,25 +98,9 @@ namespace uf
             // Implied resource loading
             fourth.Texture = new Texture(ResourceManager.GetFile("arch btw.png"));
 
-            _ = new Rectangle() {
-                Size = new Vector2(50),
-                Position = new Vector2(-10),
-                Color = Color4.Red
-            };
-            _ = new Rectangle() {
-                Position = new Vector2(10),
-                Size = new Vector2(50),
-                Color = Color4.Yellow
-            };
-            _ = new Rectangle() {
-                Position = new Vector2(-10),
-                Size = new Vector2(50),
-                Color = new Color4(255, 0, 0, 127)
-            };
-
             _ = new Rectangle("overlay") {
-                Position = new Vector2(25),
-                Size = new Vector2(50),
+                Position = new Vector2(2.5f),
+                Size = new Vector2(7.5f),
                 Color = Color4.OrangeRed,
                 Parent = fourth
             };
@@ -191,21 +175,23 @@ namespace uf
                 Camera.Zoom -= Camera.Zoom * FrameDelta;
                 //first.Scene.Scale += Vector2.One * FrameDelta;
             }
+
+            first.Scene.Rotation += FrameDelta;
                 
 
             fourth.Position = Camera.ScreenToWorldSpace((Vector2i)MousePosition);
             fourth.Color = counter % .5 < .25 ? Color4.White : new Color4(0, 0, 0, 100);
             fourth.Rotation += (MathF.Sin(counter) + 1) * FrameDelta;
-            fourth.Size = new Vector2(MathF.Sqrt(Size.X * Size.Y) * .05f);
+            fourth.Size = new Vector2(MathF.Sqrt(Size.X * Size.Y) * .005f);
             
-            first.Skew = new Vector2(MathF.Sin(counter * 10) * 20f);
+            first.Skew = new Vector2(MathF.Sin(counter * 10) * 2f);
             if (first.IsHovered)
                 first.Color = Color4.Red;
             else
                 first.Color = Color4.Beige;
-            second.Position = new Vector2(MathF.Sin(counter * 5) * 20f - 20f, 0f);
+            second.Position = new Vector2(MathF.Sin(counter * 5) * 2f - 2f, 0f);
             second.Rotation += FrameDelta;
-            third.Position = new Vector2(0f, MathF.Sin(counter * 3) * 50f + 80f);
+            third.Position = new Vector2(0f, MathF.Sin(counter * 3) * 5f + 8f);
             second.Color = Color4.FromHsv(new Vector4(counter / 2f % 1, 1f, 1f, 1f));
             FillColor = Color4.FromHsv(new Vector4(counter / 5f % 1, 1f, .5f, 1f));
 
