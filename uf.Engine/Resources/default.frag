@@ -5,10 +5,10 @@ in vec4 color;
 in vec2 uv;
 in vec2 innerPos;
 
-uniform sampler2D texture1;
+uniform sampler2D texture0;
 
 void main() {
-    vec4 _textureCol = texture(texture1, uv);
+    vec4 _textureCol = texture(texture0, uv);
 
     FragColor = color * _textureCol;
     /*if (innerPos.x < .1f)

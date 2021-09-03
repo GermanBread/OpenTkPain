@@ -49,7 +49,7 @@ namespace uf.Utility.Input
                     HoveredObject = _candidate;
             }
         }
-        // FIXME: Use events instead
+        // FIXME: Use events instead and cache those
         public static MouseButton? PressedMouseButton { get {
             MouseButton? _button = null;
             for (int i = 0; i < 8; i++) {

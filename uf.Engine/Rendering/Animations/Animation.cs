@@ -21,7 +21,7 @@ namespace uf.Rendering.Animations
             looping = IsLooping;
         }
         public List<Keyframe> Keyframes = new();
-        public readonly string Name;
+        public string Name { get; init; }
         public DateTime StartTime { get => startTime; }
 
         private DateTime startTime;

@@ -25,9 +25,7 @@ namespace uf.Utility.Resources
             var _output = resources.FirstOrDefault(x => x.Name == Name);
             return _output;
         }
-        /// <summary>
-        /// Loads a resource
-        /// </summary>
+        
         public static void LoadFile(string Name, string FilePath) {
             Logger.Log(new LogMessage(LogSeverity.Debug, $"Loading file {Name}, path {FilePath ?? "null"}"));
             
@@ -38,16 +36,13 @@ namespace uf.Utility.Resources
                 goto End;
             }
 
-            var _workdirFiles = Directory.GetFiles(Environment.CurrentDirectory);
-            var _bindirFiles = Directory.GetFiles(AppContext.BaseDirectory);
+            var _workdirPath = Path.Combine(Environment.CurrentDirectory, FilePath);
+            var _bindirPath = Path.Combine(AppContext.BaseDirectory, FilePath);
             
-            // Attempt to obtain the files from where the executable is stored
-            if (_bindirFiles.Any(x => x.Contains(FilePath))) {
-                var _file = _bindirFiles.First(x => x.Contains(FilePath));
-                resources.Add(new Resource(Name, _file, new StreamReader(_file)));
-            } else if (_workdirFiles.Any(x => x.Contains(FilePath))) {
-                var _file = _workdirFiles.First(x => x.Contains(FilePath));
-                resources.Add(new Resource(Name, _file, new StreamReader(_file)));
+            if (File.Exists(_workdirPath)) {
+                resources.Add(new Resource(Name, _workdirPath, new StreamReader(_bindirPath)));
+            } else if (File.Exists(_bindirPath)) {
+                resources.Add(new Resource(Name, _bindirPath, new StreamReader(_bindirPath)));
             } else {
                 Logger.Log(new LogMessage(LogSeverity.Error, $"Failed to load file {Name}, path {FilePath ?? "null"}"));
             }
@@ -68,20 +63,18 @@ namespace uf.Utility.Resources
             ResourcePath ??= Name;
 
             if (File.Exists(ResourcePath)) {
-                addResources(Name, ResourcePath);
+                addResources( ResourcePath);
                 goto End;
             }
 
-            var _workdirFiles = Directory.GetFiles(Environment.CurrentDirectory);
-            var _bindirFiles = Directory.GetFiles(AppContext.BaseDirectory);
+            var _workdirPath = Path.Combine(Environment.CurrentDirectory, ResourcePath);
+            var _bindirPath = Path.Combine(AppContext.BaseDirectory, ResourcePath);
             
-            // Attempt to obtain the files from where the executable is stored
-            if (_bindirFiles.Any(x => x.Contains(ResourcePath))) {
-                var _file = _bindirFiles.First(x => x.Contains(ResourcePath));
-                addResources(Name, _file);
-            } else if (_workdirFiles.Any(x => x.Contains(ResourcePath))) {
-                var _file = _workdirFiles.First(x => x.Contains(ResourcePath));
-                addResources(Name, _file);
+            if (File.Exists(_workdirPath)) {
+                var _file = _workdirPath;
+                addResources(_file);
+            } else if (File.Exists(_bindirPath)) {
+                addResources(_bindirPath);
             } else {
                 Logger.Log(new LogMessage(LogSeverity.Error, $"Failed to load resource {Name}, path {ResourcePath ?? "null"}"));
             }
@@ -89,7 +82,7 @@ namespace uf.Utility.Resources
             End:
             Logger.Log(new LogMessage(LogSeverity.Debug, $"Loaded resource {Name}, path {ResourcePath ?? "null"}"));
 
-            void addResources(string Name, string Path) {
+            static void addResources(string Path) {
                 using var _zipStream = new StreamReader(Path);
                 using var _zipArchive = new ZipArchive(_zipStream.BaseStream);
                 foreach (var item in _zipArchive.Entries)

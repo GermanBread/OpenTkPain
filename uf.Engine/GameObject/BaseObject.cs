@@ -151,7 +151,7 @@ namespace uf.GameObject
         /// <summary>
         /// Frees any resources used by this Object and preps it for reinitialization
         /// </summary>
-        public void Dispose()
+        public virtual void Dispose()
         {
             // Jokes on you, we're not actually disposing this object
             GL.DeleteVertexArray(vertexHandle);

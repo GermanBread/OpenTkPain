@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 // Open TK
 using OpenTK.Mathematics;
@@ -39,8 +40,6 @@ namespace uf
             Title += " (DEBUG)";
             #endif
 
-            // Obtain the class which inherits this one, since BaseGame is abstract we will always get a reference to the child class
-            childObject = this.GetType();
             EngineGlobals.Window = this;
         }
         protected override void OnLoad() {
@@ -59,11 +58,11 @@ namespace uf
             GL.ClearColor(Color4.DarkGray);
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
-            // Prepare default shaders
-            ResourceManager.LoadFile("default vertex shader", "default.vert");
-            ResourceManager.LoadFile("default fragment shader", "default.frag");
-            ResourceManager.LoadFile("multipass vertex shader", "multipass.vert");
-            ResourceManager.LoadFile("multipass fragment shader", "multipass.frag");
+            // Prepare included shaders
+            ResourceManager.LoadFile("default vertex shader", "Resources/default.vert");
+            ResourceManager.LoadFile("default fragment shader", "Resources/default.frag");
+            ResourceManager.LoadFile("multipass vertex shader", "Resources/multipass.vert");
+            ResourceManager.LoadFile("multipass fragment shader", "Resources/multipass.frag");
 
             // Create a blank texture (used as fallback texture)
             _ = new Texture(null);
@@ -82,9 +81,9 @@ namespace uf
             };
             // ESC, CONTROL + Q = quit
             KeyDown += (KeyboardKeyEventArgs e) => {
-                if (e.Key == Keys.Escape)
-                    Close();
                 if ((e.Command || e.Control) && e.Key == Keys.Q)
+                    Close();
+                if (e.Key == Keys.Escape)
                     Close();
             };
 
@@ -95,9 +94,13 @@ namespace uf
                     Logger.Log(new LogMessage(LogSeverity.Debug, "Focus changed: Unfocused"));
             };
 
-            if (!Invoke("Init"))
-                Panic();
-            Invoke("Update");
+            try {
+                Start();
+            }
+            catch (Exception ex) {
+                Panic(ex);
+            }
+            Update();
             
             // This is old code that won't be run anymore. To be removed...
             //EngineGlobals.Scenes.ForEach(x => x.GameObjects.ForEach(y => y.Init()));
@@ -110,16 +113,20 @@ namespace uf
         protected override void OnRenderFrame(FrameEventArgs e) {
             base.OnRenderFrame(e);
 
-            frameDelta = e.Time;
-            int FPS = -1;
-            if (frameDelta > double.Epsilon)
-                FPS = (int)Math.Ceiling(1 / frameDelta);
-            if (IsFocused || !PauseOnLostFocus)
-                Logger.Log(new LogMessage(LogSeverity.Debug, $"Frame delta: {frameDelta}  | FPS: {(FPS > 0 ? FPS : "Not Applicable")}"));
+            frameDelta = (float)e.Time;
 
-            // We want "update" to not mess with the timing
+            #if DEBUG
+            {
+                var _match = Regex.Match(Title, " \\[ render .+, update .+ \\]");
+                string _matchString = "";
+                if (_match.Success)
+                    _matchString = _match.Value;
+                Title = Title.Remove(Title.IndexOf(_matchString), _match.Length) + $" [ render {MathF.Round(1f / frameDelta)}, update {MathF.Round(1f / updateDelta)} ]";
+            }
+            #endif
+
             if (IsFocused || !PauseOnLostFocus)
-                Invoke("Update");
+                Render();
             
             // Only recreate when list has been invalidated. See comment in declaration
             if (invalidationQueued) {
@@ -176,7 +183,7 @@ namespace uf
                 SceneLoadQueue.Clear();
             }
 
-            updateDelta = e.Time;
+            updateDelta = (float)e.Time;
             
             // Loop audio when applicable
             if (IsFocused || !PauseOnLostFocus) {
@@ -196,11 +203,13 @@ namespace uf
                 go.Update();
             
             if (IsFocused || !PauseOnLostFocus)
-                Invoke("FixedUpdate");
+                Update();
         }
 
         protected override void OnUnload() {
             base.OnUnload();
+
+            Stop();
 
             AudioManager.Dispose();
         }
@@ -216,33 +225,6 @@ namespace uf
             Logger.Log(new LogMessage(LogSeverity.Debug, $"Resized window to: {e.Size}"));
         }
         
-        /// <summary>
-        /// Invoke a child method
-        /// </summary>
-        private bool Invoke(string MethodName) {
-            try {
-                MethodInfo _method;
-                
-                // First we check if our cache already contains the method we want to invoke (reflection is slow!)
-                bool _presentInCache = reflectionCache.ContainsKey(MethodName);
-                if (_presentInCache)
-                    _method = reflectionCache[MethodName];
-                else
-                    _method = childObject.GetMethod(MethodName);
-
-                // Invoke the child method and run it as a Task
-                Logger.Log(new LogMessage(LogSeverity.Debug, $"Invoking {MethodName}"));
-                _method?.Invoke(this, null);
-                
-                // Add the method to our cache
-                if (!_presentInCache)
-                    reflectionCache.Add(MethodName, _method);
-                return true;
-            } catch (Exception e) {
-                Logger.Log(new LogMessage(LogSeverity.Error, "Invoke failed", e));
-                return false;
-            }
-        }
         protected static void Panic(Exception ex = default) {
             StackTrace _st = new();
             StackFrame _sf = _st.GetFrame(1);
@@ -251,24 +233,26 @@ namespace uf
         }
         public bool InvalidateObjectsCache() => invalidationQueued = true;
 
+        public abstract void Start();
+        public abstract void Render();
+        public abstract void Update();
+        public abstract void Stop();
+
         // Variables
-        private double frameDelta;
-        private double updateDelta;
+        private float frameDelta;
+        private float updateDelta;
         private int arrayBufferHandle;
-        // Class which inherit this class. Also known as the "child"
-        private readonly Type childObject;
-        // Null = invalidated list. Often the result of an object or scene being disabled / enabled or delted / created.
+        // Null = invalidated list. Null because an object or a scene got disabled, enabled, deleted or created.
         private List<BaseObject> drawableObjects = null;
         private bool invalidationQueued = false;
-        private readonly Dictionary<string, MethodInfo> reflectionCache = new();
         /// <summary>
         /// Time it took for the last frame to draw, measured in seconds
         /// </summary>
-        public float FrameDelta { get => (float)frameDelta; }
+        public float FrameDelta { get => frameDelta; }
         /// <summary>
         /// Time it took for FixedUpdate to complete, time in seconds
         /// </summary>
-        public float UpdateDelta { get => (float)updateDelta; }
+        public float UpdateDelta { get => updateDelta; }
         /// <summary>
         /// Background color used for rendering the underlying canvas
         /// </summary>

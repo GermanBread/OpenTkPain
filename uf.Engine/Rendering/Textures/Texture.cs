@@ -86,7 +86,7 @@ namespace uf.Rendering.Textures
             );
             
             // Copy the new atlas to the old one
-            // Before we copy, make sure to release the memory used by the other one
+            // Before we copy, make sure to release the memory used by the old one
             atlas.Dispose();
             atlas = _newAtlas.Clone();
             
@@ -116,13 +116,12 @@ namespace uf.Rendering.Textures
             Logger.Log(new LogMessage(LogSeverity.Debug, $"Created new texture: {_bytes.Count / 4} pixels, dimensions {_image.Size()}, start coordinates at {_atlasSize}; ends at {_atlasSize + _imageSize}"));
            
             // Final step: create the texture
+            GL.ActiveTexture(TextureUnit.Texture0);
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, atlas.Width, atlas.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, _bytes.ToArray());
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMagFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
-
-            // This will stay here until I get multiple atlases working
-            GL.ActiveTexture(TextureUnit.Texture0);
+            
             GL.BindTexture(TextureTarget.Texture2D, handle);
 
             initialized = true;
@@ -132,10 +131,8 @@ namespace uf.Rendering.Textures
         /// </summary>
         /// <returns>1: UV start. 2: UV end.</returns>
         public (Vector2, Vector2) GetUV() {
-            // Ima stop you right there.
             // Since we don't use the incorrect way of storing coordinates as UV, we need to convert them HERE
             var _data = coordinates[Resource];
-            
             // Less ugly way of converting Imagesharp Size to OpenTK Vector2i (i stands for integer)
             Vector2i _atlasSize = new();
             atlas.Size().Deconstruct(out _atlasSize.X, out _atlasSize.Y);
@@ -146,11 +143,9 @@ namespace uf.Rendering.Textures
             return _data;
         }
 
-        // Disposing
         private bool disposed = false;
         protected virtual void Dispose(bool disposing) {
             if (!disposed) {
-                GL.DeleteTexture(handle);
                 coordinates.Remove(Resource);
                 disposed = true;
             }

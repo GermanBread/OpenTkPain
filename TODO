@@ -1,10 +1,14 @@
 [DIFFICULTY] lower = easier; scale 1-10
 
 Working on it (when these two are done my engine is ready for use, just not feature-complete):
-[5] Animation system
-[8] Text
+[8] Text (reconstruct the vectors manually inside the shader, something like: vec2(data[n*2], data[n*2 + 1]))
 
 To be done
+[2] Min/max size for objects (in pixels)
+[5] Animation system
+[2] Image cropping (in shaders)
+[2] Make renderer modular (drawing would be something along the lines of: renderer.Draw(verts, indices, ...))
+[2] Add polygon class which allows you to create obejcts with N corners
 [3] Make it easy to create .ufr archives
 [3] Add support for multiple atlases (will be needed for text rendering?)
 [6] Rework Audio: Split Music / Sound streams. FFT Sample should request blocks in size of 2^x
@@ -12,7 +16,6 @@ To be done
 [8] Add a class that does instanced rendering... Perhaps called "InstancedObject"?
     It should also check if all objects are of the same type... or it should draw the different types in a instanced render
 [5] Add ability to save / load texture atlases
-[5] Rewrite Transform.cs to feature less spaghetti
 [6] Make multithreading easy
     Provide a class that can be used to launch code in a seperate thread
     Race conditions should be avoided!
@@ -22,6 +25,7 @@ To be done
 [?] Migrate to OpenAL
 
 Done
+[5] Rewrite Transform.cs to feature less spaghetti
 [3] Implement a file format for resources (perhaps .ufr?)
     These resource files should support containing more than one file, and even other resource files (dropped the nested resource thing)
 [2] Convert to library

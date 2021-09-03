@@ -104,21 +104,9 @@ namespace uf.Utility.Scenes
             switch (Operation)
             {
                 case SceneAction.Load:
-                    if (SceneObject.IsLoaded)
-                        return;
-                    SceneObject.GameObjects.ForEach(x => {
-                        if (!x.IsInitialized)
-                            x.Init();
-                    });
                     SceneObject.Load();
                     break;
                 case SceneAction.Unload:
-                    if (!SceneObject.IsLoaded)
-                        return;
-                    SceneObject.GameObjects.ForEach(x => {
-                        if (x.IsInitialized)
-                            x.Dispose();
-                    });
                     SceneObject.Unload();
                     break;
             }

@@ -13,4 +13,9 @@
     <PackageReference Include="OpenTK" Version="4.6.4" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="good times rg.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

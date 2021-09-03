@@ -21,8 +21,8 @@ namespace uf.GameObject
                 new Vector2(1, 0)
             };
             transform.Indices = new uint[] {
-                0, 1, 3,
-                1, 2, 3
+                0, 1, 2,
+                0, 2, 3
             };
         }
     }

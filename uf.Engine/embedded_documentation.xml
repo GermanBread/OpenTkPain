@@ -4,11 +4,6 @@
         <name>Unsigned Framework</name>
     </assembly>
     <members>
-        <member name="M:uf.BaseGame.Invoke(System.String)">
-            <summary>
-            Invoke a child method
-            </summary>
-        </member>
         <member name="P:uf.BaseGame.FrameDelta">
             <summary>
             Time it took for the last frame to draw, measured in seconds
@@ -119,11 +114,6 @@
             Fired when this object is clicked
             </summary>
         </member>
-        <member name="T:uf.GameObject.ComplexShape">
-            <summary>
-            
-            </summary>
-        </member>
         <member name="M:uf.GameObject.Components.Transform.CompileData(OpenTK.Mathematics.Color4,uf.Utility.Scenes.Scene)">
             <summary>
             Compiles all data necessary for rendering into a Vertex object
@@ -152,6 +142,11 @@
         <member name="F:uf.GameObject.Components.Transform.Anchor">
             <summary>
             The Anchor of the object. Used for positioning
+            </summary>
+        </member>
+        <member name="P:uf.GameObject.Components.Transform.GlobalScale">
+            <summary>
+            Global scale. Affects everything. Lower values make objects bigger (does not behave like camera zooming!)
             </summary>
         </member>
         <member name="M:uf.Rendering.Camera.ScreenToWorldSpace(OpenTK.Mathematics.Vector2)">
@@ -230,11 +225,6 @@
         <member name="M:uf.Utility.Resources.ResourceManager.GetFile(System.String)">
             <summary>
             Retrieves a resource. If the specified resource does not exist, the parameter will be treated as a file path and subsequently LoadResource will be called.
-            </summary>
-        </member>
-        <member name="M:uf.Utility.Resources.ResourceManager.LoadFile(System.String,System.String)">
-            <summary>
-            Loads a resource
             </summary>
         </member>
     </members>

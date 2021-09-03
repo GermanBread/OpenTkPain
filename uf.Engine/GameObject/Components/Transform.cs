@@ -23,19 +23,19 @@ namespace uf.GameObject.Components
 
             // -> Local <-
             Matrix2.CreateRotation(Rotation, out var _localRotation);
-            Vector2 _localSkew = (Skew / 10);
-            Vector2 _localSize = (Size / 10) * new Vector2(Camera.Resolution.X / 720f);
-            Vector2 _localPosition = (Position / 10) + Vector2.Divide(Anchor.Xy, _aspectRatioFactor);
+            Vector2 _localSkew = (Skew / GlobalScale);
+            Vector2 _localSize = (Size / GlobalScale) * new Vector2(Camera.Resolution.X / 720f);
+            Vector2 _localPosition = (Position / GlobalScale) + Vector2.Divide(Anchor.Xy, _aspectRatioFactor);
             
             // -> Parent <-
             Matrix2.CreateRotation((ParentObject?.Rotation ?? 0), out var _parentRotation);
-            Vector2 _parentSize = (ParentObject?.Size / 10 ?? Vector2.One);
-            Vector2 _parentPosition = (ParentObject?.Position / 10 ?? Vector2.Zero);
+            Vector2 _parentSize = (ParentObject?.Size / GlobalScale ?? Vector2.One);
+            Vector2 _parentPosition = (ParentObject?.Position / GlobalScale ?? Vector2.Zero);
             
             // -> Scene <-
             Matrix2.CreateRotation(Scene.Rotation, out var _sceneRotation);
             Vector2 _sceneSize = Scene.Scale;
-            Vector2 _scenePosition = Scene.Position / 10;
+            Vector2 _scenePosition = Scene.Position / GlobalScale;
 
             // -> Global <-
             Matrix2.CreateRotation(-Camera.Rotation, out var _globalRotation);
@@ -50,7 +50,8 @@ namespace uf.GameObject.Components
             
             // -> Parent <-
             _coordinates = Array.ConvertAll(_coordinates, vec => vec * _parentRotation);
-            _coordinates = Array.ConvertAll(_coordinates, vec => vec * _parentSize);
+            // Make this optional?
+            //_coordinates = Array.ConvertAll(_coordinates, vec => vec * _parentSize);
             _coordinates = Array.ConvertAll(_coordinates, vec => vec + _parentPosition);
 
             // -> Scene <-
@@ -69,7 +70,7 @@ namespace uf.GameObject.Components
                 _output.Add(new Vertex {
                     Coordinate = _coordinates[i],
                     UV = UV[i],
-                    InnerPosition = UV[i],
+                    Position = UV[i],
                     Color = ObjectColor
                 });
             }
@@ -100,5 +101,10 @@ namespace uf.GameObject.Components
         public Vector2[] UV;
         public Vector2[] Vertices;
         public uint[] Indices;
+        /// <summary>
+        /// Global scale. Affects everything. Lower values make objects bigger (does not behave like camera zooming!)
+        /// </summary>
+        // I prefer using { get; } over readonly because it looks nicer in my IDE :)
+        public static float GlobalScale { get; } = 10;
     }
 }

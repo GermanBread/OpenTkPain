@@ -13,7 +13,7 @@ namespace uf.Rendering.Shaders
 {
     public class Shader : IDisposable
     {
-        public int ShaderHandle;
+        public readonly int ShaderHandle;
         private readonly int vertexShaderHandle;
         private readonly int fragmentShaderHandle;
         private readonly string vertexSourceCode;
@@ -25,33 +25,27 @@ namespace uf.Rendering.Shaders
                 return;
             }
 
-            // The second check makes this dispose-proof (hopefully)
+            // Don't waste storage space by creating the same shader over and over
             if (shaders.ContainsKey((VertexShader, FragmentShader)) && !shaders[(VertexShader, FragmentShader)].disposed) {
                 ShaderHandle = shaders[(VertexShader, FragmentShader)].ShaderHandle;
                 return;
             }
 
-            // Read the shader code
             vertexSourceCode = VertexShader.Stream.ReadToEnd();
             fragmentSourceCode = FragmentShader.Stream.ReadToEnd();
 
-            // Create our handles
             vertexShaderHandle = GL.CreateShader(ShaderType.VertexShader);
             fragmentShaderHandle = GL.CreateShader(ShaderType.FragmentShader);
 
-            // Bind them to the source code
             GL.ShaderSource(vertexShaderHandle, vertexSourceCode);
             GL.ShaderSource(fragmentShaderHandle, fragmentSourceCode);
 
-            // And now compile them
             GL.CompileShader(vertexShaderHandle);
             GL.CompileShader(fragmentShaderHandle);
 
-            // Get error messages
             string _vertexCompilationResult = GL.GetShaderInfoLog(vertexShaderHandle);
             string _fragmentCompilationResult = GL.GetShaderInfoLog(fragmentShaderHandle);
 
-            // If there are any, log them
             if (!string.IsNullOrEmpty(_vertexCompilationResult))
                 Logger.Log(new LogMessage(LogSeverity.Error, "Failed to compile vertex shader", new ShaderCompilationException(_vertexCompilationResult)));
             if (!string.IsNullOrEmpty(_fragmentCompilationResult))
@@ -87,7 +81,6 @@ namespace uf.Rendering.Shaders
             GL.Uniform1(_location, Value);
         }
 
-        // Disposing
         private bool disposed = false;
         protected virtual void Dispose(bool disposing) {
             if (!disposed) {

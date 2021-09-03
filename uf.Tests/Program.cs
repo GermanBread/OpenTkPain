@@ -21,14 +21,14 @@ namespace uf
                 UpdateFrequency = 120,
             }, new NativeWindowSettings {
                 Title = "Unsigned Framework Dev.",
-                Profile = ContextProfile.Any
+                Profile = ContextProfile.Core
             });
             window.VSync = VSyncMode.Off;
             try {
                 window.Run();
             }
             catch (Exception ex) {
-                Logger.Log(new LogMessage(LogSeverity.Critical, "Something is wrong in the process!", ex));
+                Logger.Log(new LogMessage(LogSeverity.Critical, "Uh huh. That's wierd.", ex));
             }
         }
     }

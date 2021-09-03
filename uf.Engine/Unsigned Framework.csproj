@@ -25,23 +25,30 @@
     <PackageReference Include="OpenTK" Version="4.6.3" />
     <PackageReference Include="ppy.osu.Framework.NativeLibs" Version="2021.115.0" />
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.3" />
+    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta13" />
     <ProjectReference Include="../glide/Glide.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="default.frag">
+    <None Update="Resources/default.frag">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="default.vert">
+    <None Update="Resources/default.vert">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="multipass.frag">
+    <None Update="Resources/text.frag">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="multipass.vert">
+    <None Update="Resources/text.vert">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Inconsolata.ttf">
+    <None Update="Resources/multipass.frag">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources/multipass.vert">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources/Inconsolata.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -11,6 +11,7 @@ using OpenTK.Windowing.Desktop;
 using uf.Rendering;
 using uf.GameObject;
 using uf.Utility.Audio;
+using uf.Rendering.Text;
 using uf.Utility.Scenes;
 using uf.Utility.Logging;
 using uf.Utility.Globals;
@@ -21,50 +22,33 @@ using uf.GameObject.Components;
 
 namespace uf
 {
-    public class Game : BaseGame
-    {
+    public class Game : BaseGame {
         public Game(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings) { }
 
         Rectangle first;
-        Triangle second = new() {
+        readonly Triangle second = new() {
             Size = new Vector2(1.5f),
             Anchor = Anchor.BottomRight
         };
-        Rectangle third = new() {
+        readonly Rectangle third = new() {
             Position = new Vector2(0, 8),
             Size = new Vector2(.5f, .25f),
             Anchor = Anchor.Left
         };
-        Rectangle fourth = new("overlay") {
+        readonly Rectangle fourth = new("overlay") {
             Size = new Vector2(.25f),
             Color = Color4.Black,
             Layer = 500
         };
-        Rectangle fifth = new() {
+        readonly Rectangle fifth = new() {
             Size = new Vector2(.1f),
             Anchor = Anchor.BottomRight,
             Color = Color4.Orange,
             Layer = 499
         };
-        ComplexShape sixth = new() {
-            Vertices = new Vector2[] {
-                new Vector2( 0, 1),
-                new Vector2( 1, 1),
-                new Vector2(-1, 1),
-                new Vector2(-1, -1),
-                new Vector2( 1, -1),
-                new Vector2(-.5f, .5f),
-                new Vector2( .5f,-.5f),
-                new Vector2( 0, -.5f),
-            },
-            Size = new Vector2(.5f),
-            Position = new Vector2(.75f),
-            Color = Color4.Cyan,
-            Anchor = Anchor.Center
-        };
         //List<Rectangle> visualisers;
         float counter = 0;
-        public void Init() {
+        public override void Start() {
             PauseOnLostFocus = !EngineGlobals.CLArgs.Contains("--no-pause");
             if (EngineGlobals.CLArgs.Contains("--no-audio"))
                 AudioManager.GlobalVolume = 0;
@@ -105,10 +89,18 @@ namespace uf
                 Parent = fourth
             };
 
+            fourth.Children[0].Texture = new Texture(ResourceManager.GetFile("nixos.png"));
+
             var _clip = AudioManager.CreateClip(ResourceManager.GetFile("music"));
-            if (_clip != default(AudioClip))
+            if (_clip != default(AudioClip)) {
                 _clip.Loop = true;
-            _clip?.Play();
+                _clip.Volume = .5f;
+            }
+            //_clip?.Play();
+            var _clip2 = AudioManager.CreateClip(ResourceManager.GetFile("E"));
+            if (_clip2 != default(AudioClip))
+                _clip2.Loop = true;
+            _clip2?.Play();
 
             Animation _anim = new("testanim", new Keyframe[] {
                 new Keyframe {
@@ -138,6 +130,10 @@ namespace uf
                 first.Size *= new Vector2(e.MouseButton == 0 ? 1.5f : .5f);
             };
 
+            _ = new Polygon(null, 4) {
+                Size = new Vector2(2)
+            };
+
             // Spam (V)RAM
             /*List<Vector2> _verticeSpam = new();
             int _count = 1000;
@@ -150,10 +146,19 @@ namespace uf
                     Size = new Vector2(100),
                     Color = Color4.AliceBlue
                 };*/
+            
+            _ = new Text(null) {
+                Size = new Vector2(5, 2),
+                Position = new Vector2(-10, -2.5f),
+                Layer = 9999,
+                Color = Color4.AliceBlue,
+                FontColor = Color4.Crimson,
+                Texture = _texture
+            };
         }
 
         //Vector2 parallax;
-        public void Update() {
+        public override void Render() {
             counter += FrameDelta;
             
             //parallax = Vector2.Lerp(parallax, Camera.ScreenToWorldSpace(MousePosition), 2.5f * FrameDelta);
@@ -207,6 +212,12 @@ namespace uf
                     visualisers[i].Color = new Color4(255, 50, 20, 100);
                 visualisers[i].Size = new Vector2(visualisers[i].Size.X, 5f + _fft[i * (_fft.Length / visualisers.Count)] * 100f);
             }*/
+        }
+        public override void Update() {
+
+        }
+        public override void Stop() {
+
         }
     }
 }
