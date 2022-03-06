@@ -68,9 +68,9 @@ namespace uf.GameObject.Components
             List<Vertex> _output = new(); // New C# 9 syntax, nice!
             for (int i = 0; i < Vertices.Length; i++) {
                 _output.Add(new Vertex {
-                    Coordinate = _coordinates[i],
+                    Position = _coordinates[i],
                     UV = UV[i],
-                    Position = UV[i],
+                    InnerBounds = UV[i],
                     Color = ObjectColor
                 });
             }

@@ -37,19 +37,23 @@ namespace uf.GameObject
                 gameWindow?.InvalidateObjectsCache();
             }
         }
-        public virtual void Init()
+        internal virtual void Init()
         {
             if (isInitialized) {
                 Logger.Log(new LogMessage(LogSeverity.Warning, "Init() was called even though this object was already initialized!"));
                 return;
             }
 
+            initValues();
+
+            createObjects();
+            initObjects();
+
+            isInitialized = true;
+        }
+        internal protected virtual void initValues() {
             if (Shader == null)
                 Shader = Shader.BaseShader;
-
-            vertexHandle = GL.GenVertexArray();
-            elementBufferHandle = GL.GenBuffer();
-            vertexBufferHandle = GL.GenBuffer();
 
             // Set a default color value
             if (Color == default)
@@ -57,21 +61,7 @@ namespace uf.GameObject
 
             // No texture? Create a blank one!
             if (Texture == null)
-                Texture = new Texture(Resource.Empty);
-
-            GL.BindVertexArray(vertexHandle);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, elementBufferHandle);
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, vertexBufferHandle); // I was missing a VBO here... how did I miss it?
-
-            GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 0);
-            GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 2 * sizeof(float));
-            GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 4 * sizeof(float));
-            GL.VertexAttribPointer(3, 4, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 6 * sizeof(float));
-
-            GL.EnableVertexAttribArray(0);
-            GL.EnableVertexAttribArray(1);
-            GL.EnableVertexAttribArray(2);
-            GL.EnableVertexAttribArray(3);
+                Texture = Texture.Empty;
 
             gameWindow.MouseDown += (e) => {
                 if (IsHovered)
@@ -82,11 +72,34 @@ namespace uf.GameObject
             Clicked += (_) => { };
 
             Children.CollectionChanged += (_, e) => {
-                foreach (var child in Children)
-                    child.Parent = this;
+                if (e.Action != System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
+                    foreach (var child in Children)
+                        child.Parent = this;
+                else
+                    foreach (var formerChild in e.OldItems)
+                        if (formerChild is BaseObject a)
+                            a.Parent = null;
             };
+        }
+        internal protected virtual void createObjects() {
+            vertexHandle = GL.GenVertexArray();
+            elementBufferHandle = GL.GenBuffer();
+            vertexBufferHandle = GL.GenBuffer();
+        }
+        internal protected virtual void initObjects() {
+            GL.BindVertexArray(vertexHandle);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, elementBufferHandle);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, vertexBufferHandle);
 
-            isInitialized = true;
+            GL.VertexAttribPointer(0, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 0);
+            GL.VertexAttribPointer(1, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 2 * sizeof(float));
+            GL.VertexAttribPointer(2, 2, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 4 * sizeof(float));
+            GL.VertexAttribPointer(3, 4, VertexAttribPointerType.Float, false, Unsafe.SizeOf<Vertex>(), 6 * sizeof(float));
+
+            GL.EnableVertexAttribArray(0);
+            GL.EnableVertexAttribArray(1);
+            GL.EnableVertexAttribArray(2);
+            GL.EnableVertexAttribArray(3);
         }
         /// <summary>
         /// Update the object's state
@@ -97,16 +110,7 @@ namespace uf.GameObject
             else
                 IsHovered = false;
         }
-        /// <summary>
-        /// Draws the object. Should be called once per frame.
-        /// </summary>
-        internal virtual void Draw()
-        {
-            if (!IsInitialized) {
-                Logger.Log(new LogMessage(LogSeverity.Error, "Not initialized; refusing to render object! Was Init() not called?"));
-                return;
-            }
-
+        internal protected virtual void preDraw() {
             // Small optimization: Don't perform a draw call if the object is 100% transparent
             if (Color.A == 0)
                 return;
@@ -118,6 +122,21 @@ namespace uf.GameObject
             //}
 
             Shader.Use();
+        }
+        internal protected virtual void postDraw() {
+            GL.Disable(EnableCap.Blend);
+        }
+        /// <summary>
+        /// Draws the object. Should be called once per frame.
+        /// </summary>
+        internal virtual void Draw()
+        {
+            if (!IsInitialized) {
+                Logger.Log(new LogMessage(LogSeverity.Error, "Not initialized; refusing to render object! Was Init() not called?"));
+                return;
+            }
+            
+            preDraw();
 
             var _data = transform.CompileData(Color, Scene);
 
@@ -132,7 +151,7 @@ namespace uf.GameObject
 
             GL.DrawElements(PrimitiveType.Triangles, transform.Indices.Length, DrawElementsType.UnsignedInt, 0);
 
-            GL.Disable(EnableCap.Blend);
+            postDraw();
         }
         internal virtual void MultipassDraw(Color4 Override)
         {
@@ -254,9 +273,9 @@ namespace uf.GameObject
         /// </summary>
         public event OnClicked Clicked;
         public bool IsInitialized { get => isInitialized; }
-        private bool isInitialized = false;
-        private int vertexHandle;
-        private int vertexBufferHandle;
-        private int elementBufferHandle;
+        protected bool isInitialized = false;
+        protected int vertexHandle;
+        protected int vertexBufferHandle;
+        protected int elementBufferHandle;
     }
 }

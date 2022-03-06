@@ -8,8 +8,7 @@ using OpenTK.Mathematics;
 // Unsigned Framework
 using uf.Utility.Logging;
 
-namespace uf.GameObject
-{
+namespace uf.GameObject {
     public class Polygon : BaseObject {
         public Polygon(string Scene, ushort Corners) : base(Scene) {
             if (Corners < 3) {

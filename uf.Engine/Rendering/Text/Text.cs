@@ -1,67 +1,100 @@
-using System.Drawing;
 // System
-using System;
-using System.IO;
-using System.Linq;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 
 // OpenTK
 using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Windowing.Common;
-using OpenTK.Windowing.Desktop;
-using OpenTK.Windowing.GraphicsLibraryFramework;
 
 // Unsigned Framework
 using uf.GameObject;
 using uf.Utility.Logging;
-using uf.Rendering.Shaders;
-using uf.Utility.Resources;
-using uf.GameObject.Components;
-
-// Imagesharp
-using SixLabors.Fonts;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.PixelFormats;
-using IColor = SixLabors.ImageSharp.Color;
-using IPointF = SixLabors.ImageSharp.PointF;
-using SixLabors.ImageSharp.Drawing.Processing;
+using uf.Rendering.Textures;
 
 namespace uf.Rendering.Text {
     public class Text : BaseObject {
         public Text(string Scene) : base(Scene) {
-            // Copied from Rectangle.cs
-            transform.Vertices = new Vector2[] {
-                new Vector2(-1, -1),
-                new Vector2(-1,  1),
-                new Vector2( 1,  1),
-                new Vector2( 1, -1)
-            };
-            transform.UV = new Vector2[] {
-                new Vector2(0, 0),
-                new Vector2(0, 1),
-                new Vector2(1, 1),
-                new Vector2(1, 0)
-            };
-            transform.Indices = new uint[] {
-                0, 1, 2,
-                0, 2, 3
-            };
-            
-            // Bind a new shader made for text here
-            ResourceManager.LoadFile("text vertex shader", "Resources/text.vert");
-            ResourceManager.LoadFile("text fragment shader", "Resources/text.frag");
-            Shader = new Shader(ResourceManager.GetFile("text vertex shader"), ResourceManager.GetFile("text fragment shader"));
+
         }
-        
+
         internal override void Draw() {
-            base.Draw();
-        }
-        public override void Dispose() {
-            base.Dispose();
+            if (!IsInitialized) {
+                Logger.Log(new LogMessage(LogSeverity.Error, "Not initialized; refusing to render object! Was Init() not called?"));
+                return;
+            }
+            
+            preDraw();
+
+            // returned vectors from Texture.GetUV() should not be altered!
+
+            List<Vertex> mesh = new();
+            List<uint> meshIndices = new();
+            float step = 0;
+            int wrap = 1; // Overflow wrap to next line (if possible). 1 = not wrapped yet
+
+            for (int i = 0; i < content.Length; i++) {
+                if (!texes.ContainsKey(content[i])) {
+                    // TODO: Generate texture
+                }
+                
+                var uv = texes[content[i]].GetUV();
+                var charSize = new Vector2(uv.Item2.X - uv.Item1.X, uv.Item2.Y - uv.Item1.Y);
+
+                // Check if we will overflow horizontally
+                if (step + charSize.X > Size.X) {
+                    step = 0;
+                    wrap++;
+                }
+
+                // We are overflowing vertically, stop generating the mesh
+                if (FontSize*wrap > Size.Y)
+                    break;
+
+                // Top Left
+                mesh.Add(new Vertex {
+                    Position = new Vector2(Position.X + step, Position.Y + FontSize*wrap - charSize.Y),
+                    UV = uv.Item1,
+                    Color = Color
+                });
+                meshIndices.Add((uint)i*4);
+                
+                // Top Right
+                mesh.Add(new Vertex {
+                    Position = new Vector2(Position.X + charSize.X + step, Position.Y + FontSize*wrap - charSize.Y),
+                    UV = uv.Item1,
+                    Color = Color
+                });
+                meshIndices.Add((uint)i*4 + 1);
+                
+                // Bottom Right
+                mesh.Add(new Vertex {
+                    Position = new Vector2(Position.X + charSize.X + step, Position.Y + Size.Y),
+                    UV = uv.Item1,
+                    Color = Color
+                });
+                meshIndices.Add((uint)i*4 + 2);
+                
+                // Bottom Left
+                mesh.Add(new Vertex {
+                    Position = new Vector2(Position.X + step, Position.Y + Size.Y),
+                    UV = uv.Item1,
+                    Color = Color
+                });
+                meshIndices.Add((uint)i*4 + 3);
+
+                // Move forwards...
+                step += charSize.X;
+            }
+
+            var _data = mesh.ToArray();
+            transform.Indices = meshIndices.ToArray();
+            
+            GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.DynamicDraw);
+            GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.DynamicDraw);
+
+            GL.DrawElements(PrimitiveType.Triangles, transform.Indices.Length, DrawElementsType.UnsignedInt, 0);
+
+            postDraw();
         }
 
         public string Content { get => content; set {
@@ -76,5 +109,6 @@ namespace uf.Rendering.Text {
         public float FontSize = 50;
         public Color4 FontColor = Color4.Black;
         private string content = "Placeholder text";
+        private static readonly Dictionary<char, Texture> texes = new();
     }
 }

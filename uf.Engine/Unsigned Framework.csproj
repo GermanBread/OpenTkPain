@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <RootNamespace>uf</RootNamespace>
 
@@ -22,10 +22,9 @@
 
   <ItemGroup>
     <PackageReference Include="ManagedBass" Version="3.0.0" />
-    <PackageReference Include="OpenTK" Version="4.6.3" />
+    <PackageReference Include="OpenTK" Version="4.6.7" />
     <PackageReference Include="ppy.osu.Framework.NativeLibs" Version="2021.115.0" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.3" />
-    <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta13" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="2.0.0" />
     <ProjectReference Include="../glide/Glide.csproj" />
   </ItemGroup>
 
@@ -49,6 +48,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources/Inconsolata.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources/white.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

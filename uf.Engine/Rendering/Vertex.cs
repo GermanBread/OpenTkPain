@@ -10,9 +10,9 @@ namespace uf.Rendering
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct Vertex
     {
-        public Vector2 Coordinate;
-        public Vector2 UV;
         public Vector2 Position;
+        public Vector2 UV;
+        public Vector2 InnerBounds;
         public Color4 Color;
     }
 }

@@ -18,7 +18,7 @@ namespace uf.Rendering.Shaders
         private readonly int fragmentShaderHandle;
         private readonly string vertexSourceCode;
         private readonly string fragmentSourceCode;
-        private readonly Dictionary<(Resource, Resource), Shader> shaders = new();
+        private static readonly Dictionary<(Resource, Resource), Shader> shaders = new();
         public Shader(Resource VertexShader, Resource FragmentShader) {
             if (VertexShader == null || FragmentShader == null) {
                 ShaderHandle = BaseShader.ShaderHandle;

@@ -38,6 +38,9 @@ namespace uf
             #if DEBUG
             Logger.Log(new LogMessage(LogSeverity.Info, "This app has been configured in DEBUG mode - expect a lot of console output"));
             Title += " (DEBUG)";
+            #else
+            if (IsWINE())
+                Logger.Log(new LogMessage(LogSeverity.Warning, "My primitive detection algo has told me that you are using WINE to run this executable! Expect problems!"));
             #endif
 
             EngineGlobals.Window = this;
@@ -59,6 +62,7 @@ namespace uf
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
             // Prepare included shaders
+            ResourceManager.LoadFile("white texture", "Resources/white.png");
             ResourceManager.LoadFile("default vertex shader", "Resources/default.vert");
             ResourceManager.LoadFile("default fragment shader", "Resources/default.frag");
             ResourceManager.LoadFile("multipass vertex shader", "Resources/multipass.vert");
@@ -231,6 +235,8 @@ namespace uf
             Logger.Log(new LogMessage(LogSeverity.Critical, $"OVER HERE! Panic has been invoked by {_sf.GetMethod().Name}.", ex ?? new Exception("No exception has been provided, look at the messages above")));
             Environment.Exit(1);
         }
+        private static bool IsWINE()
+         => OperatingSystem.IsWindows() && Process.GetProcessesByName("winlogon").Length == 0;
         public bool InvalidateObjectsCache() => invalidationQueued = true;
 
         public abstract void Start();

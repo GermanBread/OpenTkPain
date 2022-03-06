@@ -1,7 +1,11 @@
 [DIFFICULTY] lower = easier; scale 1-10
 
+Personal notes
+[*] The Transform class might be freaking out over the new UV values
+
 Working on it (when these two are done my engine is ready for use, just not feature-complete):
-[8] Text (reconstruct the vectors manually inside the shader, something like: vec2(data[n*2], data[n*2 + 1]))
+[3] Refactor Texture stuff
+[8] Text (use Meshes ffs)
 
 To be done
 [2] Min/max size for objects (in pixels)
@@ -41,4 +45,3 @@ Done
 [3] Scene position offset, rotation, scale
 [2] Input helper (must also be able to determine the object clicked)
 [1] Camera (must be able to convert between camera-coordinates, world-coordinates and cursor-coordinates)
-[4] Texture atlas (applies to text too!) [DONE!]
