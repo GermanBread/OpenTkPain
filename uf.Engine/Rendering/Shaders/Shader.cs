@@ -1,6 +1,5 @@
 // System
 using System;
-using System.IO;
 using System.Collections.Generic;
 
 // OpenTK
@@ -11,40 +10,37 @@ using uf.Utility.Resources;
 
 namespace uf.Rendering.Shaders
 {
-    public class Shader : IDisposable
+    public sealed class Shader : IDisposable
     {
-        public readonly int ShaderHandle;
-        private readonly int vertexShaderHandle;
-        private readonly int fragmentShaderHandle;
-        private readonly string vertexSourceCode;
-        private readonly string fragmentSourceCode;
+        private readonly int shaderHandle;
         private static readonly Dictionary<(Resource, Resource), Shader> shaders = new();
-        public Shader(Resource VertexShader, Resource FragmentShader) {
-            if (VertexShader == null || FragmentShader == null) {
-                ShaderHandle = BaseShader.ShaderHandle;
+
+        private Shader(Resource vertexShader, Resource fragmentShader) {
+            if (vertexShader == null || fragmentShader == null) {
+                shaderHandle = BaseShader.shaderHandle;
                 return;
             }
 
             // Don't waste storage space by creating the same shader over and over
-            if (shaders.ContainsKey((VertexShader, FragmentShader)) && !shaders[(VertexShader, FragmentShader)].disposed) {
-                ShaderHandle = shaders[(VertexShader, FragmentShader)].ShaderHandle;
+            if (shaders.ContainsKey((vertexShader, fragmentShader)) && !shaders[(vertexShader, fragmentShader)].disposed) {
+                shaderHandle = shaders[(vertexShader, fragmentShader)].shaderHandle;
                 return;
             }
 
-            vertexSourceCode = VertexShader.Stream.ReadToEnd();
-            fragmentSourceCode = FragmentShader.Stream.ReadToEnd();
+            var _vertexSourceCode = vertexShader.Stream.ReadToEnd();
+            var _fragmentSourceCode = fragmentShader.Stream.ReadToEnd();
 
-            vertexShaderHandle = GL.CreateShader(ShaderType.VertexShader);
-            fragmentShaderHandle = GL.CreateShader(ShaderType.FragmentShader);
+            var _vertexShaderHandle = GL.CreateShader(ShaderType.VertexShader);
+            var _fragmentShaderHandle = GL.CreateShader(ShaderType.FragmentShader);
 
-            GL.ShaderSource(vertexShaderHandle, vertexSourceCode);
-            GL.ShaderSource(fragmentShaderHandle, fragmentSourceCode);
+            GL.ShaderSource(_vertexShaderHandle, _vertexSourceCode);
+            GL.ShaderSource(_fragmentShaderHandle, _fragmentSourceCode);
 
-            GL.CompileShader(vertexShaderHandle);
-            GL.CompileShader(fragmentShaderHandle);
+            GL.CompileShader(_vertexShaderHandle);
+            GL.CompileShader(_fragmentShaderHandle);
 
-            string _vertexCompilationResult = GL.GetShaderInfoLog(vertexShaderHandle);
-            string _fragmentCompilationResult = GL.GetShaderInfoLog(fragmentShaderHandle);
+            var _vertexCompilationResult = GL.GetShaderInfoLog(_vertexShaderHandle);
+            var _fragmentCompilationResult = GL.GetShaderInfoLog(_fragmentShaderHandle);
 
             if (!string.IsNullOrEmpty(_vertexCompilationResult))
                 Logger.Log(new LogMessage(LogSeverity.Error, "Failed to compile vertex shader", new ShaderCompilationException(_vertexCompilationResult)));
@@ -52,42 +48,43 @@ namespace uf.Rendering.Shaders
                 Logger.Log(new LogMessage(LogSeverity.Error, "Failed to compile fragment shader", new ShaderCompilationException(_fragmentCompilationResult)));
 
             // Now we're making the shader usable
-            ShaderHandle = GL.CreateProgram();
+            shaderHandle = GL.CreateProgram();
 
             // Attach a label to our shader
-            string _label = $"Shader {ShaderHandle} (vert: {VertexShader.Name}, frag: {FragmentShader.Name})";
-            GL.ObjectLabel(ObjectLabelIdentifier.Program, ShaderHandle, _label.Length, _label);
+            var _label = $"Shader {shaderHandle} (vert: {vertexShader.Name}, frag: {fragmentShader.Name})";
+            GL.ObjectLabel(ObjectLabelIdentifier.Program, shaderHandle, _label.Length, _label);
 
-            GL.AttachShader(ShaderHandle, vertexShaderHandle);
-            GL.AttachShader(ShaderHandle, fragmentShaderHandle);
-            GL.LinkProgram(ShaderHandle);
+            GL.AttachShader(shaderHandle, _vertexShaderHandle);
+            GL.AttachShader(shaderHandle, _fragmentShaderHandle);
+            GL.LinkProgram(shaderHandle);
 
             // Do a little cleanup
-            GL.DetachShader(ShaderHandle, vertexShaderHandle);
-            GL.DetachShader(ShaderHandle, fragmentShaderHandle);
-            GL.DeleteShader(vertexShaderHandle);
-            GL.DeleteShader(fragmentShaderHandle);
+            GL.DetachShader(shaderHandle, _vertexShaderHandle);
+            GL.DetachShader(shaderHandle, _fragmentShaderHandle);
+            GL.DeleteShader(_vertexShaderHandle);
+            GL.DeleteShader(_fragmentShaderHandle);
         }
 
         public void Use() {
             //Logger.Log(new LogMessage(LogSeverity.Debug, $"Using shader {ShaderHandle} (vert: {vertexShaderHandle}, frag: {fragmentShaderHandle})"));
-            GL.UseProgram(ShaderHandle);
+            GL.UseProgram(shaderHandle);
         }
 
-        public void SetInt(string Name, int Value)
+        public void SetInt(string name, int value)
         {
-            int _location = GL.GetUniformLocation(ShaderHandle, Name);
+            int _location = GL.GetUniformLocation(shaderHandle, name);
 
-            GL.Uniform1(_location, Value);
+            GL.Uniform1(_location, value);
         }
 
-        private bool disposed = false;
-        protected virtual void Dispose(bool disposing) {
-            if (!disposed) {
-                GL.DeleteProgram(ShaderHandle);
+        private bool disposed;
 
-                disposed = true;
-            }
+        private void Dispose(bool disposing)
+        {
+            if (disposed) return;
+            GL.DeleteProgram(shaderHandle);
+
+            disposed = true;
         }
         public void Dispose() {
             if (this == BaseShader || this == MultipassShader) {
@@ -97,23 +94,20 @@ namespace uf.Rendering.Shaders
             GC.SuppressFinalize(this);
         }
 
-        private static Shader baseShader;
+        private static Shader _baseShader;
         /// <summary>
         /// Returns a basic shader that can be used
         /// </summary>
-        public static Shader BaseShader { get {
-            if (baseShader == null)
-                baseShader = new(ResourceManager.GetFile("default vertex shader"), ResourceManager.GetFile("default fragment shader"));
-            return baseShader;
-        } }
-        private static Shader multipassShader;
+        public static Shader BaseShader =>
+            _baseShader ??= new Shader(ResourceManager.GetFile("default vertex shader"),
+                ResourceManager.GetFile("default fragment shader"));
+
+        private static Shader _multipassShader;
         /// <summary>
         /// Returns a basic shader that can be used for multipass rendering
         /// </summary>
-        public static Shader MultipassShader { get {
-            if (multipassShader == null)
-                multipassShader = new(ResourceManager.GetFile("multipass vertex shader"), ResourceManager.GetFile("multipass fragment shader"));
-            return multipassShader;
-        } }
+        public static Shader MultipassShader =>
+            _multipassShader ??= new Shader(ResourceManager.GetFile("multipass vertex shader"),
+                ResourceManager.GetFile("multipass fragment shader"));
     }
 }

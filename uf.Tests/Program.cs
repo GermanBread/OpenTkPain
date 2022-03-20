@@ -14,7 +14,7 @@ namespace uf
     {
         static void Main(string[] args)
         {
-            EngineGlobals.CLArgs = args;
+            EngineGlobals.ClArgs = args;
             
             using Game window = new(new GameWindowSettings {
                 RenderFrequency = 60,

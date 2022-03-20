@@ -16,27 +16,27 @@ namespace uf.GameObject.Components
             Y = value.X;
             X = value.Y;
         } }
-        public Anchor(float X, float Y) {
-            this.X = X;
-            this.Y = Y;
+        public Anchor(float x, float y) {
+            this.X = x;
+            this.Y = y;
         }
-        public Anchor(Vector2 Position) {
-            Position.Deconstruct(out X, out Y);
+        public Anchor(Vector2 position) {
+            position.Deconstruct(out X, out Y);
         }
     }
     // Preset values
     public partial struct Anchor {
-        public static Anchor Center { get => new(0, 0); }
-        
-        public static Anchor Top { get => new(0, 1); }
-        public static Anchor Bottom { get => new(0, -1); }
-        public static Anchor Left { get => new(-1, 0); }
-        public static Anchor Right { get => new(1, 0); }
+        public static Anchor Center => new(0, 0);
 
-        public static Anchor TopLeft { get => new(-1, 1); }
-        public static Anchor TopRight { get => new(1, 1); }
-        public static Anchor BottomLeft { get => new(-1, -1); }
-        public static Anchor BottomRight { get => new(1, -1); }
+        public static Anchor Top => new(0, 1);
+        public static Anchor Bottom => new(0, -1);
+        public static Anchor Left => new(-1, 0);
+        public static Anchor Right => new(1, 0);
+
+        public static Anchor TopLeft => new(-1, 1);
+        public static Anchor TopRight => new(1, 1);
+        public static Anchor BottomLeft => new(-1, -1);
+        public static Anchor BottomRight => new(1, -1);
     }
     // Arithmetic
     public partial struct Anchor {

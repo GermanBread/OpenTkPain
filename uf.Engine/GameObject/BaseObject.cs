@@ -1,74 +1,63 @@
 // System
-using System;
-using System.IO;
-using System.Linq;
-using System.Collections.Generic;
+
 using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
 
 // OpenTK
 using OpenTK.Mathematics;
 using OpenTK.Graphics.OpenGL;
-using OpenTK.Windowing.Common;
-using OpenTK.Windowing.Desktop;
-using OpenTK.Windowing.GraphicsLibraryFramework;
-
 using uf.Rendering;
 using uf.Utility.Input;
 using uf.Utility.Scenes;
 using uf.Utility.Globals;
 using uf.Utility.Logging;
-using uf.Utility.Resources;
 using uf.Rendering.Shaders;
 using uf.Rendering.Textures;
-using uf.Rendering.Animations;
 using uf.GameObject.Components;
 
 namespace uf.GameObject
 {
-    public abstract class BaseObject
+    public class BaseObject
     {
-        public BaseObject(string scene)
+        protected BaseObject(string scene)
         {
             Scene = SceneManager.AddToScene(this, scene ?? "default");
             // Automatically initialise
-            if (Scene.IsLoaded) {
-                Init();
-                gameWindow?.InvalidateObjectsCache();
-            }
+            if (!Scene.IsLoaded) return;
+            Init();
+            GameWindow?.InvalidateObjectsCache();
         }
-        internal virtual void Init()
+        internal void Init()
         {
-            if (isInitialized) {
+            if (IsInitialized) {
                 Logger.Log(new LogMessage(LogSeverity.Warning, "Init() was called even though this object was already initialized!"));
                 return;
             }
 
-            initValues();
+            InitValues();
 
-            createObjects();
-            initObjects();
+            CreateObjects();
+            InitObjects();
 
-            isInitialized = true;
+            IsInitialized = true;
         }
-        internal protected virtual void initValues() {
-            if (Shader == null)
-                Shader = Shader.BaseShader;
+
+        private void InitValues() {
+            shader ??= Shader.BaseShader;
 
             // Set a default color value
             if (Color == default)
                 Color = Color4.White;
 
             // No texture? Create a blank one!
-            if (Texture == null)
-                Texture = Texture.Empty;
+            Texture ??= Texture.Empty;
 
-            gameWindow.MouseDown += (e) => {
+            GameWindow.MouseDown += (e) => {
                 if (IsHovered)
-                    Clicked.Invoke(new ClickedEventArgs(e.Button));
+                    Clicked?.Invoke(new ClickedEventArgs(e.Button));
             };
             
-            // Dummy event handler that prevents a nullref
+            // Dummy event handler that prevents a null-ref
             Clicked += (_) => { };
 
             Children.CollectionChanged += (_, e) => {
@@ -76,17 +65,19 @@ namespace uf.GameObject
                     foreach (var child in Children)
                         child.Parent = this;
                 else
-                    foreach (var formerChild in e.OldItems)
+                    foreach (var formerChild in e.OldItems!)
                         if (formerChild is BaseObject a)
                             a.Parent = null;
             };
         }
-        internal protected virtual void createObjects() {
+
+        private void CreateObjects() {
             vertexHandle = GL.GenVertexArray();
             elementBufferHandle = GL.GenBuffer();
             vertexBufferHandle = GL.GenBuffer();
         }
-        internal protected virtual void initObjects() {
+
+        private void InitObjects() {
             GL.BindVertexArray(vertexHandle);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, elementBufferHandle);
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, vertexBufferHandle);
@@ -104,13 +95,13 @@ namespace uf.GameObject
         /// <summary>
         /// Update the object's state
         /// </summary>
-        internal virtual void Update() {
+        internal void Update() {
             if (IsHoverable && InputManager.HoveredObject == this)
                 IsHovered = true;
             else
                 IsHovered = false;
         }
-        internal protected virtual void preDraw() {
+        internal void PreDraw() {
             // Small optimization: Don't perform a draw call if the object is 100% transparent
             if (Color.A == 0)
                 return;
@@ -121,9 +112,9 @@ namespace uf.GameObject
                 GL.Enable(EnableCap.Blend);
             //}
 
-            Shader.Use();
+            shader.Use();
         }
-        internal protected virtual void postDraw() {
+        internal void PostDraw() {
             GL.Disable(EnableCap.Blend);
         }
         /// <summary>
@@ -136,14 +127,14 @@ namespace uf.GameObject
                 return;
             }
             
-            preDraw();
+            PreDraw();
 
             var _data = transform.CompileData(Color, Scene);
 
-            for (int i = 0; i < _data.Length; i++) {
-                var _uv = Texture.GetUV();
-                _data[i].UV *= _uv.Item2 - _uv.Item1;
-                _data[i].UV += _uv.Item1;
+            for (var i = 0; i < _data.Length; i++) {
+                var (_vector2, _item2) = Texture.GetUV();
+                _data[i].UV *= _item2 - _vector2;
+                _data[i].UV += _vector2;
             }
 
             GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.DynamicDraw);
@@ -151,16 +142,16 @@ namespace uf.GameObject
 
             GL.DrawElements(PrimitiveType.Triangles, transform.Indices.Length, DrawElementsType.UnsignedInt, 0);
 
-            postDraw();
+            PostDraw();
         }
-        internal virtual void MultipassDraw(Color4 Override)
+        internal void MultiPassDraw(Color4 @override)
         {
             if (!IsInitialized) {
                 Logger.Log(new LogMessage(LogSeverity.Error, "Not initialized; refusing to render object! Was Init() not called?"));
                 return;
             }
             
-            var _data = transform.CompileData(Override, Scene);
+            var _data = transform.CompileData(@override, Scene);
 
             GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.DynamicDraw);
             GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.DynamicDraw);
@@ -170,34 +161,37 @@ namespace uf.GameObject
         /// <summary>
         /// Frees any resources used by this Object and preps it for reinitialization
         /// </summary>
-        public virtual void Dispose()
+        public void Dispose()
         {
             // Jokes on you, we're not actually disposing this object
             GL.DeleteVertexArray(vertexHandle);
             GL.DeleteBuffer(vertexBufferHandle);
             GL.DeleteBuffer(elementBufferHandle);
-            isInitialized = false;
+            IsInitialized = false;
         }
         /// <summary>
         /// Get the scene this object is located in
         /// </summary>
-        public Scene Scene { get => scene; set {
-            gameWindow?.InvalidateObjectsCache();
+        public Scene Scene { get => scene;
+            private init {
+            GameWindow?.InvalidateObjectsCache();
             scene = value;
         } }
-        private Scene scene;
+        private readonly Scene scene;
         /// <summary>
         /// Alias to EngineGlobals.Window
         /// </summary>
-        protected static BaseGame gameWindow { get => EngineGlobals.Window; }
+        private static BaseGame GameWindow => EngineGlobals.Window;
+
         /// <summary>
         /// Contains all information related to size, position and rotation
         /// </summary>
-        protected Transform transform = new();
+        protected readonly Transform transform = new();
         /// <summary>
         /// Alias to transform.Skew
         /// </summary>
-        public Vector2 Skew { get => transform.Skew; set => transform.Skew = value; }
+        public Vector2 Skew {
+            set => transform.Skew = value; }
         /// <summary>
         /// Alias to transform.Size
         /// </summary>
@@ -233,7 +227,7 @@ namespace uf.GameObject
                     // And of course, if the parent is already null, don't bother wasting CPU cycles
                     if (transform.ParentObject != null && transform.ParentObject.Children.Contains(this))
                         transform.ParentObject.Children.Remove(this);
-                    transform.ParentObject = value;
+                    transform.ParentObject = null;
                 } else {
                     // If we set the parent after, the code will fail too.
                     transform.ParentObject = value;
@@ -245,15 +239,15 @@ namespace uf.GameObject
         /// <summary>
         /// Draw order, smaller = drawn earlier
         /// </summary>
-        public int Layer { get => layer; set {
-            gameWindow?.InvalidateObjectsCache();
+        public int Layer { get => layer; init {
+            GameWindow?.InvalidateObjectsCache();
             layer = value;
         } }
-        private int layer = int.MinValue;
+        private readonly int layer = int.MinValue;
         /// <summary>
         /// The shader currently in use
         /// </summary>
-        public Shader Shader;
+        private Shader shader;
         /// <summary>
         /// Default color of the object
         /// </summary>
@@ -266,16 +260,16 @@ namespace uf.GameObject
         /// If a cursor is hovering above this object
         /// </summary>
         public bool IsHovered { get; private set; }
-        public bool IsHoverable { get; set; } = false;
+        public bool IsHoverable { get; init; }
         public delegate void OnClicked(ClickedEventArgs e);
         /// <summary>
         /// Fired when this object is clicked
         /// </summary>
         public event OnClicked Clicked;
-        public bool IsInitialized { get => isInitialized; }
-        protected bool isInitialized = false;
-        protected int vertexHandle;
-        protected int vertexBufferHandle;
-        protected int elementBufferHandle;
+        public bool IsInitialized { get; private set; }
+
+        private int vertexHandle;
+        private int vertexBufferHandle;
+        private int elementBufferHandle;
     }
 }

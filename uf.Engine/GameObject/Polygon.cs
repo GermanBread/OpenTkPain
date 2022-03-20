@@ -1,5 +1,5 @@
 // System
-using System;
+
 using System.Collections.Generic;
 
 // OpenTK
@@ -23,7 +23,7 @@ namespace uf.GameObject {
                 _verts.Add(new Vector2(-1, 1) * _rot);
             }
             transform.Vertices = _verts.ToArray();
-            transform.UV = _verts.ToArray();
+            transform.Uv = _verts.ToArray();
             
             List<Vector3i> _indices = new();
             for (int i = 1; i <= Corners; i++) {

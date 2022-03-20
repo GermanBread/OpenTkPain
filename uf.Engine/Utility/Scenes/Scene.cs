@@ -1,26 +1,24 @@
 // System
-using System;
+
 using System.Collections.Generic;
-
-// OpenTK
 using OpenTK.Mathematics;
-
 using uf.GameObject;
+// OpenTK
 
 namespace uf.Utility.Scenes
 {
     public class Scene
     {
-        public string SceneName;
-        public List<BaseObject> GameObjects;
+        public readonly string SceneName;
+        public readonly List<BaseObject> GameObjects;
         public bool IsLoaded { get; private set; }
         public Vector2 Position = Vector2.Zero;
         public Vector2 Scale = Vector2.One;
         public float Rotation = 0;
         public Scene(string sceneName, List<BaseObject> gameObjects) {
-            this.SceneName = sceneName;
-            this.GameObjects = gameObjects;
-            this.IsLoaded = false;
+            SceneName = sceneName;
+            GameObjects = gameObjects;
+            IsLoaded = false;
         }
         public void Load() {
             if (IsLoaded)

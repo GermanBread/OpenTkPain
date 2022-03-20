@@ -5,9 +5,9 @@ namespace uf.GameObject
 {
     public struct ClickedEventArgs
     {
-        public ClickedEventArgs(MouseButton Button) {
-            MouseButton = Button;
+        public ClickedEventArgs(MouseButton button) {
+            MouseButton = button;
         }
-        public MouseButton MouseButton;
+        public readonly MouseButton MouseButton;
     }
 }

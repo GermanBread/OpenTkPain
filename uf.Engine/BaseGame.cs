@@ -1,38 +1,36 @@
 // System
-using System;
-using System.Linq;
-using System.Reflection;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
-// Open TK
-using OpenTK.Mathematics;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text.RegularExpressions;
+using ManagedBass;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
-
-// BASS
-using ManagedBass;
-
-// Unsigned Framework
 using uf.GameObject;
-using uf.Utility.Input;
+using uf.Rendering.Textures;
 using uf.Utility.Audio;
-using uf.Utility.Scenes;
+using uf.Utility.Debugging;
 using uf.Utility.Globals;
+using uf.Utility.Input;
 using uf.Utility.Logging;
 using uf.Utility.Resources;
-using uf.Utility.Debugging;
-using uf.Rendering.Textures;
+using uf.Utility.Scenes;
+// Open TK
+
+// BASS
+
+// Unsigned Framework
 
 namespace uf
 {
     public abstract class BaseGame : GameWindow
     {
-        public BaseGame(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings) {
+        protected BaseGame(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings) {
             Logger.Log(new LogMessage(LogSeverity.Info, "Unsigned Framework - Made by GermanBread#9077"));
 
             #if DEBUG
@@ -50,7 +48,7 @@ namespace uf
 
             #if DEBUG
             // Prepare GL callbacks
-            GLCallback.Init();
+            GlCallback.Init();
             #endif
 
             // We will use this buffer for basically everything we do
@@ -75,27 +73,24 @@ namespace uf
             AudioManager.Init();
 
             // ALT + ENTER, F11 = toggle fullscreen
-            KeyDown += (KeyboardKeyEventArgs e) => {
-                if ((e.Alt && e.Key == Keys.Enter) || e.Key == Keys.F11) {
-                    if (WindowState == WindowState.Fullscreen)
-                        WindowState = WindowState.Normal;
-                    else
-                        WindowState = WindowState.Fullscreen;
-                }
+            KeyDown += e =>
+            {
+                if ((!e.Alt || e.Key != Keys.Enter) && e.Key != Keys.F11) return;
+                WindowState = WindowState == WindowState.Fullscreen ? WindowState.Normal : WindowState.Fullscreen;
             };
             // ESC, CONTROL + Q = quit
-            KeyDown += (KeyboardKeyEventArgs e) => {
+            KeyDown += e => {
                 if ((e.Command || e.Control) && e.Key == Keys.Q)
                     Close();
                 if (e.Key == Keys.Escape)
                     Close();
             };
 
-            FocusedChanged += (FocusedChangedEventArgs e) => {
-                if (e.IsFocused)
-                    Logger.Log(new LogMessage(LogSeverity.Debug, "Focus changed: Focused"));
-                else
-                    Logger.Log(new LogMessage(LogSeverity.Debug, "Focus changed: Unfocused"));
+            FocusedChanged += e =>
+            {
+                Logger.Log(e.IsFocused
+                    ? new LogMessage(LogSeverity.Debug, "Focus changed: Focused")
+                    : new LogMessage(LogSeverity.Debug, "Focus changed: Unfocused"));
             };
 
             try {
@@ -117,7 +112,7 @@ namespace uf
         protected override void OnRenderFrame(FrameEventArgs e) {
             base.OnRenderFrame(e);
 
-            frameDelta = (float)e.Time;
+            FrameDelta = (float)e.Time;
 
             #if DEBUG
             {
@@ -125,7 +120,8 @@ namespace uf
                 string _matchString = "";
                 if (_match.Success)
                     _matchString = _match.Value;
-                Title = Title.Remove(Title.IndexOf(_matchString), _match.Length) + $" [ render {MathF.Round(1f / frameDelta)}, update {MathF.Round(1f / updateDelta)} ]";
+                Title = Title.Remove(Title.IndexOf(_matchString, StringComparison.Ordinal), _match.Length) +
+                        $" [ render {MathF.Round(1f / FrameDelta)}, update {MathF.Round(1f / UpdateDelta)} ]";
             }
             #endif
 
@@ -171,8 +167,6 @@ namespace uf
                 go.Draw();
 
             Context.SwapBuffers();
-
-            return;
         }
 
         // Pretty much equal to FixedUpdate in Unity
@@ -181,13 +175,14 @@ namespace uf
 
             if (SceneLoadQueue.Any()) {
                 Logger.Log(new LogMessage(LogSeverity.Debug, "Executing Scene queue"));
-                for (int i = 0; i < SceneLoadQueue.Count; i++) {
-                    SceneManager.OperateOnScene(SceneLoadQueue[i]);
+                foreach (var _t in SceneLoadQueue)
+                {
+                    SceneManager.OperateOnScene(_t);
                 }
                 SceneLoadQueue.Clear();
             }
 
-            updateDelta = (float)e.Time;
+            UpdateDelta = (float)e.Time;
             
             // Loop audio when applicable
             if (IsFocused || !PauseOnLostFocus) {
@@ -228,42 +223,45 @@ namespace uf
             GL.Viewport(0, 0, e.Width, e.Height);
             Logger.Log(new LogMessage(LogSeverity.Debug, $"Resized window to: {e.Size}"));
         }
-        
-        protected static void Panic(Exception ex = default) {
+
+        private static void Panic(Exception ex = default) {
             StackTrace _st = new();
-            StackFrame _sf = _st.GetFrame(1);
-            Logger.Log(new LogMessage(LogSeverity.Critical, $"OVER HERE! Panic has been invoked by {_sf.GetMethod().Name}.", ex ?? new Exception("No exception has been provided, look at the messages above")));
+            var _sf = _st.GetFrame(1);
+            Logger.Log(new LogMessage(LogSeverity.Critical,
+                $"OVER HERE! Panic has been invoked by {_sf?.GetMethod()?.Name}.",
+                ex ?? new Exception("No exception has been provided, look at the messages above")));
             Environment.Exit(1);
         }
         private static bool IsWINE()
          => OperatingSystem.IsWindows() && Process.GetProcessesByName("winlogon").Length == 0;
         public bool InvalidateObjectsCache() => invalidationQueued = true;
 
-        public abstract void Start();
-        public abstract void Render();
-        public abstract void Update();
-        public abstract void Stop();
+        protected abstract void Start();
+        protected abstract void Render();
+        protected abstract void Update();
+        protected abstract void Stop();
 
         // Variables
-        private float frameDelta;
-        private float updateDelta;
         private int arrayBufferHandle;
         // Null = invalidated list. Null because an object or a scene got disabled, enabled, deleted or created.
-        private List<BaseObject> drawableObjects = null;
-        private bool invalidationQueued = false;
+        private List<BaseObject> drawableObjects;
+        private bool invalidationQueued;
         /// <summary>
         /// Time it took for the last frame to draw, measured in seconds
         /// </summary>
-        public float FrameDelta { get => frameDelta; }
+        protected float FrameDelta { get; private set; }
+
         /// <summary>
         /// Time it took for FixedUpdate to complete, time in seconds
         /// </summary>
-        public float UpdateDelta { get => updateDelta; }
+        private float UpdateDelta { get; set; }
+
         /// <summary>
         /// Background color used for rendering the underlying canvas
         /// </summary>
-        public Color4 FillColor { get; set; }
-        public bool PauseOnLostFocus = false;
-        readonly internal List<(Scene, SceneAction)> SceneLoadQueue = new();
+        protected Color4 FillColor { get; set; }
+
+        protected bool PauseOnLostFocus = false;
+        internal readonly List<(Scene, SceneAction)> SceneLoadQueue = new();
     }
 }

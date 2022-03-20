@@ -1,5 +1,3 @@
-using System.Net.Sockets;
-using System.Runtime.InteropServices;
 // System
 using System;
 using System.IO;
@@ -17,76 +15,79 @@ namespace uf.Utility.Resources
         /// <summary>
         /// Retrieves a resource. If the specified resource does not exist, the parameter will be treated as a file path and subsequently LoadResource will be called.
         /// </summary>
-        public static Resource GetFile(string Name) {
-            var _firstResult = resources.FirstOrDefault(x => x.Name == Name);
+        public static Resource GetFile(string name) {
+            var _firstResult = resources.FirstOrDefault(x => x.Name == name);
             if (_firstResult == default(Resource))
                 // Resource not present in List? Load it!
-                LoadResource(Name, null);
-            var _output = resources.FirstOrDefault(x => x.Name == Name);
+                LoadResource(name, null);
+            var _output = resources.FirstOrDefault(x => x.Name == name);
             return _output;
         }
         
-        public static void LoadFile(string Name, string FilePath) {
-            Logger.Log(new LogMessage(LogSeverity.Debug, $"Loading file {Name}, path {FilePath ?? "null"}"));
+        public static void LoadFile(string name, string filePath) {
+            Logger.Log(new LogMessage(LogSeverity.Debug, $"Loading file {name}, path {filePath ?? "null"}"));
             
-            FilePath ??= Name;
+            filePath ??= name;
 
-            if (File.Exists(FilePath)) {
-                resources.Add(new Resource(Name, FilePath, new StreamReader(FilePath)));
+            if (File.Exists(filePath)) {
+                resources.Add(new Resource(name, filePath, new StreamReader(filePath)));
                 goto End;
             }
 
-            var _workdirPath = Path.Combine(Environment.CurrentDirectory, FilePath);
-            var _bindirPath = Path.Combine(AppContext.BaseDirectory, FilePath);
+            if (filePath != null)
+            {
+                var _workdirPath = Path.Combine(Environment.CurrentDirectory, filePath);
+                var _bindirPath = Path.Combine(AppContext.BaseDirectory, filePath);
             
-            if (File.Exists(_workdirPath)) {
-                resources.Add(new Resource(Name, _workdirPath, new StreamReader(_bindirPath)));
-            } else if (File.Exists(_bindirPath)) {
-                resources.Add(new Resource(Name, _bindirPath, new StreamReader(_bindirPath)));
-            } else {
-                Logger.Log(new LogMessage(LogSeverity.Error, $"Failed to load file {Name}, path {FilePath ?? "null"}"));
+                if (File.Exists(_workdirPath)) {
+                    resources.Add(new Resource(name, _workdirPath, new StreamReader(_bindirPath)));
+                } else if (File.Exists(_bindirPath)) {
+                    resources.Add(new Resource(name, _bindirPath, new StreamReader(_bindirPath)));
+                } else {
+                    Logger.Log(new LogMessage(LogSeverity.Error, $"Failed to load file {name}, path {filePath}"));
+                }
             }
-            
+
             End:
-            Logger.Log(new LogMessage(LogSeverity.Debug, $"Loaded file {Name}, path {FilePath ?? "null"}"));
+            Logger.Log(new LogMessage(LogSeverity.Debug, $"Loaded file {name}, path {filePath ?? "null"}"));
         }
 
-        public static void LoadResource(string Name, string ResourcePath) {
-            Logger.Log(new LogMessage(LogSeverity.Debug, $"Loading resource {Name}, path {ResourcePath ?? "null"}"));
+        public static void LoadResource(string name, string resourcePath) {
+            Logger.Log(new LogMessage(LogSeverity.Debug, $"Loading resource {name}, path {resourcePath ?? "null"}"));
 
-            if (!(ResourcePath ?? Name).EndsWith(".ufr")) {
-                Logger.Log(new LogMessage(LogSeverity.Warning, $"Falling back to file loading for file {Name}, path {ResourcePath ?? "null"}. This file is not a resource file (.ufr)"));
-                LoadFile(Name, ResourcePath);
+            if (!(resourcePath ?? name).EndsWith(".ufr")) {
+                Logger.Log(new LogMessage(LogSeverity.Warning,
+                    $"Falling back to file loading for file {name}, path {resourcePath ?? "null"}. This file is not a resource file (.ufr)"));
+                LoadFile(name, resourcePath);
                 return;
             }
 
-            ResourcePath ??= Name;
+            resourcePath ??= name;
 
-            if (File.Exists(ResourcePath)) {
-                addResources( ResourcePath);
+            if (File.Exists(resourcePath)) {
+                AddResources( resourcePath);
                 goto End;
             }
 
-            var _workdirPath = Path.Combine(Environment.CurrentDirectory, ResourcePath);
-            var _bindirPath = Path.Combine(AppContext.BaseDirectory, ResourcePath);
+            var _workdirPath = Path.Combine(Environment.CurrentDirectory, resourcePath ?? string.Empty);
+            var _bindirPath = Path.Combine(AppContext.BaseDirectory, resourcePath ?? string.Empty);
             
             if (File.Exists(_workdirPath)) {
-                var _file = _workdirPath;
-                addResources(_file);
+                AddResources(_workdirPath);
             } else if (File.Exists(_bindirPath)) {
-                addResources(_bindirPath);
+                AddResources(_bindirPath);
             } else {
-                Logger.Log(new LogMessage(LogSeverity.Error, $"Failed to load resource {Name}, path {ResourcePath ?? "null"}"));
+                Logger.Log(new LogMessage(LogSeverity.Error, $"Failed to load resource {name}, path {resourcePath}"));
             }
             
             End:
-            Logger.Log(new LogMessage(LogSeverity.Debug, $"Loaded resource {Name}, path {ResourcePath ?? "null"}"));
+            Logger.Log(new LogMessage(LogSeverity.Debug, $"Loaded resource {name}, path {resourcePath}"));
 
-            static void addResources(string Path) {
-                using var _zipStream = new StreamReader(Path);
+            static void AddResources(string path) {
+                using var _zipStream = new StreamReader(path);
                 using var _zipArchive = new ZipArchive(_zipStream.BaseStream);
                 foreach (var item in _zipArchive.Entries)
-                    resources.Add(new Resource(item.Name, Path, new StreamReader(item.Open())));
+                    resources.Add(new Resource(item.Name, path, new StreamReader(item.Open())));
             }
         }
     }

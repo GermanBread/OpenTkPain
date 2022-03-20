@@ -13,7 +13,7 @@ using uf.Rendering.Textures;
 
 namespace uf.Rendering.Text {
     public class Text : BaseObject {
-        public Text(string Scene) : base(Scene) {
+        public Text(string scene) : base(scene) {
 
         }
 
@@ -23,7 +23,7 @@ namespace uf.Rendering.Text {
                 return;
             }
             
-            preDraw();
+            PreDraw();
 
             // returned vectors from Texture.GetUV() should not be altered!
 
@@ -32,12 +32,12 @@ namespace uf.Rendering.Text {
             float step = 0;
             int wrap = 1; // Overflow wrap to next line (if possible). 1 = not wrapped yet
 
-            for (int i = 0; i < content.Length; i++) {
-                if (!texes.ContainsKey(content[i])) {
+            for (int i = 0; i < Content.Length; i++) {
+                if (!texes.ContainsKey(Content[i])) {
                     // TODO: Generate texture
                 }
                 
-                var uv = texes[content[i]].GetUV();
+                var uv = texes[Content[i]].GetUV();
                 var charSize = new Vector2(uv.Item2.X - uv.Item1.X, uv.Item2.Y - uv.Item1.Y);
 
                 // Check if we will overflow horizontally
@@ -94,21 +94,18 @@ namespace uf.Rendering.Text {
 
             GL.DrawElements(PrimitiveType.Triangles, transform.Indices.Length, DrawElementsType.UnsignedInt, 0);
 
-            postDraw();
+            PostDraw();
         }
 
-        public string Content { get => content; set {
-            // Update vertices here. If I were to pass arrays to the shader I should use fixed-size arrays?
-            content = value;
-        } }
+        public string Content { get; init; } = "Placeholder text";
 
         /// <summary>
         /// Either the name of a font or the path to a font file
         /// </summary>
         public string Font = "good times rg.ttf";
-        public float FontSize = 50;
+
+        private const float FontSize = 50;
         public Color4 FontColor = Color4.Black;
-        private string content = "Placeholder text";
         private static readonly Dictionary<char, Texture> texes = new();
     }
 }
