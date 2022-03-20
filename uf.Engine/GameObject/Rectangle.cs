@@ -14,7 +14,7 @@ namespace uf.GameObject
                 new Vector2( 1,  1),
                 new Vector2( 1, -1)
             };
-            transform.UV = new Vector2[] {
+            transform.Uv = new Vector2[] {
                 new Vector2(0, 0),
                 new Vector2(0, 1),
                 new Vector2(1, 1),

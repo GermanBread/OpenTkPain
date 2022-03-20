@@ -14,68 +14,70 @@ namespace uf.Utility.Audio
 {
     public static class AudioManager
     {
-        private static bool isInitialized;
-        public static bool Ready { get => isInitialized; }
-        public static List<AudioClip> AudioClips { get => clips; }
+        public static bool Ready { get; private set; }
+        public static IEnumerable<AudioClip> AudioClips => clips;
         private static readonly List<AudioClip> clips = new();
-        public static float GlobalVolume { get => (float)Bass.GlobalStreamVolume / 10000f; set => Bass.GlobalStreamVolume = (int)Math.Round(value * 10000f); }
-        public static void SetVolume(string Group, float Volume) {
-            foreach (var clip in clips.Where(x => x.Group == Group)) {
-                clip.Volume = Volume;
+        public static float GlobalVolume { get => Bass.GlobalStreamVolume / 10000f; set => Bass.GlobalStreamVolume = (int)Math.Round(value * 10000f); }
+        public static void SetVolume(string @group, float volume) {
+            foreach (var clip in clips.Where(x => x.Group == @group)) {
+                clip.Volume = volume;
             }
         }
-        public static AudioClip GetClip(string ClipName) {
-            return clips.FirstOrDefault(x => x.Name == ClipName);
+        public static AudioClip GetClip(string clipName) {
+            return clips.FirstOrDefault(x => x.Name == clipName);
         }
-        public static void DeleteClip(string ClipName) {
+        public static void DeleteClip(string clipName) {
             // There should be an easier way to do this, right? Apparently not.
-            clips.Remove(clips.FirstOrDefault(x => x.Name == ClipName));
+            clips.Remove(clips.FirstOrDefault(x => x.Name == clipName));
         }
-        public static void DeleteClip(AudioClip Clip) {
-            clips.Remove(Clip);
+        public static void DeleteClip(AudioClip clip) {
+            clips.Remove(clip);
         }
         /// <summary>
         /// Creates an audio clip and returns a reference
         /// </summary>
         /// <returns>Reference to the audio clip</returns>
-        public static AudioClip CreateClip(string ClipName, string SoundFilePath) {
-            if (!isInitialized)
+        public static AudioClip CreateClip(string clipName, string soundFilePath) {
+            if (!Ready)
                 return default;
-            var _clip = new AudioClip(ClipName);
-            _clip.Open(SoundFilePath);
+            var _clip = new AudioClip(clipName);
+            _clip.Open(soundFilePath);
             clips.Add(_clip);
             return _clip;
         }
-        public static AudioClip CreateClip(Resource Resource) {
-            if (!isInitialized)
+        public static AudioClip CreateClip(Resource resource) {
+            if (!Ready)
                 return default;
-            AudioClip _clip;
-            if (Resource == null)
+            if (resource == null)
                 return null;
-            _clip = new AudioClip(Resource.Name);
-            _clip.Open(Resource.Path);
+            var _clip = new AudioClip(resource.Name);
+            _clip.Open(resource.Path);
             clips.Add(_clip);
             return _clip;
         }
         public static void Init() {
-            if (isInitialized)
+            if (Ready)
                 return;
             try {
                 Bass.Init();
-                isInitialized = true;
-            } catch (DllNotFoundException dex) {
-                if (!File.Exists("Bass.dll"))
-                    Logger.Log(new LogMessage(LogSeverity.Warning, "Bass.dll not found. It should be included but apparently isn't. You won't hear audio.\n\tYou can also just download the .dlls from here: (https://www.un4seen.com/) and install bass.dll in this folder", dex));
-                else
-                    Logger.Log(new LogMessage(LogSeverity.Warning, "Bass.dll exists but could not be loaded for whatever reason that might be. You won't hear audio.\n\tYou can try and fix this by copying Bass.dll into either C:\\Windows\\System32 or /lib respectively", dex));
+                Ready = true;
+            } catch (DllNotFoundException dex)
+            {
+                Logger.Log(!File.Exists("Bass.dll")
+                    ? new LogMessage(LogSeverity.Warning,
+                        "Bass.dll not found. It should be included but apparently isn't. You won't hear audio.\n\tYou can also just download the .dlls from here: (https://www.un4seen.com/) and install bass.dll in this folder",
+                        dex)
+                    : new LogMessage(LogSeverity.Warning,
+                        "Bass.dll exists but could not be loaded for whatever reason that might be. You won't hear audio.\n\tYou can try and fix this by copying Bass.dll into either C:\\Windows\\System32 or /lib respectively",
+                        dex));
             }
         }
         public static void Dispose() {
-            if (!isInitialized)
+            if (!Ready)
                 return;
             Bass.Stop();
             Bass.Free();
-            isInitialized = false;
+            Ready = false;
         }
     }
 }

@@ -48,9 +48,10 @@ namespace uf
         };
         List<Rectangle> visualisers;
         float counter = 0;
-        public override void Start() {
-            PauseOnLostFocus = !EngineGlobals.CLArgs.Contains("--no-pause");
-            if (EngineGlobals.CLArgs.Contains("--no-audio"))
+
+        protected override void Start() {
+            PauseOnLostFocus = !EngineGlobals.ClArgs.Contains("--no-pause");
+            if (EngineGlobals.ClArgs.Contains("--no-audio"))
                 AudioManager.GlobalVolume = 0;
             
             Logger.Log(new LogMessage(LogSeverity.Debug, "Logging is cool"));
@@ -160,7 +161,7 @@ namespace uf
         }
 
         //Vector2 parallax;
-        public override void Render() {
+        protected override void Render() {
             counter += FrameDelta;
             
             //parallax = Vector2.Lerp(parallax, Camera.ScreenToWorldSpace(MousePosition), 2.5f * FrameDelta);
@@ -215,10 +216,12 @@ namespace uf
                 visualisers[i].Size = new Vector2(visualisers[i].Size.X, 5f + _fft[i * (_fft.Length / visualisers.Count)] * 100f);
             }
         }
-        public override void Update() {
+
+        protected override void Update() {
 
         }
-        public override void Stop() {
+
+        protected override void Stop() {
 
         }
     }

@@ -1,4 +1,3 @@
-using System.Drawing;
 // System
 using System;
 using System.Collections.Generic;
@@ -14,51 +13,50 @@ namespace uf.Rendering.Animations
 {
     public class Animation
     {
-        public Animation(string Name, Keyframe[] Keyframes, BaseObject GameObject, bool IsLooping) {
-            this.Name = Name;
-            this.Keyframes.AddRange(Keyframes);
-            target = GameObject;
-            looping = IsLooping;
+        public Animation(string name, IEnumerable<Keyframe> keyframes, BaseObject gameObject, bool isLooping) {
+            this.keyframes.AddRange(keyframes);
+            this.name = name;
+            target = gameObject;
+            looping = isLooping;
         }
-        public List<Keyframe> Keyframes = new();
-        public string Name { get; init; }
-        public DateTime StartTime { get => startTime; }
 
-        private DateTime startTime;
-        private readonly bool looping = false;
+        private readonly List<Keyframe> keyframes = new();
+        private DateTime StartTime { get; set; }
+
+        private readonly bool looping;
+        private readonly string name;
         private readonly BaseObject target;
         private readonly Tweener tweener = new();
-        private int currentKeyframe = 0;
-        private GameObjectdata data;
+        private int currentKeyframe;
+        private GameObjectData data;
         // TODO: Not completely done, there should be an option to ignore values
         // FIXME: Currently sends objects into the aether
         public void Play() {
-            startTime = DateTime.Now;
-            target.Position = Keyframes[currentKeyframe].Position;
-            target.Rotation = Keyframes[currentKeyframe].Rotation;
-            target.Size = Keyframes[currentKeyframe].Size;
-            target.Color = Keyframes[currentKeyframe].Color;
-            target.Anchor = Keyframes[currentKeyframe].Anchor;
-            updateTween();
-            EngineGlobals.Window.UpdateFrame += (_) => update();
+            StartTime = DateTime.Now;
+            target.Position = keyframes[currentKeyframe].Position;
+            target.Rotation = keyframes[currentKeyframe].Rotation;
+            target.Size = keyframes[currentKeyframe].Size;
+            target.Color = keyframes[currentKeyframe].Color;
+            target.Anchor = keyframes[currentKeyframe].Anchor;
+            UpdateTween();
+            EngineGlobals.Window.UpdateFrame += (_) => Update();
         }
         public void Stop() {
             tweener.Cancel();
         }
-        private void update() {
-            tweener.Update((float)DateTime.Now.Subtract(startTime).TotalSeconds);
+        private void Update() {
+            tweener.Update((float)DateTime.Now.Subtract(StartTime).TotalSeconds);
             data.ApplyTo(target);
-            if (currentKeyframe + 1 < Keyframes.Count)
-                if (DateTime.Now.Subtract(startTime) >= Keyframes[currentKeyframe + 1].Timing) {
-                    currentKeyframe++;
-                    updateTween();
-                }
+            if (currentKeyframe + 1 >= keyframes.Count) return;
+            if (DateTime.Now.Subtract(StartTime) < keyframes[currentKeyframe + 1].Timing) return;
+            currentKeyframe++;
+            UpdateTween();
         }
-        private void updateTween() {
-            if (currentKeyframe >= Keyframes.Count - 1)
+        private void UpdateTween() {
+            if (currentKeyframe >= keyframes.Count - 1)
                 return;
-            data = new GameObjectdata(Keyframes[currentKeyframe]);
-            var _raw = new GameObjectdata(Keyframes[currentKeyframe + 1]);
+            data = new GameObjectData(keyframes[currentKeyframe]);
+            var _raw = new GameObjectData(keyframes[currentKeyframe + 1]);
 
             tweener.Tween(data, new {
                     _raw.SkewX,
@@ -75,7 +73,7 @@ namespace uf.Rendering.Animations
                     _raw.PositionX,
                     _raw.PositionY
                 }, 
-                (float)Keyframes[currentKeyframe + 1].Timing.Subtract(Keyframes[currentKeyframe].Timing).TotalSeconds
+                (float)keyframes[currentKeyframe + 1].Timing.Subtract(keyframes[currentKeyframe].Timing).TotalSeconds
             ).Repeat(looping ? -1 : 0);
         }
     }

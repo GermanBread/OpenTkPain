@@ -9,7 +9,7 @@ using uf.Utility.Logging;
 
 namespace uf.Utility.Debugging
 {
-    public class GLCallback
+    public static class GlCallback
     {
         public static void Init() {
             GCHandle.Alloc(debugProcCallback);
@@ -18,10 +18,10 @@ namespace uf.Utility.Debugging
             GL.Enable(EnableCap.DebugOutput);
             GL.Enable(EnableCap.DebugOutputSynchronous);
         }
-        private static readonly DebugProc debugProcCallback = debugCallback;
-        private static void debugCallback(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam) {
-            string _messageString = Marshal.PtrToStringAnsi(message, length);
-            string _messageSource = source.ToString().Remove(0, 11);
+        private static readonly DebugProc debugProcCallback = DebugCallback;
+        private static void DebugCallback(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr userParam) {
+            var _messageString = Marshal.PtrToStringAnsi(message, length);
+            var _messageSource = source.ToString().Remove(0, 11);
 
             switch (severity) {
                 case DebugSeverity.DebugSeverityHigh:
@@ -37,6 +37,8 @@ namespace uf.Utility.Debugging
                 case DebugSeverity.DontCare:
                     Logger.Log(new LogMessage(LogSeverity.Info, _messageString, null, _messageSource));
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(severity), severity, null);
             }
         }
     }

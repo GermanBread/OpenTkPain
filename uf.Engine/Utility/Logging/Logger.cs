@@ -10,12 +10,12 @@ namespace uf.Utility.Logging
 {
     public static class Logger
     {
-        public static async Task LogAsync(LogMessage Message) {
+        private static async Task LogAsync(LogMessage message) {
             // Get the output stream
-            TextWriter cout = Console.Out;
+            var cout = Console.Out;
             
             // Determine the color to use
-            switch (Message.Severity)
+            switch (message.Severity)
             {
                 case LogSeverity.Critical:
                 case LogSeverity.Error:
@@ -37,28 +37,30 @@ namespace uf.Utility.Logging
                     // I had to flip DEBUG and VERBOSE
                     Console.ForegroundColor = ConsoleColor.DarkGray;
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
-            await cout.WriteAsync($"[{Message.Severity, 8}] ");
+            await cout.WriteAsync($"[{message.Severity, 8}] ");
             Console.ResetColor();
 
             // Source
-            await cout.WriteAsync(Message.Source);
+            await cout.WriteAsync(message.Source);
 
             // Spacer
             await cout.WriteAsync(": ");
 
             // Message
-            await cout.WriteLineAsync(Message.Message);
+            await cout.WriteLineAsync(message.Message);
 
             // This exception gets displayed on a newline
-            if (Message.Exception != null) await cout.WriteLineAsync(Message.Exception.ToString());
+            if (message.Exception != null) await cout.WriteLineAsync(message.Exception.ToString());
 
             cout.Close();
-            cout.Dispose();
+            await cout.DisposeAsync();
         }
         
-        public static void Log(LogMessage Message) {
-            LogAsync(Message).Wait();
+        public static void Log(LogMessage message) {
+            LogAsync(message).Wait();
         }
     }
 }

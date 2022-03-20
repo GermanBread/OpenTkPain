@@ -1,4 +1,6 @@
 // System
+
+using System;
 using System.Linq;
 using System.Collections.Generic;
 
@@ -10,29 +12,29 @@ namespace uf.Utility.Scenes
     public static class SceneManager
     {
         // Adding objects to scenes
-        public static Scene AddToScene(BaseObject GameObject, string SceneName) {
-            var _scene = GetScene(SceneName);
-            _scene.GameObjects.Add(GameObject);
+        public static Scene AddToScene(BaseObject gameObject, string sceneName) {
+            var _scene = GetScene(sceneName);
+            _scene.GameObjects.Add(gameObject);
             EngineGlobals.Window?.InvalidateObjectsCache();
             return _scene;
         }
-        public static Scene AddToScene(BaseObject[] GameObjects, string SceneName) {
-            var _scene = GetScene(SceneName);
-            _scene.GameObjects.AddRange(GameObjects);
+        public static Scene AddToScene(IEnumerable<BaseObject> gameObjects, string sceneName) {
+            var _scene = GetScene(sceneName);
+            _scene.GameObjects.AddRange(gameObjects);
             EngineGlobals.Window?.InvalidateObjectsCache();
             return _scene;
         }
         
         // Removing
-        public static Scene RemoveFromScene(BaseObject GameObject) {
-            var _scene = GetSceneOfObject(GameObject);
-            _scene.GameObjects.Remove(GameObject);
+        public static Scene RemoveFromScene(BaseObject gameObject) {
+            var _scene = GetSceneOfObject(gameObject);
+            _scene.GameObjects.Remove(gameObject);
             EngineGlobals.Window?.InvalidateObjectsCache();
             return _scene;
         }
-        public static Dictionary<BaseObject, Scene> RemoveFromScene(BaseObject[] GameObjects) {
+        public static Dictionary<BaseObject, Scene> RemoveFromScene(IEnumerable<BaseObject> gameObjects) {
             Dictionary<BaseObject, Scene> _dict = new();
-            foreach (var gameObject in GameObjects) {
+            foreach (var gameObject in gameObjects) {
                 var _scene = GetSceneOfObject(gameObject);
                 _scene.GameObjects.Remove(gameObject);
                 _dict.Add(gameObject, _scene);
@@ -40,16 +42,16 @@ namespace uf.Utility.Scenes
             EngineGlobals.Window?.InvalidateObjectsCache();
             return _dict;
         }
-        public static Scene RemoveFromScene(BaseObject GameObject, string SceneName) {
-            var _scene = GetScene(SceneName);
-            _scene.GameObjects.Remove(GameObject);
+        public static Scene RemoveFromScene(BaseObject gameObject, string sceneName) {
+            var _scene = GetScene(sceneName);
+            _scene.GameObjects.Remove(gameObject);
             EngineGlobals.Window?.InvalidateObjectsCache();
             return _scene;
         }
-        public static Dictionary<BaseObject, Scene> RemoveFromScene(BaseObject[] GameObjects, string SceneName) {
+        public static Dictionary<BaseObject, Scene> RemoveFromScene(IEnumerable<BaseObject> gameObjects, string sceneName) {
             Dictionary<BaseObject, Scene> _dict = new();
-            foreach (var gameObject in GameObjects) {
-                var _scene = GetScene(SceneName);
+            foreach (var gameObject in gameObjects) {
+                var _scene = GetScene(sceneName);
                 _scene.GameObjects.Remove(gameObject);
                 _dict.Add(gameObject, _scene);
             }
@@ -58,12 +60,12 @@ namespace uf.Utility.Scenes
         }
 
         // Getting the scene a object is located in
-        public static Scene GetSceneOfObject(BaseObject GameObject) {
-            return EngineGlobals.Scenes.FirstOrDefault(x => x.GameObjects.Contains(GameObject));
+        private static Scene GetSceneOfObject(BaseObject gameObject) {
+            return EngineGlobals.Scenes.FirstOrDefault(x => x.GameObjects.Contains(gameObject));
         }
         
         // Adding scenes
-        public static void AddScene(Scene sceneObject) {
+        private static void AddScene(Scene sceneObject) {
             EngineGlobals.Scenes.Add(sceneObject);
             EngineGlobals.Window?.InvalidateObjectsCache();
         }
@@ -75,14 +77,13 @@ namespace uf.Utility.Scenes
         }
 
         // Retrieving Scenes
-        public static Scene GetScene(string name) {
+        private static Scene GetScene(string name) {
             var _scene = EngineGlobals.Scenes.FirstOrDefault(x => x.SceneName == name);
             // Check if the value is a default value
-            if (_scene == default(Scene)) {
-                _scene = new Scene(name, new List<BaseObject>());
-                // This scene dies not exist in the list yet. So add it now.
-                AddScene(_scene);
-            }
+            if (_scene != default(Scene)) return _scene;
+            _scene = new Scene(name, new List<BaseObject>());
+            // This scene dies not exist in the list yet. So add it now.
+            AddScene(_scene);
             return _scene;
         }
 
@@ -97,18 +98,23 @@ namespace uf.Utility.Scenes
             EngineGlobals.Window?.SceneLoadQueue.Add((_scene, SceneAction.Load));
         }
 
-        internal static void OperateOnScene((Scene, SceneAction) ActionTuple) {
-            OperateOnScene(ActionTuple.Item1, ActionTuple.Item2);
+        internal static void OperateOnScene((Scene, SceneAction) actionTuple)
+        {
+            var (_scene, _sceneAction) = actionTuple;
+            OperateOnScene(_scene, _sceneAction);
         }
-        internal static void OperateOnScene(Scene SceneObject, SceneAction Operation) {
-            switch (Operation)
+
+        private static void OperateOnScene(Scene sceneObject, SceneAction operation) {
+            switch (operation)
             {
                 case SceneAction.Load:
-                    SceneObject.Load();
+                    sceneObject.Load();
                     break;
                 case SceneAction.Unload:
-                    SceneObject.Unload();
+                    sceneObject.Unload();
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(operation), operation, null);
             }
             EngineGlobals.Window?.InvalidateObjectsCache();
         }
