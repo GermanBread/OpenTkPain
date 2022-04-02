@@ -192,7 +192,7 @@ namespace uf
             // Loop audio when applicable
             if (IsFocused || !PauseOnLostFocus) {
                 if (AudioManager.Ready)
-                    foreach (var clip in AudioManager.AudioClips.Where(x => (x.Loop && x.IsPlaying && x.ClipStatus == PlaybackState.Stopped)))
+                    foreach (var clip in AudioManager.AudioClips.Where(x => x.Loop && x.IsPlaying && x.ClipStatus == PlaybackState.Stopped))
                         clip.Play();
             }
             if (AudioManager.Ready) {

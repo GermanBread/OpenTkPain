@@ -1,5 +1,6 @@
 // System
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -19,17 +20,17 @@ namespace uf.Rendering.Textures;
 
 public static class TextureAtlas {
     public static void AddTexture(Texture texture) {
-        if (textures.Contains(texture)) return;
-        textures.Add(texture);
+        if (textures.ContainsKey(texture.ID)) return;
+        textures.Add(texture.ID, texture);
         createTexture();
     }
     public static void RemoveTexture(Texture texture) {
-        if (!textures.Contains(texture)) return;
-        textures.Remove(texture);
+        if (!textures.ContainsKey(texture.ID)) return;
+        textures.Remove(texture.ID);
         createTexture();
     }
     public static (Vector2, Vector2) GetUV(Texture texture) {
-        var _cleaned = coordinates[texture];
+        var _cleaned = coordinates[texture.ID];
         var _atlasSize = atlas.Size().ToVector2();
         
         _cleaned.Item1 = Vector2.Divide(_cleaned.Item1, _atlasSize);
@@ -47,7 +48,7 @@ public static class TextureAtlas {
 
         coordinates.Clear();
 
-        textures.ForEach(x => {
+        textures.Values.ToList().ForEach(x => {
             if (atlas == null) {
                 atlas = x.TextureImage.Clone();
                 return;
@@ -58,12 +59,13 @@ public static class TextureAtlas {
 
             atlas.Mutate(y
                 // Resize is not what we want, just re-draw the atlas over
-                => y.Resize(new Size(Math.Max(atlas.Width, x.TextureImage.Width), atlas.Height + x.TextureImage.Height))
-                    .DrawImage(_copy, PixelColorBlendingMode.Add, 1)
+                => y.DrawImage(_copy, 1)
             );
 
-            coordinates.Add(x, (new Vector2(0, atlas.Height - x.TextureImage.Height), new Vector2(x.TextureImage.Width, atlas.Height)));
+            coordinates.Add(x.ID, (new Vector2(0, atlas.Height - x.TextureImage.Height), new Vector2(x.TextureImage.Width, atlas.Height)));
         });
+
+        atlas.SaveAsPng("/tmp/atlas.png");
 
         // Create a byte array for OpenGL
         var _pixels = new List<byte>(4 * atlas.Width * atlas.Height);
@@ -88,10 +90,10 @@ public static class TextureAtlas {
         GL.ObjectLabel(ObjectLabelIdentifier.Texture, texturehandle, _label.Length, _label);
     }
 
-    public static IReadOnlyList<Texture> Textures => textures;
+    public static IReadOnlyList<Texture> Textures => textures.Values.ToList();
 
     private static Image<Rgba32> atlas;
     private static int texturehandle = -1;
-    private static readonly List<Texture> textures = new();
-    private static readonly Dictionary<Texture, (Vector2, Vector2)> coordinates = new();
+    private static readonly Dictionary<uint, Texture> textures = new();
+    private static readonly Dictionary<uint, (Vector2, Vector2)> coordinates = new();
 }

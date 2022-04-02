@@ -103,6 +103,8 @@ namespace uf
                 _clip2.Loop = true;
             _clip2?.Play();
 
+            return;
+
             Animation _anim = new("testanim", new Keyframe[] {
                 new Keyframe {
                     Size = new Vector2(50, 100),
@@ -131,9 +133,9 @@ namespace uf
                 first.Size *= new Vector2(e.MouseButton == 0 ? 1.5f : .5f);
             };
 
-            _ = new Polygon(null, 4) {
-                Size = new Vector2(2)
-            };
+            //_ = new Polygon(null, 4) {
+            //    Size = new Vector2(2)
+            //};
 
             // Spam (V)RAM
             /*List<Vector2> _verticeSpam = new();
@@ -184,7 +186,6 @@ namespace uf
             }
 
             first.Scene.Rotation += FrameDelta;
-                
 
             fourth.Position = Camera.ScreenToWorldSpace((Vector2i)MousePosition);
             fourth.Color = counter % .5 < .25 ? Color4.White : new Color4(0, 0, 0, 100);
@@ -202,6 +203,8 @@ namespace uf
             second.Color = Color4.FromHsv(new Vector4(counter / 2f % 1, 1f, 1f, 1f));
             FillColor = Color4.FromHsv(new Vector4(counter / 5f % 1, 1f, .5f, 1f));
 
+            return;
+            
             var _clip = AudioManager.GetClip("music");
             var _data = (Array.Empty<float>(), -1);
             if (_clip != null)

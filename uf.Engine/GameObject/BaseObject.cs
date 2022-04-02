@@ -135,7 +135,7 @@ namespace uf.GameObject
                 Logger.Log(new LogMessage(LogSeverity.Error, "Not initialized; refusing to render object! Was Init() not called?"));
                 return;
             }
-            
+
             preDraw();
 
             var _data = transform.CompileData(Color, Scene);

@@ -49,11 +49,13 @@ namespace uf.Rendering.Textures
             
             Logger.Log(new LogMessage(LogSeverity.Debug, $"Created new texture: {TextureImage.Width * TextureImage.Height} pixels, dimensions {TextureImage.Width}*{TextureImage.Height}"));
 
+            id = counter++;
             TextureAtlas.AddTexture(this);
         }
 
         static Texture() {
             blank = new(ResourceManager.GetFile("white texture"));
+            blank.id = counter++;
             TextureAtlas.AddTexture(blank);
         }
 
@@ -76,11 +78,18 @@ namespace uf.Rendering.Textures
             GC.SuppressFinalize(this);
         }
 
+        public uint ID { get => id; }
         public static Texture Empty { get => blank; }
 
         public Resource Resource;
         public Image<Rgba32> TextureImage;
 
+        private uint id;
+
+        /// <summary>
+        /// This variable keeps count of how many textures have been created, it's value will be used as the texture's ID
+        /// </summary>
+        private static uint counter = 0;
         private static readonly Texture blank;
     }
 }

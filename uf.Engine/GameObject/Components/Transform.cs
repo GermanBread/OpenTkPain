@@ -1,6 +1,7 @@
 // System
 using System;
 using System.Linq;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -23,14 +24,14 @@ namespace uf.GameObject.Components
 
             // -> Local <-
             Matrix2.CreateRotation(Rotation, out var _localRotation);
-            Vector2 _localSkew = (Skew / GlobalScale);
-            Vector2 _localSize = (Size / GlobalScale) * new Vector2(Camera.Resolution.X / 720f);
+            Vector2 _localSkew = Skew / GlobalScale;
+            Vector2 _localSize = Size / GlobalScale * new Vector2(Camera.Resolution.X / 720f);
             Vector2 _localPosition = (Position / GlobalScale) + Vector2.Divide(Anchor.Xy, _aspectRatioFactor);
             
             // -> Parent <-
-            Matrix2.CreateRotation((ParentObject?.Rotation ?? 0), out var _parentRotation);
-            Vector2 _parentSize = (ParentObject?.Size / GlobalScale ?? Vector2.One);
-            Vector2 _parentPosition = (ParentObject?.Position / GlobalScale ?? Vector2.Zero);
+            Matrix2.CreateRotation(ParentObject?.Rotation ?? 0, out var _parentRotation);
+            Vector2 _parentSize = ParentObject?.Size / GlobalScale ?? Vector2.One;
+            Vector2 _parentPosition = ParentObject?.Position / GlobalScale ?? Vector2.Zero;
             
             // -> Scene <-
             Matrix2.CreateRotation(Scene.Rotation, out var _sceneRotation);

@@ -178,6 +178,11 @@
             </summary>
             <returns>1: UV start. 2: UV end.</returns>
         </member>
+        <member name="F:uf.Rendering.Textures.Texture.counter">
+            <summary>
+            This variable keeps count of how many textures have been created, it's value will be used as the texture's ID
+            </summary>
+        </member>
         <member name="P:uf.Utility.Audio.AudioClip.Volume">
             <summary>
             Volume, ranges from 0 to 1
