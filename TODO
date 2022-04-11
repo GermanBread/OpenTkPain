@@ -4,7 +4,6 @@ Personal notes
 [*] The Transform class might be freaking out over the new UV values
 
 Working on it (when these two are done my engine is ready for use, just not feature-complete):
-[3] Refactor Texture stuff
 [8] Text (use Meshes ffs)
 
 To be done
@@ -29,6 +28,7 @@ To be done
 [?] Migrate to OpenAL
 
 Done
+[3] Refactor Texture stuff
 [5] Rewrite Transform.cs to feature less spaghetti
 [3] Implement a file format for resources (perhaps .ufr?)
     These resource files should support containing more than one file, and even other resource files (dropped the nested resource thing)

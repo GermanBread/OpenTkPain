@@ -56,7 +56,7 @@ public static class TextureAtlas {
             var _texture = x.TextureImage.Clone();
 
             _texture.Mutate(y
-                => y.Transform(_transform)
+                => y.Flip(FlipMode.Vertical).Transform(_transform)
             );
             _canvas.Mutate(y
                 => y.DrawImage(atlas, 1).DrawImage(_texture, 1)
@@ -82,14 +82,14 @@ public static class TextureAtlas {
             }
         }
         
+        string _label = "atlas";
+
         GL.ActiveTexture(TextureUnit.Texture0);
+        GL.BindTexture(TextureTarget.Texture2D, texturehandle);
         GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, atlas.Width, atlas.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, _pixels.ToArray());
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMagFilter.Linear);
         GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
         GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
-        
-        GL.BindTexture(TextureTarget.Texture2D, texturehandle);
-        string _label = "atlas";
         GL.ObjectLabel(ObjectLabelIdentifier.Texture, texturehandle, _label.Length, _label);
     }
 
