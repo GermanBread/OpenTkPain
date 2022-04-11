@@ -140,11 +140,12 @@ namespace uf.GameObject
 
             var _data = transform.CompileData(Color, Scene);
 
-            for (int i = 0; i < _data.Length; i++) {
-                var _uv = Texture.GetUV();
-                _data[i].UV *= _uv.Item2 - _uv.Item1;
-                _data[i].UV += _uv.Item1;
-            }
+            // UV Vectors need to be scaled down
+            //for (int i = 0; i < _data.Length; i++) {
+            //    var _uv = Texture.GetUV();
+            //    _data[i].UV *= _uv.Item2 - _uv.Item1;
+            //    _data[i].UV += _uv.Item1;
+            //}
 
             GL.BufferData(BufferTarget.ArrayBuffer, _data.Length * Unsafe.SizeOf<Vertex>(), _data, BufferUsageHint.DynamicDraw);
             GL.BufferData(BufferTarget.ElementArrayBuffer, transform.Indices.Length * sizeof(uint), transform.Indices, BufferUsageHint.DynamicDraw);

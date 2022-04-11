@@ -44,28 +44,31 @@ public static class TextureAtlas {
         texturehandle = GL.GenTexture();
 
         atlas?.Dispose();
-        atlas = null;
+        atlas = new Image<Rgba32>(1, 1, Color.Transparent);
 
         coordinates.Clear();
 
         textures.Values.ToList().ForEach(x => {
-            if (atlas == null) {
-                atlas = x.TextureImage.Clone();
-                return;
-            }
+            if (coordinates.ContainsKey(x.ID)) return;
 
-            using var _copy = x.TextureImage.Clone();
-            _copy.Mutate(y => y.Transform(new AffineTransformBuilder().AppendTranslation(new PointF(0, atlas.Height))));
+            var _canvas = new Image<Rgba32>(Math.Max(atlas.Width, x.TextureImage.Width), atlas.Height + x.TextureImage.Height, Color.Transparent);
+            var _transform = new AffineTransformBuilder().AppendTranslation(new PointF(0, atlas.Height));
+            var _texture = x.TextureImage.Clone();
 
-            atlas.Mutate(y
-                // Resize is not what we want, just re-draw the atlas over
-                => y.DrawImage(_copy, 1)
+            _texture.Mutate(y
+                => y.Transform(_transform)
+            );
+            _canvas.Mutate(y
+                => y.DrawImage(atlas, 1).DrawImage(_texture, 1)
             );
 
-            coordinates.Add(x.ID, (new Vector2(0, atlas.Height - x.TextureImage.Height), new Vector2(x.TextureImage.Width, atlas.Height)));
-        });
+            coordinates.Add(x.ID, (new Vector2(0, atlas.Height), new Vector2(_texture.Width, _canvas.Height)));
 
-        atlas.SaveAsPng("/tmp/atlas.png");
+            _texture.Dispose();
+            atlas.Dispose();
+            atlas = _canvas.Clone();
+            _canvas.Dispose();
+        });
 
         // Create a byte array for OpenGL
         var _pixels = new List<byte>(4 * atlas.Width * atlas.Height);
