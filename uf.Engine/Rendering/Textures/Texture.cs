@@ -1,18 +1,16 @@
 // System
 using System;
 using System.IO;
-using System.Linq;
-using System.Collections.Generic;
 
 // OpenTK
 using OpenTK.Mathematics;
-using OpenTK.Graphics.OpenGL;
 
 // Imagesharp
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
 using uf.Utility.Logging;
+using uf.Utility.Globals;
 using uf.Utility.Resources;
 
 namespace uf.Rendering.Textures
@@ -21,7 +19,7 @@ namespace uf.Rendering.Textures
     {
         public Texture(Resource TextureResource) {
             if (TextureResource == null) {
-                Logger.Log(new LogMessage(LogSeverity.Error, $"Cannot load texture resource is null, please use Texture.Empty instead"));
+                Logger.Log(new(LogSeverity.Error, "I don't know what to do with \"null\"!"));
                 return;
             }
             
@@ -49,13 +47,16 @@ namespace uf.Rendering.Textures
             
             Logger.Log(new LogMessage(LogSeverity.Debug, $"Created new texture: {TextureImage.Width * TextureImage.Height} pixels, dimensions {TextureImage.Width}*{TextureImage.Height}"));
 
-            id = counter++;
+            id = ++counter;
             TextureAtlas.AddTexture(this);
         }
 
         static Texture() {
-            blank = new(ResourceManager.GetFile("white texture"));
-            blank.id = counter++;
+            ResourceManager.LoadFile("white texture", Path.Combine(EngineGlobals.EngineResourcesPath, "white.png"));
+            blank = new(ResourceManager.GetFile("white texture"))
+            {
+                id = 0
+            };
             TextureAtlas.AddTexture(blank);
         }
 

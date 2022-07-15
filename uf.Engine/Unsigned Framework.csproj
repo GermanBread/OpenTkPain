@@ -29,28 +29,28 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Resources/default.frag">
+    <None Update="EngineResources/default.frag">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources/default.vert">
+    <None Update="EngineResources/default.vert">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources/text.frag">
+    <None Update="EngineResources/text.frag">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources/text.vert">
+    <None Update="EngineResources/text.vert">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources/multipass.frag">
+    <None Update="EngineResources/multipass.frag">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources/multipass.vert">
+    <None Update="EngineResources/multipass.vert">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources/Inconsolata.ttf">
+    <None Update="EngineResources/Inconsolata.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Resources/white.png">
+    <None Update="EngineResources/white.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

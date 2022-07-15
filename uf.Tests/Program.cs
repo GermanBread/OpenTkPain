@@ -14,16 +14,15 @@ namespace uf
     {
         static void Main(string[] args)
         {
-            EngineGlobals.CLArgs = args;
+            EngineGlobals.Args = args;
             
             using Game window = new(new GameWindowSettings {
-                RenderFrequency = 60,
                 UpdateFrequency = 120,
             }, new NativeWindowSettings {
                 Title = "Unsigned Framework Dev.",
                 Profile = ContextProfile.Core
             });
-            window.VSync = VSyncMode.Off;
+            window.VSync = VSyncMode.On;
             try {
                 window.Run();
             }

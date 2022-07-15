@@ -29,61 +29,61 @@ namespace uf.Rendering.Text {
 
             List<Vertex> mesh = new();
             List<uint> meshIndices = new();
-            float step = 0;
-            int wrap = 1; // Overflow wrap to next line (if possible). 1 = not wrapped yet
+            float _step = 0;
+            int _wrap = 1; // Overflow wrap to next line (if possible). 1 = not wrapped yet
 
             for (int i = 0; i < content.Length; i++) {
                 if (!texes.ContainsKey(content[i])) {
-                    // TODO: Generate texture
+                    // TODO: Generate texture for glyph
                 }
                 
-                var uv = texes[content[i]].GetUV();
-                var charSize = new Vector2(uv.Item2.X - uv.Item1.X, uv.Item2.Y - uv.Item1.Y);
+                var _uv = texes[content[i]].GetUV();
+                var _charSize = new Vector2(_uv.Item2.X - _uv.Item1.X, _uv.Item2.Y - _uv.Item1.Y);
 
                 // Check if we will overflow horizontally
-                if (step + charSize.X > Size.X) {
-                    step = 0;
-                    wrap++;
+                if (_step + _charSize.X > Size.X) {
+                    _step = 0;
+                    _wrap++;
                 }
 
                 // We are overflowing vertically, stop generating the mesh
-                if (FontSize*wrap > Size.Y)
+                if (FontSize*_wrap > Size.Y)
                     break;
 
                 // Top Left
                 mesh.Add(new Vertex {
-                    Position = new Vector2(Position.X + step, Position.Y + FontSize*wrap - charSize.Y),
-                    UV = uv.Item1,
+                    Position = new Vector2(Position.X + _step, Position.Y + FontSize*_wrap - _charSize.Y),
+                    UV = _uv.Item1,
                     Color = Color
                 });
                 meshIndices.Add((uint)i*4);
                 
                 // Top Right
                 mesh.Add(new Vertex {
-                    Position = new Vector2(Position.X + charSize.X + step, Position.Y + FontSize*wrap - charSize.Y),
-                    UV = uv.Item1,
+                    Position = new Vector2(Position.X + _charSize.X + _step, Position.Y + FontSize*_wrap - _charSize.Y),
+                    UV = _uv.Item1,
                     Color = Color
                 });
                 meshIndices.Add((uint)i*4 + 1);
                 
                 // Bottom Right
                 mesh.Add(new Vertex {
-                    Position = new Vector2(Position.X + charSize.X + step, Position.Y + Size.Y),
-                    UV = uv.Item1,
+                    Position = new Vector2(Position.X + _charSize.X + _step, Position.Y + Size.Y),
+                    UV = _uv.Item1,
                     Color = Color
                 });
                 meshIndices.Add((uint)i*4 + 2);
                 
                 // Bottom Left
                 mesh.Add(new Vertex {
-                    Position = new Vector2(Position.X + step, Position.Y + Size.Y),
-                    UV = uv.Item1,
+                    Position = new Vector2(Position.X + _step, Position.Y + Size.Y),
+                    UV = _uv.Item1,
                     Color = Color
                 });
                 meshIndices.Add((uint)i*4 + 3);
 
                 // Move forwards...
-                step += charSize.X;
+                _step += _charSize.X;
             }
 
             var _data = mesh.ToArray();

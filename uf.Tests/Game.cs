@@ -36,7 +36,7 @@ namespace uf
             Anchor = Anchor.Left
         };
         readonly Rectangle fourth = new("overlay") {
-            Size = new Vector2(.25f),
+            Size = new Vector2(.125f),
             Color = Color4.Black,
             Layer = 500
         };
@@ -49,8 +49,8 @@ namespace uf
         List<Rectangle> visualisers;
         float counter = 0;
         public override void Start() {
-            PauseOnLostFocus = !EngineGlobals.CLArgs.Contains("--no-pause");
-            if (EngineGlobals.CLArgs.Contains("--no-audio"))
+            PauseOnLostFocus = !EngineGlobals.Args.Contains("--no-pause");
+            if (EngineGlobals.Args.Contains("--no-audio"))
                 AudioManager.GlobalVolume = 0;
             
             Logger.Log(new LogMessage(LogSeverity.Debug, "Logging is cool"));
@@ -85,7 +85,7 @@ namespace uf
 
             _ = new Rectangle("overlay") {
                 Position = new Vector2(2.5f),
-                Size = new Vector2(7.5f),
+                Size = new Vector2(2.5f),
                 Color = Color4.OrangeRed,
                 Parent = fourth
             };
@@ -97,13 +97,11 @@ namespace uf
                 _clip.Loop = true;
                 _clip.Volume = .5f;
             }
-            //_clip?.Play();
+            _clip?.Play();
             var _clip2 = AudioManager.CreateClip(ResourceManager.GetFile("E"));
             if (_clip2 != default(AudioClip))
                 _clip2.Loop = true;
-            _clip2?.Play();
-
-            return;
+            //_clip2?.Play();
 
             Animation _anim = new("testanim", new Keyframe[] {
                 new Keyframe {
@@ -115,6 +113,7 @@ namespace uf
             }, first, true);
             //_anim.Play();
             
+            // Example of creating objects in a new scene, but never showing them
             visualisers = new List<Rectangle>();
             for (int i = 0; i < Size.X / 2; i++) {
                 visualisers.Add(new Rectangle("visualisers") {
@@ -125,7 +124,7 @@ namespace uf
                     IsHoverable = i % 2 == 0
                 });
             }
-            SceneManager.LoadScene("visualisers");
+            //SceneManager.LoadScene("visualisers");
 
             CursorVisible = false;
 
@@ -150,15 +149,15 @@ namespace uf
                     Color = Color4.AliceBlue
                 };*/
             
-            _ = new Text(null) {
-                Size = new Vector2(5, 2),
-                Position = new Vector2(-10, -2.5f),
-                Layer = 9999,
-                Color = Color4.AliceBlue,
-                FontColor = Color4.Crimson,
-                Texture = _texture,
-                Content = "Hello, World!"
-            };
+            //_ = new Text(null) {
+            //    Size = new Vector2(5, 2),
+            //    Position = new Vector2(-10, -2.5f),
+            //    Layer = 9999,
+            //    Color = Color4.AliceBlue,
+            //    FontColor = Color4.Crimson,
+            //    Texture = _texture,
+            //    Content = "Hello, World!"
+            //};
         }
 
         //Vector2 parallax;
@@ -203,20 +202,18 @@ namespace uf
             second.Color = Color4.FromHsv(new Vector4(counter / 2f % 1, 1f, 1f, 1f));
             FillColor = Color4.FromHsv(new Vector4(counter / 5f % 1, 1f, .5f, 1f));
 
-            return;
-            
-            var _clip = AudioManager.GetClip("music");
-            var _data = (Array.Empty<float>(), -1);
-            if (_clip != null)
-                _data = _clip.GetWaveform();
-            var _fft = _data.Item1;
-            for (int i = 0; i < visualisers.Count; i++) {
-                if (visualisers[i].IsHovered)
-                    visualisers[i].Color = Color4.Violet;
-                else
-                    visualisers[i].Color = new Color4(255, 50, 20, 100);
-                visualisers[i].Size = new Vector2(visualisers[i].Size.X, 5f + _fft[i * (_fft.Length / visualisers.Count)] * 100f);
-            }
+            //var _clip = AudioManager.GetClip("music");
+            //var _data = (Array.Empty<float>(), -1);
+            //if (_clip != null)
+            //    _data = _clip.GetWaveform();
+            //var _fft = _data.Item1;
+            //for (int i = 0; i < visualisers.Count; i++) {
+            //    if (visualisers[i].IsHovered)
+            //        visualisers[i].Color = Color4.Violet;
+            //    else
+            //        visualisers[i].Color = new Color4(255, 50, 20, 100);
+            //    visualisers[i].Size = new Vector2(visualisers[i].Size.X, 5f + _fft[i * (_fft.Length / visualisers.Count)] * 100f);
+            //}
         }
         public override void Update() {
 

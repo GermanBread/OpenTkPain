@@ -4,17 +4,18 @@ Personal notes
 [*] The Transform class might be freaking out over the new UV values
 
 Working on it (when these two are done my engine is ready for use, just not feature-complete):
+[3] Non-blocking atlas regeneration
 [8] Text (use Meshes ffs)
 
 To be done
 [2] Min/max size for objects (in pixels)
 [5] Animation system
 [2] Image cropping (in shaders)
-[2] Make renderer modular (drawing would be something along the lines of: renderer.Draw(verts, indices, ...))
-[2] Add polygon class which allows you to create obejcts with N corners
+[2] Make renderer modular [drawing would be something along the lines of: renderer.Draw(verts, indices, ...)]
+[2] Add polygon class which allows you to create objects with N corners
 [3] Make it easy to create .ufr archives
 [3] Add support for multiple atlases (will be needed for text rendering?)
-[6] Rework Audio: Split Music / Sound streams. FFT Sample should request blocks in size of 2^x
+[6] Rework Audio: Split Music / Sound streams. FFT Sample should request blocks in size of x*2
     Volume can be set with Bass.SampleSetInfo();
 [8] Add a class that does instanced rendering... Perhaps called "InstancedObject"?
     It should also check if all objects are of the same type... or it should draw the different types in a instanced render
@@ -23,7 +24,7 @@ To be done
     Provide a class that can be used to launch code in a seperate thread
     Race conditions should be avoided!
 [2] Move drawable objects list from BaseGame.cs to SceneManager.cs
-[3] Drawing & Multipass: Instead of invalidating the list when am element changes, remove/add that object/scene from the list.
+[3] Drawing & Multipass: Instead of invalidating the list (mentioned above) when am element changes, remove/add that object/scene from the list.
 [?] Integrate ImGUI.Net
 [?] Migrate to OpenAL
 

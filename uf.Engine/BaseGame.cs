@@ -1,5 +1,6 @@
 // System
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Diagnostics;
@@ -33,14 +34,17 @@ namespace uf
     public abstract class BaseGame : GameWindow
     {
         public BaseGame(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings) {
-            Logger.Log(new LogMessage(LogSeverity.Info, "Unsigned Framework - Made by GermanBread#9077"));
+            {
+                using var _str = File.OpenRead(typeof(BaseGame).Assembly.Location);
+                Logger.Log(new LogMessage(LogSeverity.Info, $"Unsigned Framework (#{_str.GetHashCode()}) - Made by GermanBread#9077"));
+            }
 
             #if DEBUG
             Logger.Log(new LogMessage(LogSeverity.Info, "This app has been configured in DEBUG mode - expect a lot of console output"));
             Title += " (DEBUG)";
             #else
             if (IsWINE())
-                Logger.Log(new LogMessage(LogSeverity.Warning, "My primitive detection algo has told me that you are using WINE to run this executable! Expect problems!"));
+                Logger.Log(new LogMessage(LogSeverity.Warning, "My primitive detection has told me that you are using WINE to run this executable! Expect problems!"));
             #endif
 
             EngineGlobals.Window = this;
@@ -62,14 +66,11 @@ namespace uf
             GL.Clear(ClearBufferMask.ColorBufferBit);
 
             // Prepare included shaders
-            ResourceManager.LoadFile("white texture", "Resources/white.png");
-            ResourceManager.LoadFile("default vertex shader", "Resources/default.vert");
-            ResourceManager.LoadFile("default fragment shader", "Resources/default.frag");
-            ResourceManager.LoadFile("multipass vertex shader", "Resources/multipass.vert");
-            ResourceManager.LoadFile("multipass fragment shader", "Resources/multipass.frag");
-
-            // Create a blank texture (used as fallback texture)
-            _ = new Texture(null);
+            ResourceManager.LoadFile("default vertex shader", Path.Combine(EngineGlobals.EngineResourcesPath, "default.vert"));
+            ResourceManager.LoadFile("default fragment shader", Path.Combine(EngineGlobals.EngineResourcesPath, "default.frag"));
+            ResourceManager.LoadFile("multipass vertex shader", Path.Combine(EngineGlobals.EngineResourcesPath, "multipass.vert"));
+            ResourceManager.LoadFile("multipass fragment shader", Path.Combine(EngineGlobals.EngineResourcesPath, "multipass.frag"));
+            // Default texture loading was moved to Texture.cs
 
             // Prepare Audio
             AudioManager.Init();

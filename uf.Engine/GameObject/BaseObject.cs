@@ -60,7 +60,7 @@ namespace uf.GameObject
                 Color = Color4.White;
 
             // No texture? Create a blank one!
-            if (Texture == null)
+            if (Texture == default)
                 Texture = Texture.Empty;
 
             gameWindow.MouseDown += (e) => {
@@ -111,15 +111,9 @@ namespace uf.GameObject
                 IsHovered = false;
         }
         internal protected virtual void preDraw() {
-            // Small optimization: Don't perform a draw call if the object is 100% transparent
-            if (Color.A == 0)
-                return;
-
-            //if (Color.A < 1) {
-                GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-                GL.BlendEquation(BlendEquationMode.FuncAdd);
-                GL.Enable(EnableCap.Blend);
-            //}
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            GL.BlendEquation(BlendEquationMode.FuncAdd);
+            GL.Enable(EnableCap.Blend);
 
             Shader.Use();
         }
